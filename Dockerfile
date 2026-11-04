@@ -4,9 +4,7 @@ FROM node:22-alpine AS build
 WORKDIR /src/app
 
 COPY app/package.json app/package-lock.json ./
-# Bootstrap while the committed lockfile is stale.
-# Switch to npm ci once app/package-lock.json is synchronized.
-RUN npm install --no-audit --no-fund
+RUN npm ci --include=dev --no-audit --no-fund
 
 COPY app/ ./
 RUN npm run typecheck && npm run test && npm run build

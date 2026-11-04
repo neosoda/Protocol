@@ -8,7 +8,7 @@ Créer une Application liée au dépôt Git `https://github.com/neosoda/Protocol
 
 | Paramètre | Valeur |
 |---|---|
-| Branche de test | `feat/observatory-v4-workbench` (PR #5 non fusionnée) |
+| Branche | `main` |
 | Build strategy | **Dockerfile** |
 | Base Directory / build context | `/` (racine Git) |
 | Dockerfile Location | `Dockerfile` |
@@ -22,16 +22,12 @@ Coolify gère le proxy, le domaine, HTTPS et le cycle de vie du conteneur. Utili
 ## Fonctionnement
 
 - `/` sert l'application V4 originale ;
-- `/observatory` et `/observatory/` redirigent vers `/` (HTTP 308) ;
+- `/observatory` et `/observatory/` redirigent vers `/` (HTTP 308). La cible relative conserve le HTTPS du proxy Coolify ;
 - `/assets/*` est servi avec cache immuable (noms versionnés par Vite) ;
 - `/healthz` renvoie HTTP 200 pour vérifier Nginx.
 
-Le Dockerfile enchaîne `npm install`, `npm run typecheck`, `npm run test`, `npm run build`. **Une erreur stoppe la construction de l'image.** Le build Vite applique `scripts/verify-build.mjs`, qui refuse les artefacts historiques ; la phase runtime copie uniquement `app/dist/`. Le dossier historique `app/public/` est exclu du contexte Docker par `.dockerignore`.
-
-**Dette à régler :** `app/package-lock.json` est obsolète, d'où l'utilisation transitoire de `npm install`. Il faut régénérer ce lockfile, le versionner, puis passer à `npm ci` pour obtenir des builds reproductibles.
+Le Dockerfile enchaîne `npm ci --include=dev`, `npm run typecheck`, `npm run test` et `npm run build`. **Une erreur stoppe la construction de l'image.** Le build Vite applique `scripts/verify-build.mjs`, qui refuse les artefacts historiques. La phase runtime copie `app/dist/`. Le dossier historique `app/public/` est exclu du contexte Docker par `.dockerignore`.
 
 ## Critères de déploiement réel
 
-Le nouveau Dockerfile n'a **pas été testé par une compilation complète** dans cet environnement : dépendances npm, tests TypeScript, build Vite, Playwright et rendu visuel restent à vérifier. Avant de basculer une instance publique, tester les écrans 390/768/1440, FR/EN/AR, clair/sombre, clavier et contraste. Vérifier l'absence d'assets historiques dans l'image finale et résoudre leurs droits (voir `docs/RIGHTS_AND_ATTRIBUTIONS.md`).
-
-Une fois les gates validés, fusionner la PR #5 puis pointer l'application de production Coolify sur `main`. **Aucun déploiement Coolify n'est effectué par cette PR.**
+Vérifier que `/healthz` et `/` répondent sur le domaine public et que `/observatory/` redirige vers la racine du même domaine en HTTPS. Avant de basculer une instance publique, tester les écrans 390/768/1440, FR/EN/AR, clair/sombre, clavier et contraste. Vérifier l'absence d'assets historiques dans l'image finale et résoudre leurs droits (voir `docs/RIGHTS_AND_ATTRIBUTIONS.md`).
