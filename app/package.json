@@ -1,14 +1,21 @@
 {
   "name": "protocol-explorer",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/*.test.ts"
   },
   "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.9.3",
     "vite": "^6.0.0"
   }
 }
