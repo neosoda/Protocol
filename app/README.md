@@ -2,8 +2,8 @@
 
 Ce répertoire contient **deux expériences distinctes** :
 
-- `/` : reproduction historique de Protocol Explorer (Dilum Sanjaya), issue de bundles compilés. **Licence/autorisation de redistribution non vérifiée.** Attribution originale conservée.
-- `/observatory/` : laboratoire original en Vite + TypeScript ; catalogue de 14 scénarios modélisés, diagramme ladder, topologie logique, inspecteur à champs sélectionnables, moteur DOM-indépendant et thèmes clair/sombre.
+- `/` : **nouvelle application moderne originale V4 Workbench**, qui remplace le HTML historique dans le projet courant. L'ancienne version reste dans l'historique Git, et des ressources héritées peuvent encore exister sous `app/public/` en développement (non distribuées).
+- `/observatory/` : chemin de compatibilité en dev et rewrite Vercel du laboratoire original en Vite + TypeScript ; catalogue de 14 scénarios modélisés, diagramme ladder, topologie logique, inspecteur à champs sélectionnables, moteur DOM-indépendant et thèmes clair/sombre.
 
 ## Démarrage
 
@@ -26,7 +26,7 @@ Lire `../docs/RIGHTS_AND_ATTRIBUTIONS.md` (verrou publication), `../docs/RELEASE
 
 ## Isolation du build moderne (PR #3)
 
-Le serveur **de développement** conserve `/` et ses ressources historiques pour consultation locale. La commande **de production** `npm run build` ne compile que `/observatory/`, désactive la copie automatique de `public/` et lance `scripts/verify-build.mjs`. Le résultat de ce build n'a pas été vérifié dans l'environnement actuel (npm indisponible). La publication de l'historique reste interdite tant que ses droits ne sont pas clarifiés.
+Le serveur **de développement** sert le laboratoire moderne à `/` ainsi qu'à `/observatory/`. La commande `npm run build` ne compile que l'entrée moderne `/`, désactive la copie automatique de `public/` et lance `scripts/verify-build.mjs`. Le résultat de ce build n'a pas été vérifié dans l'environnement actuel (npm indisponible). La publication de l'historique reste interdite tant que ses droits ne sont pas clarifiés.
 
 Les quatre tests autonomes du garde-fou ont été exécutés avec succès sur des copies identiques aux sources poussées. Cela ne valide ni TypeScript, ni les scénarios, ni l'accessibilité, ni les tests navigateur. Consulter `../PROJECT_HANDOFF.md`.
 
@@ -35,3 +35,9 @@ Le scénario SSH comporte maintenant 14 événements modélisés et l'exemple HT
 ## V3 / Signal & Structure
 
 Branche `feat/observatory-v3-signal-structure` : feuilles de style refactorisées, nouvelle marque vectorielle, interface de recherche locale dans le catalogue, messages FR/EN avec repli anglais sur les 13 autres langues. Des tests E2E complémentaires existent mais **ne sont pas exécutés** dans l'environnement actuel. Voir `../docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md` et le début du handoff.
+
+## V4 Workbench — changement structurel
+
+La V4 introduit une barre latérale de navigation, un grand moniteur de TCP en SVG original, un catalogue indexé et un laboratoire en **diagramme de séquence principal + topologie et inspecteur latéraux**. Nouveau monogramme N/O, palette ivoire/corail/encre, menu mobile. Voir `../docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md`.
+
+**Statut :** sources poussées, pas de build local complet ; `package-lock.json` doit être régénéré. Les previews Vercel sont désormais autorisées avec gates TypeScript + Node + Vite, mais la production reste bloquée. N'interprétez pas une fusion Git comme un déploiement du site.
