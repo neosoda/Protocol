@@ -1,5 +1,15 @@
 # PROJECT HANDOFF — Network Observatory (2026-11-04)
 
+## Plateforme confirmée : Coolify — 04/11/2026
+
+**Le site est hébergé par Coolify personnel, pas par Vercel.** Les travaux précédents qui supposaient Vercel étaient mal orientés. Cette section prévaut sur les mentions historiques plus bas.
+
+- PR [#5](https://github.com/neosoda/Protocol/pull/5), branche `feat/observatory-v4-workbench`, **en brouillon, non fusionnée**.
+- `vercel.json` supprimé. Ajout de `Dockerfile` multi-stage Node 22/Nginx, `.dockerignore` (exclusion `app/public` historique), `deploy/nginx.conf` (port interne **80**, route `/`, redirection de `/observatory/` vers `/`, endpoint `/healthz`).
+- Build Docker : `npm install`, `npm run typecheck`, `npm run test`, `npm run build`. Installation non reproductible tant que `app/package-lock.json` n'est pas synchronisé ; passer à `npm ci` ensuite.
+- [Guide de déploiement Coolify](docs/DEPLOY_COOLIFY.md) : stratégie Dockerfile, contexte **/**, chemin **Dockerfile**, Ports Exposes **80**, d'abord dans une application de test distincte.
+- Aucun déploiement automatique, ni accès à l'instance Coolify, ni exécution de la compilation complète ou de Playwright depuis cet environnement. Les droits historiques et la QA restent ouverts.
+
 ## ÉTAT ACTUEL — V4 Workbench — 4 novembre 2026
 
 **Pourquoi le design restait identique sur le site :** la V3 avait été fusionnée sur GitHub, mais `/` était encore l'ancien `app/index.html` (163 633 caractères), tandis que le laboratoire moderne était uniquement sous `/observatory/`. Le `vercel.json` ignorait tous les builds. La V3 ne modifiait en outre pas assez la structure.
