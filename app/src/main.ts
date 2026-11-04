@@ -78,7 +78,7 @@ function catalogue(): string {
   return `<main id="main-content" class="page home">
     <section class="intro" aria-labelledby="home-title">
       <div><span class="eyebrow"><span class="pulse" aria-hidden="true"></span> AN INTERACTIVE NETWORK LAB</span>
-      <h1 id="home-title">L’Internet, <em>événement par événement.</em></h1>
+      <h1 id="home-title" tabindex="-1">L’Internet, <em>événement par événement.</em></h1>
       <p>Observez les échanges entre machines, reliez la chronologie aux protocoles et comprenez chaque étape sans vous perdre dans les paquets.</p>
       <div class="intro-actions"><button class="primary-button" data-action="open" data-id="tcp">${escapeHtml(t('start'))} TCP <span aria-hidden="true">→</span></button>
       <button class="secondary-button" data-action="open" data-id="${escapeHtml(last.id)}">${escapeHtml(t('resume'))} ${escapeHtml(last.name)}</button></div></div>
@@ -108,7 +108,7 @@ function simulation(): string {
     <div class="lab-overview">
       <div><button data-action="catalog" class="back-link">← ${escapeHtml(t('back'))}</button>
       <div class="eyebrow">LAB / ${escapeHtml(active.category.toUpperCase())} / ${escapeHtml(active.id.toUpperCase())}</div>
-      <h1>${escapeHtml(active.name)} <span class="muted">/ ${escapeHtml(t('experiment'))}</span></h1>
+      <h1 id="lab-title" tabindex="-1">${escapeHtml(active.name)} <span class="muted">/ ${escapeHtml(t('experiment'))}</span></h1>
       <p>${escapeHtml(active.summary)}</p>
       </div><div class="mode-switch" role="group" aria-label="Mode d'exploration">
       <button data-action="mode" data-mode="discovery" aria-pressed="${mode === 'discovery'}" class="${mode === 'discovery' ? 'chosen' : ''}">${escapeHtml(t('discovery'))}</button>
@@ -140,12 +140,14 @@ function simulation(): string {
   </main>`;
 }
 
-function render(): void {
+function render(focusSelector?: string): void {
   applyPreferences();
   app!.innerHTML = `<a class="skip-link" href="#main-content">Aller au contenu principal</a><div class="shell">${header()}${onCatalog ? catalogue() : simulation()}
     <footer class="footer"><span>Network Observatory · alpha de migration · données pédagogiques modélisées</span>
     <span>Œuvre de référence : <a href="https://protocol-explorer-alpha.vercel.app/" target="_blank" rel="noopener noreferrer">Protocol Explorer — Dilum Sanjaya</a> · droits de reproduction historiques non confirmés</span></footer></div>`;
   if (!onCatalog) update();
+  // Full view replacements must not silently discard keyboard focus.
+  if (focusSelector) app!.querySelector<HTMLElement>(focusSelector)?.focus();
 }
 
 function update(): void {
@@ -189,16 +191,16 @@ function openScenario(id: string): void {
   store('last-protocol', active.id);
   onCatalog = false;
   timeline.setProtocol(active, readStep(active));
-  render();
+  render('#lab-title');
 }
 app.addEventListener('click', ev => {
   const target = (ev.target as Element).closest<HTMLElement>('[data-action]');
   if (!target || !app.contains(target)) return;
   switch (target.dataset.action) {
-    case 'catalog': timeline.dispatch({ type: 'PAUSE' }); onCatalog = true; render(); break;
+    case 'catalog': timeline.dispatch({ type: 'PAUSE' }); onCatalog = true; render('#home-title'); break;
     case 'open': openScenario(target.dataset.id ?? 'tcp'); break;
-    case 'theme': theme = theme === 'dark' ? 'light' : 'dark'; store('theme', theme); render(); break;
-    case 'mode': mode = target.dataset.mode === 'expert' ? 'expert' : 'discovery'; store('mode', mode); render(); break;
+    case 'theme': theme = theme === 'dark' ? 'light' : 'dark'; store('theme', theme); render('[data-action="theme"]'); break;
+    case 'mode': mode = target.dataset.mode === 'expert' ? 'expert' : 'discovery'; store('mode', mode); render('[data-action="mode"][data-mode="' + mode + '"]'); break;
     case 'toggle': timeline.dispatch({ type: 'TOGGLE' }); break;
     case 'prev': timeline.dispatch({ type: 'PREVIOUS' }); break;
     case 'next': timeline.dispatch({ type: 'NEXT' }); break;
@@ -218,7 +220,7 @@ app.addEventListener('click', ev => {
 app.addEventListener('change', ev => {
   const target = ev.target as HTMLSelectElement;
   if (target.id === 'language-select' && languageSupported(target.value)) {
-    language = target.value; store('language', language); render();
+    language = target.value; store('language', language); render('#language-select');
   }
   if (target.id === 'speed-select') {
     const speed = Number(target.value);

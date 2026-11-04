@@ -96,6 +96,29 @@ test('theme and RTL orientation preserve technical chart direction', async ({ pa
   await expect(page.locator('.ladder-list')).toHaveCSS('direction', 'ltr');
 });
 
+
+test('keyboard focus survives mode/theme/language rerenders and navigation', async ({ page }) => {
+  await open(page, 'tcp');
+  await expect(page.locator('#lab-title')).toBeFocused();
+  await page.getByRole('button', { name: 'Expert' }).click();
+  await expect(page.getByRole('button', { name: 'Expert' })).toBeFocused();
+  await page.getByRole('button', { name: 'Thème' }).click();
+  await expect(page.getByRole('button', { name: 'Thème' })).toBeFocused();
+  await page.locator('#language-select').selectOption('en');
+  await expect(page.locator('#language-select')).toBeFocused();
+  await page.locator('button[data-action="catalog"].back-link').click();
+  await expect(page.locator('#home-title')).toBeFocused();
+});
+
+test('mobile layout does not scroll horizontally at 390px', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await open(page, 'http');
+  await page.getByRole('button', { name: 'Expert' }).click();
+  await expect.poll(async () => page.evaluate(() =>
+    document.documentElement.scrollWidth <= window.innerWidth
+  )).toBe(true);
+});
+
 for (const width of [390, 768, 1440]) {
   for (const theme of ['dark', 'light']) {
     for (const language of ['fr', 'en', 'ar']) {
