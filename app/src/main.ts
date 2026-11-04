@@ -4,6 +4,8 @@ import { category, lang, setLang, t, tx } from './i18n.ts';
 import { Player, schedule, type Frame } from './engine/player.ts';
 import { hops } from './views/geometry.ts';
 import { TopologyView } from './views/topology.ts';
+import { LogView } from './views/log.ts';
+import { summarize } from './views/summary.ts';
 import { SequenceView } from './views/sequence.ts';
 import { InspectorView } from './views/inspector.ts';
 import { icon, mark, ui } from './views/icons.ts';
@@ -27,7 +29,7 @@ const prefersDark = matchMedia('(prefers-color-scheme: dark)');
 const savedLang = store.get('lang');
 setLang(savedLang === 'fr' || savedLang === 'en' ? savedLang : navigator.language.toLowerCase().startsWith('fr') ? 'fr' : 'en');
 let theme: Theme = store.get('theme') === 'dark' ? 'dark' : store.get('theme') === 'light' ? 'light' : prefersDark.matches ? 'dark' : 'light';
-let view: View = (['network', 'sequence', 'both'] as const).find(v => v === store.get('view')) ?? 'both';
+let view: View = (['network', 'sequence', 'both'] as const).find(v => v === store.get('view')) ?? 'network';
 let speed: number = SPEEDS.find(s => String(s) === store.get('speed')) ?? 1;
 let progress = readProgress();
 let scenario: Scenario = findScenario(location.hash.slice(2)) ?? findScenario(store.get('last')) ?? scenarios[3];
@@ -74,13 +76,15 @@ app.innerHTML = `
         <span class="counter"></span>
         <div class="seg speed" role="group">${SPEEDS.map(s => `<button type="button" data-speed="${s}">${s}×</button>`).join('')}</div>
       </section>
+      <section class="log"></section>
       <p class="hint"></p>
     </main>
     <aside class="inspector" aria-live="off"></aside>
   </div>`;
 
 const $ = <T extends Element = HTMLElement>(selector: string): T => app.querySelector<T>(selector)!;
-const topology = new TopologyView($<SVGSVGElement>('.topology'));
+const topology = new TopologyView($<SVGSVGElement>('.topology'), () => reduced.matches);
+const log = new LogView($('.log'), i => { player.replay(i); });
 const sequence = new SequenceView($<SVGSVGElement>('.sequence'), $('.pane-sequence'), i => { player.replay(i); });
 const inspector = new InspectorView($('.inspector'));
 const player = new Player(draw, () => reduced.matches);
@@ -92,6 +96,7 @@ function draw(frame: Frame): void {
   if (!event) return;
   topology.update(event, frame.index, frame.progress);
   sequence.update(frame.index, frame.progress);
+  log.update(frame.index, frame.progress);
   inspector.render(scenario, event, frame.index, frame.progress >= 1);
   const arrived = frame.progress >= 1;
   if (arrived && frame.index > (progress[scenario.id] ?? -1)) {
@@ -151,7 +156,8 @@ function renderLesson(): void {
   $('.lesson').innerHTML = `<div class="lesson-meta"><span>${esc(category(scenario.category))}</span><span class="dot">·</span><span>${levels[scenario.level]}</span>
     <span class="dot">·</span><span>${scenario.events.length} ${t('step').toLowerCase()}s</span></div>
     <h1>${esc(scenario.name)} <span>${esc(tx(scenario.tagline))}</span></h1>
-    <p>${esc(tx(scenario.intro))}</p>`;
+    <p class="intro">${esc(tx(scenario.intro))}</p>
+    <button type="button" class="more" data-action="more" aria-expanded="false">${t('readMore')}</button>`;
   $('.ticks').innerHTML = scenario.events.map((e, i) =>
     `<button type="button" class="tick tone-${e.tone}" data-index="${i}" aria-label="${esc(`${t('step')} ${i + 1} : ${tx(e.title)}`)}" title="${esc(`${i + 1}. ${tx(e.title)}`)}"></button>`).join('');
 }
@@ -197,8 +203,11 @@ function open(next: Scenario, keepPlace = false): void {
   renderRail();
   renderLesson();
   renderProgress();
-  topology.render(scenario);
-  sequence.render(scenario);
+  const hopCount = (e: Parameters<typeof hops>[1]) => hops(scenario.topology, e);
+  const summaries = summarize(scenario, hopCount);
+  topology.render(scenario, summaries);
+  sequence.render(scenario, summaries, hopCount);
+  log.render(scenario, summaries);
   const slots = schedule(scenario.events, e => hops(scenario.topology, e));
   const seen = progress[scenario.id] ?? -1;
   player.load(slots, keepPlace ? player.frame().index : seen >= scenario.events.length - 1 ? -1 : seen);
@@ -240,6 +249,12 @@ app.addEventListener('click', e => {
     case 'previous': player.previous(); break;
     case 'next': player.next(); break;
     case 'play': player.toggle(); break;
+    case 'more': {
+      const open = $('.lesson').classList.toggle('is-open');
+      button.setAttribute('aria-expanded', String(open));
+      button.textContent = t(open ? 'readLess' : 'readMore');
+      break;
+    }
   }
 });
 

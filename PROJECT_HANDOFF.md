@@ -2,12 +2,21 @@
 
 ## État
 
-Branche `feat/original-v6`. L’application servie à `/` est **entièrement écrite pour ce projet** : moteur de lecture, 14 leçons bilingues (FR/EN), paquets encodés octet par octet, carte réseau animée, diagramme de séquence, inspecteur, icônes et image de partage. Plus aucun fichier précompilé ni ressource d’un autre site dans l’arbre.
+Branche `main`. L’application servie à `/` est **entièrement écrite pour ce projet** : moteur de lecture, 14 leçons bilingues (FR/EN), paquets encodés octet par octet, carte réseau animée, diagramme de séquence, inspecteur, icônes et image de partage. Plus aucun fichier précompilé ni ressource d’un autre site dans l’arbre.
 
 - Entrée : `app/index.html` → `app/src/main.ts` (Vite).
 - Langues : français et anglais uniquement (choix du propriétaire).
 - Ancien laboratoire `/observatory/` supprimé ; l’URL redirige vers `/`.
 - Docker : build Node 22 (typecheck, tests, build) puis Nginx. Voir `docs/DEPLOY_COOLIFY.md`.
+
+## Mise en scène (v6.1)
+
+- **Équipements illustrés** en volume (projection oblique), dessinés dans `app/src/views/devices.ts` : ordinateur, box, nuage, serveurs (badge DNS ou courrier), téléphone, point d'accès Wi-Fi. Diodes qui clignotent à l'envoi, rebond et onde à l'arrivée.
+- **Caméra** : la scène s'ouvre zoomée sur l'émetteur, les équipements apparaissent quand un paquet les atteint et la vue s'élargit en douceur (`TopologyView.reveal`).
+- **Paquets en étiquettes** : protocole, message, ports ; cadenas pour le chiffré ; chute barrée pour une perte.
+- **Journal des paquets** (`app/src/views/log.ts`) qui se remplit en direct, avec numéros de séquence relatifs et résumé par protocole (`app/src/views/summary.ts`).
+- **Séquence** : flèches dont la pente suit le nombre de sauts, libellés le long des flèches, horodatage simulé.
+- Vue par défaut : Réseau.
 
 ## Vérifié
 

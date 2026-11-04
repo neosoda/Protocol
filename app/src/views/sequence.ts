@@ -1,12 +1,11 @@
-import type { Scenario } from '../model.ts';
+import type { NetEvent, Scenario } from '../model.ts';
+import type { Summary } from './summary.ts';
 import { t, tx } from '../i18n.ts';
 import { ease } from './geometry.ts';
 import { escapeHtml as esc } from './escape.ts';
 
 const NS = 'http://www.w3.org/2000/svg';
 const HEAD = 78;
-const ROW = 58;
-const SLANT = 26;
 const DROP_AT = 0.55;
 
 interface Row { group: SVGGElement; line: SVGLineElement; head: SVGPolygonElement; dot: SVGCircleElement; x1: number; x2: number; y1: number; y2: number; length: number }
@@ -20,6 +19,8 @@ export class SequenceView {
   private shown = -1;
   private W = 1000;
   private last: [number, number] = [0, 0];
+  private summaries: Summary[] = [];
+  private hops: (e: NetEvent) => number = () => 1;
 
   constructor(svg: SVGSVGElement, scroller: HTMLElement, onSelect: (index: number) => void) {
     this.svg = svg;
@@ -46,14 +47,24 @@ export class SequenceView {
     return Math.round(Math.max(least, Math.min(1100, this.scroller.clientWidth || 1000)));
   }
 
-  render(scenario: Scenario): void {
+  render(scenario: Scenario, summaries: Summary[] = this.summaries, hops: (e: NetEvent) => number = this.hops): void {
     this.scenario = scenario;
+    this.summaries = summaries;
+    this.hops = hops;
     this.shown = -1;
     const W = this.W = this.width(scenario);
     const actors = scenario.actors;
-    const margin = Math.min(actors.length > 3 ? 110 : 190, W * 0.22);
+    const margin = Math.min(actors.length > 3 ? 120 : 200, W * 0.24);
     const x = (id: string) => margin + (W - 2 * margin) * (actors.length === 1 ? 0.5 : actors.indexOf(id) / (actors.length - 1));
-    const height = HEAD + scenario.events.length * ROW + 30;
+    // Arrows slope with travel time: the further a packet goes, the steeper.
+    let top = HEAD;
+    const layout = scenario.events.map(event => {
+      const slant = 16 + 14 * Math.min(4, hops(event));
+      const row = { y1: top + 22, y2: top + 22 + slant, x1: x(event.from), x2: x(event.to), top, height: slant + 40 };
+      top += row.height;
+      return row;
+    });
+    const height = top + 24;
     const parts: string[] = [];
     for (const id of actors) {
       const n = scenario.topology.nodes.find(node => node.id === id)!;
@@ -64,31 +75,28 @@ export class SequenceView {
         <line y1="${HEAD - 18}" y2="${height - 10}" class="lifeline"/></g>`);
     }
     scenario.events.forEach((event, i) => {
-      const y1 = HEAD + i * ROW + 6;
-      const y2 = y1 + SLANT;
-      const x1 = x(event.from), x2 = x(event.to);
-      const mid = (x1 + x2) / 2;
+      const { x1, x2, y1, y2, top: rowTop, height: rowH } = layout[i];
+      const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+      const upright = angle > 90 || angle < -90 ? angle - 180 : angle;
       const name = `${t('step')} ${i + 1} : ${tx(event.title)}`;
       parts.push(`<g class="row tone-${event.tone}${event.drop ? ' is-drop' : ''}" data-index="${i}" tabindex="0" role="button" aria-label="${esc(name)}">
-        <rect class="row-hit" x="0" y="${y1 - 22}" width="${W}" height="${ROW}" rx="10"/>
-        <text class="row-num" x="22" y="${y1 + 17}">${String(i + 1).padStart(2, '0')}</text>
+        <rect class="row-hit" x="0" y="${rowTop}" width="${W}" height="${rowH}" rx="10"/>
+        <text class="row-num" x="16" y="${y1 + 4}">${String(i + 1).padStart(2, '0')}</text>
+        <text class="row-time" x="16" y="${y1 + 18}">${(summaries[i]?.time ?? 0).toFixed(3)}</text>
         <line class="row-ghost" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>
         <line class="row-line" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>
-        <polygon class="row-head" points="0,0 -11,-5.5 -11,5.5"/>
+        <polygon class="row-head" points="0,0 -12,-6 -12,6"/>
         <circle class="row-dot" r="6"/>
-        <text class="row-label" x="${mid}" y="${Math.min(y1, y2) - 8 + SLANT / 2 - 6}" text-anchor="middle">${esc(event.label)}</text>
+        <text class="row-label" text-anchor="middle" transform="translate(${(x1 + x2) / 2} ${(y1 + y2) / 2}) rotate(${upright.toFixed(2)}) translate(0 -8)">${esc(event.label)}</text>
       </g>`);
     });
     this.svg.setAttribute('viewBox', `0 0 ${W} ${height}`);
     this.svg.style.width = `${W}px`;
     this.svg.innerHTML = parts.join('');
     this.rows = [...this.svg.querySelectorAll<SVGGElement>('.row')].map((group, i) => {
-      const event = scenario.events[i];
-      const y1 = HEAD + i * ROW + 6;
-      const x1 = x(event.from), x2 = x(event.to);
-      const line = group.querySelector<SVGLineElement>('.row-line')!;
+      const { x1, x2, y1, y2 } = layout[i];
       return {
-        group, line, x1, x2, y1, y2: y1 + SLANT, length: Math.hypot(x2 - x1, SLANT),
+        group, line: group.querySelector<SVGLineElement>('.row-line')!, x1, x2, y1, y2, length: Math.hypot(x2 - x1, y2 - y1),
         head: group.querySelector<SVGPolygonElement>('.row-head')!, dot: group.querySelector<SVGCircleElement>('.row-dot')!
       };
     });
