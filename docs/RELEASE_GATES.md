@@ -1,34 +1,23 @@
-# Network Observatory — release gates V4 Workbench (2026-11-04)
+# Release gates — retour au design classique
 
-**État : code V4 développé, tests de compilation et d'acceptation encore à valider. Ne pas confondre fusion Git et publication.**
+L'objectif du rollback est de **restituer fidèlement les animations et l'interface d'origine**, sans nouvelle refonte du moteur de visualisation.
 
-## Entrée et distribution
+## Contrôles statiques effectués
 
-- Nouvelle entrée root `app/index.html` (application moderne originale), remplaçant les 163 Ko de HTML historique.
-- `app/vite.config.ts` construit **seulement** `dist/index.html` et refuse de copier `app/public` pour le build.
-- `app/scripts/verify-build.mjs` n'accepte qu'un HTML racine reconnu, les artefacts Vite CSS/JS/SVG, et exactement **un JS moderne**. Il rejette le site historique et les artefacts inattendus.
-- Coolify : `Dockerfile` multi-stage + `deploy/nginx.conf`, port interne **80**, redirection `/observatory/` → `/`. `vercel.json` est supprimé. Aucun déploiement réel déclenché.
+- L'HTML racine correspond exactement au blob `043fb1c6b2ecd3d607cea3ecbfffe617da89903b` de `main` avant la PR #5.
+- Les blobs du JavaScript animé `app/public/assets/index-l76eMM6E.js` et du CSS `app/public/assets/index-C1vckX_Q.css` sont inchangés.
+- Les scripts `style-switcher.js` et `alternate-style.css` sont eux aussi inchangés.
+- Les **8 références absolues locales** (`src`/`href`) de `app/index.html` pointent vers des fichiers existants dans `app/public/`.
+- `Dockerfile` fournit directement `app/index.html` et `app/public/` avec Nginx, port 80, sans Vite. `/healthz` est conservé.
 
-## Vérifications nécessaires, sans GitHub Actions
+## Validation encore nécessaire
 
-1. Depuis la racine : `npm --prefix app install`, committer `app/package-lock.json` puis `npm --prefix app ci`.
-2. `npm --prefix app run typecheck`, `npm --prefix app run test`, `npm --prefix app run build`. Le Dockerfile lance ces commandes pendant la construction de l'image ; aucune exécution de ce build complet n'est encore attestée.
-3. Tester `/` et `/observatory/` en dev et sur **une instance Coolify de test** ; vérifier `dist` et absence des bundles tiers.
-4. Exécuter `npm --prefix app run test:e2e` avec Chromium ; examiner les 18 captures 390/768/1440 × FR/EN/AR × clair/sombre.
-5. Clavier, focus sur menu mobile, recherche, navigation du ladder, lecteur d'écran, zoom 200 %, RTL, reduced motion, contrastes WCAG 2.2 AA.
-6. Revue des droits : aucune réutilisation non autorisée de la reproduction historique et de ses ressources.
-7. Seulement après preuves, envisager une fusion V4 et configurer l'application Coolify de production.
+- Build de l'image Docker sous Coolify et contrôle de l'état de santé.
+- HTTP 200 et bonnes réponses MIME pour le HTML, JS, CSS, polices et manifest.
+- Captures et animations réelles pour TCP, DNS, TLS/HTTPS sur desktop/mobile ; absence de déformations, sauts ou erreurs JS.
+- Vérification du cache après rollback (`index.html` non mis en cache, assets inchangés).
+- Vérification des licences : la version historique attribuée à Dilum Sanjaya reste soumise à ses propres droits. Le retour arrière ne vaut pas autorisation de redistribution.
 
-## Réalisé vs non vérifié
+Le laboratoire Vite/TypeScript reste dans le dépôt mais n'est **pas compilé dans l'image Docker**. Ses tests ne prouvent donc rien concernant l'interface classique restaurée.
 
-**5/5 tests Node autonomes du garde-fou de sortie exécutés et réussis** sur des copies aux SHA de blobs GitHub identiques. Cela ne valide pas le build Vite réel. **Vérifié statiquement :** 85 clés de traduction FR/EN complètes, nouvelle structure rail/moniteur/workbench, HTML root moderne, CSS avec accolades équilibrées, tests de build et E2E ajoutés.
-
-**Non exécuté :** npm ci, typecheck, tests Node métier du catalogue, Vite, Playwright, visual QA et audits WCAG. Le registre npm reste inaccessible depuis le runtime local. Ces validations ne doivent jamais être annoncées comme réussies par anticipation.
-
-## Statut juridique
-
-L'ancien `app/index.html` a été remplacé, mais des assets historiques peuvent demeurer dans `app/public/` et l'historique Git. Ne pas présumer qu'ils sont libres de droits. Le contrôle Vite exclut `public/` du build, mais une vraie revue de distribution reste nécessaire.
-
-## Déploiement self-hosted
-
-Configuration exacte et limites : [DEPLOY_COOLIFY.md](DEPLOY_COOLIFY.md). Tant que le lockfile est obsolète, le Dockerfile utilise `npm install` temporairement et doit être durci vers `npm ci` ; **ne pas considérer l'image comme validée avant un build et des tests réels**.
+Pas de GitHub Actions ni de Vercel.

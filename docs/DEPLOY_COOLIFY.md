@@ -1,33 +1,38 @@
-# Network Observatory — déploiement sur Coolify
+# Déploiement Coolify — design classique restauré
 
-Le projet V4 est une application statique Vite : une étape Node compile et teste, puis un conteneur Nginx sert uniquement les fichiers produits. **Pas de serveur Node ni de base de données à maintenir en production.**
+La refonte V4 a été annulée pour retrouver les **animations d'origine**. Le service est redevenu un **site statique Nginx** : aucune compilation Vite, installation npm, base de données, variable ni volume requis.
 
-## Configuration Coolify
-
-Créer une Application liée au dépôt Git `https://github.com/neosoda/Protocol`.
+## Application Coolify
 
 | Paramètre | Valeur |
 |---|---|
-| Branche | `main` |
-| Build strategy | **Dockerfile** |
-| Base Directory / build context | `/` (racine Git) |
+| Source | `https://github.com/neosoda/Protocol` |
+| Branche | `main` après fusion du rollback |
+| Build Pack | **Dockerfile** |
+| Base Directory / Build Context | `/` |
 | Dockerfile Location | `Dockerfile` |
 | Ports Exposes | `80` |
-| Domaine | À renseigner dans Coolify |
-| Santé | Docker HEALTHCHECK sur `/healthz` |
-| Variables / volumes | Aucune nécessité pour ce site statique |
+| Healthcheck | `GET /healthz` via le Dockerfile |
+| Variables et volumes | Aucun nécessaire |
 
-Coolify gère le proxy, le domaine, HTTPS et le cycle de vie du conteneur. Utiliser d'abord **une application de test distincte** de la production ; ne pas changer immédiatement la branche ou le domaine de production. Aucun GitHub Actions ni service Vercel requis.
+Le `Dockerfile` utilise `nginx:stable-alpine`, copie le fichier `app/index.html` historique et l'intégralité de `app/public/` dans `/usr/share/nginx/html/`. Il conserve les mêmes bundles JS/CSS que la version initiale, **sans recompilation**. `.dockerignore` n'exclut plus `app/public/`.
 
-## Fonctionnement
+## Routes
 
-- `/` sert l'application V4 originale ;
-- `/observatory` et `/observatory/` redirigent vers `/` (HTTP 308). La cible relative conserve le HTTPS du proxy Coolify ;
-- `/assets/*` est servi avec cache immuable (noms versionnés par Vite) ;
-- `/healthz` renvoie HTTP 200 pour vérifier Nginx.
+- `/` : page historique et ses animations.
+- `/assets/*` : JS/CSS, animations, traductions et typographies historiques.
+- `/favicon.ico`, `/site.webmanifest`, etc. : fichiers statiques de `app/public/`.
+- `/observatory/` : redirection 308 vers `/`.
+- `/healthz` : réponse HTTP 200.
 
-Le Dockerfile enchaîne `npm ci --include=dev`, `npm run typecheck`, `npm run test` et `npm run build`. **Une erreur stoppe la construction de l'image.** Le build Vite applique `scripts/verify-build.mjs`, qui refuse les artefacts historiques. La phase runtime copie `app/dist/`. Le dossier historique `app/public/` est exclu du contexte Docker par `.dockerignore`.
+Le proxy Coolify s'occupe du domaine et du HTTPS. La configuration Nginx ne doit pas réécrire les liens statiques ni transformer les bundles.
 
-## Critères de déploiement réel
+## Vérifications après déploiement
 
-Vérifier que `/healthz` et `/` répondent sur le domaine public et que `/observatory/` redirige vers la racine du même domaine en HTTPS. Avant de basculer une instance publique, tester les écrans 390/768/1440, FR/EN/AR, clair/sombre, clavier et contraste. Vérifier l'absence d'assets historiques dans l'image finale et résoudre leurs droits (voir `docs/RIGHTS_AND_ATTRIBUTIONS.md`).
+1. Dans Coolify, vérifier que l'application suit bien la branche `main` et qu'un nouveau déploiement est en statut **Healthy** ; aucun déploiement n'a été lancé depuis ChatGPT.
+2. Faire un rechargement complet du navigateur ; la racine doit retrouver l'ancienne présentation et non le rail V4.
+3. Dans l'onglet Réseau, vérifier HTTP 200 pour `/assets/index-l76eMM6E.js` et `/assets/index-C1vckX_Q.css`, ainsi que l'absence d'erreurs de chargement.
+4. Tester plusieurs animations originales (TCP, DNS, TLS/HTTPS), desktop et mobile.
+5. Confirmer les droits de publication du contenu historique avec son auteur si nécessaire : voir `RIGHTS_AND_ATTRIBUTIONS.md`.
+
+**QA connue :** le blob historique de l'HTML et les bundles JS/CSS ont des SHA identiques à ceux d'avant PR #5 ; les 8 références statiques absolues repérées dans l'HTML existent. Aucun build Docker ni test des animations dans un vrai navigateur n'a pu être exécuté ici.
