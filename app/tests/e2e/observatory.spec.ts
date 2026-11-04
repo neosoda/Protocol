@@ -70,6 +70,7 @@ test('discovery and expert reveal different field depth, only sourced sample byt
   await expect(page.locator('.hex-view')).toBeVisible();
   await expect(page.locator('.byte-selected')).toHaveCount(6); // "GET": 3 HEX + 3 ASCII
   await page.locator('button[data-action="inspect-field"][data-field-index="1"]').click();
+  await expect(page.locator('button[data-action="inspect-field"][data-field-index="1"]')).toBeFocused();
   await expect(page.locator('.field-explanation')).toContainText('Hôte HTTP demandé');
   await expect(page.locator('.byte-selected')).toHaveCount(0);
   await expect(page.locator('.raw-caption')).toContainText('Pas une trame réseau capturée');

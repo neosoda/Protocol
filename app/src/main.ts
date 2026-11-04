@@ -211,7 +211,7 @@ app.addEventListener('click', ev => {
       if (Number.isInteger(index) && index >= 0 && index < active.events[timeline.getState().index].fields.length) {
         selectedField = index;
         update();
-        $('inspector-body')?.querySelectorAll<HTMLButtonElement>('button[data-field-index]')[index]?.focus();
+        $('inspector-body')?.querySelector<HTMLButtonElement>(`button[data-field-index="${index}"]`)?.focus();
       }
       break;
     }

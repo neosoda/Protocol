@@ -39,7 +39,7 @@ Node.js **22+** conseillé. Depuis la racine du dépôt :
 
 ```bash
 npm --prefix app install
-npm run dev
+npm --prefix app run dev
 ```
 
 - `http://localhost:5173/observatory/` : laboratoire nouveau, en TypeScript.
@@ -49,8 +49,8 @@ npm run dev
 npm --prefix app run typecheck
 npm --prefix app run test
 npm --prefix app run test:e2e
-npm run build
-npm run preview
+npm --prefix app run build
+npm --prefix app run preview
 ```
 
 **État de validation (04/11/2026) :** les nouveaux tests unitaires et Playwright sont **rédigés mais non exécutés** ; aucun résultat de build, typecheck ou capture navigateur n'est revendiqué. Le verrou npm est toujours ouvert : le `app/package-lock.json` historique n'est **pas synchronisé** avec les dépendances du socle TypeScript. Exécuter `npm --prefix app install`, versionner le lock puis vérifier `npm --prefix app ci` dans un environnement disposant de npm et du réseau. Aucun workflow GitHub Actions n'est requis.\n
