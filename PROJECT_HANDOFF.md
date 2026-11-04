@@ -4,7 +4,7 @@
 
 - `main` : `9dbeea4877ec78ed40eb54d94350b346072db848` — PR #2 **fusionnée sur instruction explicite du propriétaire**, sans exécution des tests ni autorisation de distribution.
 - Nouvelle branche : `fix/observatory-v2-hardening`, issue de ce commit.
-- Nouvelle PR : non fusionnée ; ouvrir en brouillon après vérification statique.
+- Nouvelle PR : [#3](https://github.com/neosoda/Protocol/pull/3), **brouillon non fusionné** ; correctifs prêts pour validations locales.
 - Critères de publication : `docs/RELEASE_GATES.md` (P0 droits historiques toujours bloquant).
 
 ### Travaux du lot durcissement
