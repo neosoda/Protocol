@@ -174,6 +174,18 @@ function update(): void {
       button.classList.toggle('is-active', selected);
       if (selected) button.setAttribute('aria-current', 'step'); else button.removeAttribute('aria-current');
     });
+    // Scroll only within the ladder, without moving keyboard focus or the page.
+    // This also keeps the final event visible when playback stops on the last tick.
+    const selected = list.querySelector<HTMLButtonElement>(`button[data-index="${state.index}"]`);
+    if (selected) {
+      const viewport = list.getBoundingClientRect();
+      const item = selected.getBoundingClientRect();
+      const stickyHeader = list.querySelector('.ladder-head')?.getBoundingClientRect().height ?? 0;
+      const upperEdge = viewport.top + stickyHeader + 8;
+      const lowerEdge = viewport.bottom - 8;
+      if (item.top < upperEdge) list.scrollTop -= upperEdge - item.top;
+      else if (item.bottom > lowerEdge) list.scrollTop += item.bottom - lowerEdge;
+    }
   }
   $('topology-actors')?.querySelectorAll<HTMLElement>('[data-actor]').forEach(element => {
     element.classList.toggle('is-sender', element.dataset.actor === current.from);
@@ -226,6 +238,31 @@ app.addEventListener('change', ev => {
     const speed = Number(target.value);
     if ([0.5, 1, 1.5, 2].includes(speed)) timeline.dispatch({ type: 'SPEED', speed: speed as Speed });
   }
+});
+// The ladder is a keyboard-operable timeline: physical arrows stay LTR even
+// inside RTL interfaces, matching the diagram's chronological layout.
+app.addEventListener('keydown', event => {
+  const target = event.target;
+  if (!(target instanceof HTMLButtonElement) || !target.matches('#event-list button[data-action="select"]')) return;
+  const index = Number(target.dataset.index);
+  const last = active.events.length - 1;
+  let next: number;
+  switch (event.key) {
+    case 'ArrowDown':
+    case 'ArrowRight': next = Math.min(last, index + 1); break;
+    case 'ArrowUp':
+    case 'ArrowLeft': next = Math.max(0, index - 1); break;
+    case 'Home': next = 0; break;
+    case 'End': next = last; break;
+    default: return;
+  }
+  event.preventDefault();
+  timeline.dispatch({ type: 'SELECT', index: next });
+  $('event-list')?.querySelector<HTMLButtonElement>(`button[data-index="${next}"]`)?.focus();
+});
+// Background tabs should not consume timer resources or silently advance lessons.
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && timeline.getState().playing) timeline.dispatch({ type: 'PAUSE' });
 });
 window.addEventListener('pagehide', () => timeline.dispose());
 render();

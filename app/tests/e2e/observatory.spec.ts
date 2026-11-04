@@ -137,6 +137,22 @@ test('mobile layout does not scroll horizontally at 390px', async ({ page }) => 
   )).toBe(true);
 });
 
+test('ladder keyboard navigation follows event order and keeps the active step in view', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page, 'tls');
+  await page.locator('#event-list button[data-index="0"]').focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.locator('#event-list button[data-index="1"]')).toBeFocused();
+  await expect(page.locator('#progress-text')).toContainText('2 / 7');
+  await page.keyboard.press('End');
+  await expect(page.locator('#event-list button[data-index="6"]')).toBeFocused();
+  await expect(page.locator('#progress-text')).toContainText('7 / 7');
+  await expect.poll(() => page.locator('#event-list').evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+  await page.keyboard.press('Home');
+  await expect(page.locator('#event-list button[data-index="0"]')).toBeFocused();
+  await expect(page.locator('#progress-text')).toContainText('1 / 7');
+});
+
 for (const width of [390, 768, 1440]) {
   for (const theme of ['dark', 'light']) {
     for (const language of ['fr', 'en', 'ar']) {
