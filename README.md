@@ -1,3 +1,5 @@
+> **V4 Workbench — changement complet d'interface (branche `feat/observatory-v4-workbench`).** L'ancienne page racine de 163 Ko est remplacée par l'application moderne : rail latéral, moniteur TCP, catalogue numéroté, chronologie dominante, topologie et inspecteur latéraux, nouveau monogramme N/O et palette ivoire/corail. **Le site Vercel en production reste inchangé tant que sa barrière de publication est active.** La branche permet uniquement une preview conditionnée au typecheck, aux tests et au build sécurisé. [Identité V4](docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md) · [Handoff](PROJECT_HANDOFF.md).
+
 <div align="center">
 
 <img src="app/public/observatory-mark.svg" width="72" height="72" alt="Network Observatory">
@@ -50,8 +52,8 @@ npm --prefix app install
 npm --prefix app run dev
 ```
 
-- `http://localhost:5173/observatory/` : laboratoire nouveau, en TypeScript.
-- `http://localhost:5173/` : version historique conservée à titre de référence interne.
+- `http://localhost:5173/observatory/` : chemin de compatibilité du même laboratoire TypeScript.
+- `http://localhost:5173/` : **nouvelle interface originale V4**, accueil principal.
 
 ```bash
 npm --prefix app run typecheck
@@ -65,7 +67,7 @@ npm --prefix app run preview
 
 ### Séparation de la distribution
 
-En développement, la version historique reste accessible localement à la racine pour comparaison. **Le build de production Vite n'embarque intentionnellement que `/observatory/`** : `app/public/` est exclu et un contrôle automatique (`app/scripts/verify-build.mjs`) rejette les artefacts suspects. Ce comportement est **implémenté mais pas encore vérifié par un build réel**, faute d'accès à npm. Il ne régularise pas les droits du contenu historique déjà présent dans le dépôt.
+En développement, la version historique reste accessible localement à la racine pour comparaison. **Le build de production Vite n'embarque intentionnellement que la nouvelle entrée `/`** : `app/public/` est exclu et un contrôle automatique (`app/scripts/verify-build.mjs`) rejette les artefacts suspects. Ce comportement est **implémenté mais pas encore vérifié par un build réel**, faute d'accès à npm. Il ne régularise pas les droits du contenu historique déjà présent dans le dépôt.
 
 **Validation partielle réelle (04/11/2026) :** 4/4 tests autonomes du garde-fou réussis sous Node 22.16.0 sur des copies identiques aux fichiers GitHub ; les tests métier, le build Vite et Playwright ne sont toujours pas exécutés. La PR #3 reste ouverte. Voir `PROJECT_HANDOFF.md` pour les SHA, les blocages réseau et le plan de reprise.
 
@@ -79,7 +81,7 @@ La topologie expose directement les états émetteur/récepteur au lieu de les m
 
 ```text
 app/
-├── index.html                 # application historique (bundles compilés)
+├── index.html                 # entrée moderne originale V4
 ├── observatory/index.html     # nouvelle entrée Vite
 ├── src/
 │   ├── protocols/             # catalogue original, données et types
