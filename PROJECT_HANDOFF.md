@@ -1,5 +1,16 @@
 # PROJECT HANDOFF — Network Observatory (2026-11-04)
 
+## État actuel après fusion PR #4 — 04/11/2026
+
+- **PR #4 « Signal & Structure » fusionnée dans `main`**, commit `5da7512c52ebefec763eb6a5248d1eb2a8db780a`. PR #3 fusionnée auparavant : `80dac1df1327a0c7dc9872806c27aa15824be8ad`.
+- **Fusion Git uniquement** : l'identité visuelle, la recherche catalogue, le CSS refactorisé et les tests ajoutés se trouvent sur `main` ; aucune preuve de réussite TypeScript/Vite/Playwright ou de conformité WCAG 2.2 AA n'a été obtenue. Le lockfile n'est toujours pas synchronisé.
+- **Publication toujours bloquée par défaut** : `vercel.json` contient `ignoreCommand` retournant 0, prévu pour ignorer les nouveaux builds Vercel. Cela ne garantit pas l'absence de déploiements tiers ni la suppression d'une ancienne publication.
+- **Droits historiques non résolus** ; ne pas déclencher de redistribution ni supprimer la barrière de publication sans autorisation explicite ou suppression totale des ressources concernées.
+- **Reprise prochaine** : partir du commit `main` le plus récent, installer/régénérer `app/package-lock.json` dans un environnement avec réseau npm, exécuter `npm ci`, `typecheck`, tests unitaires, `vite build` et Playwright, corriger les échecs constatés, revoir le rendu 390/768/1440 et l'accessibilité.
+- Aucun GitHub Actions lancé volontairement lors de cette intervention.
+
+**Les sections précédentes ci-dessous documentent l'historique avant fusion ; ce bloc fait foi pour l'état actuel.**
+
 ## V3 — Signal & Structure (reprise courante, 04/11/2026)
 
 **PR #3 fusionnée dans `main`** par demande explicite : commit de fusion `80dac1df1327a0c7dc9872806c27aa15824be8ad`. La fusion a eu lieu malgré la non-validation de `npm ci`, TypeScript, build et E2E (blocage DNS). **Elle ne vaut ni certificat qualité ni autorisation de redistribution.**
