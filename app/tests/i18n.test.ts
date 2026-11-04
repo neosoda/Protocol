@@ -17,3 +17,14 @@ test('all labels always have a non-empty fallback', () => {
     }
   }
 });
+
+
+test('navigation, study diagram and inspector text are translated in French and English', () => {
+  for (const key of ["heroLead","heroAccent","heroDescription","labEyebrow","exploreEyebrow","events","levelInitial","levelIntermediate","levelAdvanced","groupMode","groupControls","groupWorkspace","groupParticipants","skipLink","logicalFlow","sender","receiver","inspectStep","inspectTo","selectedEvent","selectedField","sampleLabel","sampleBytes","sampleMeaning","sampleValidRange","sampleNoRange","discoveryHint","noFields","footerAlpha","footerAttribution","footerRights","diagramTcp","themeLight","themeDark","panelNetwork","panelTimeline","panelAnalysis","flowLegend","sampleLegend","handshake"] as const) {
+    const fr = label('fr', key);
+    const en = label('en', key);
+    assert.ok(fr && en, key);
+    assert.notEqual(fr, en, `FR/EN translation identical: ${key}`);
+    assert.equal(label('ar', key), en, `missing fallback: ${key}`);
+  }
+});

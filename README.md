@@ -31,7 +31,7 @@ Les diagrammes sont des **vues d'un scénario logique modélisé** : ils n'affic
 
 Les **14 protocoles** représentés sont : IP, TCP, UDP, ICMP, DNS, DHCP, HTTP, HTTPS, SMTP, POP3, IMAP, FTP, SSH et TLS 1.3. Chaque scénario est **une abstraction pédagogique construite**, non une capture pcap ni du trafic réseau.
 
-> La nouvelle interface propose un sélecteur de 15 langues pour ses libellés (avec traductions partielles et repli anglais). Les **descriptions des scénarios restent en français** à ce stade : la parité multilingue intégrale n'est pas acquise. La version historique reste conservée pour comparaison.
+> La nouvelle interface propose un sélecteur de 15 langues pour ses libellés (avec interface principale FR/EN et traductions partielles/repli anglais pour les 13 autres langues). Les **descriptions des scénarios restent en français** à ce stade : la parité multilingue intégrale n'est pas acquise. La version historique reste conservée pour comparaison.
 
 ## Installation
 
@@ -39,7 +39,7 @@ Node.js **22+** conseillé. Depuis la racine du dépôt :
 
 ```bash
 npm --prefix app install
-npm run dev
+npm --prefix app run dev
 ```
 
 - `http://localhost:5173/observatory/` : laboratoire nouveau, en TypeScript.
@@ -49,11 +49,24 @@ npm run dev
 npm --prefix app run typecheck
 npm --prefix app run test
 npm --prefix app run test:e2e
-npm run build
-npm run preview
+npm --prefix app run build
+npm --prefix app run preview
 ```
 
-**État de validation (04/11/2026) :** les nouveaux tests unitaires et Playwright sont **rédigés mais non exécutés** ; aucun résultat de build, typecheck ou capture navigateur n'est revendiqué. Le verrou npm est toujours ouvert : le `app/package-lock.json` historique n'est **pas synchronisé** avec les dépendances du socle TypeScript. Exécuter `npm --prefix app install`, versionner le lock puis vérifier `npm --prefix app ci` dans un environnement disposant de npm et du réseau. Aucun workflow GitHub Actions n'est requis.\n
+**État de validation (04/11/2026) :** les nouveaux tests unitaires et Playwright sont **rédigés mais non exécutés** ; aucun résultat de build, typecheck ou capture navigateur n'est revendiqué. Le verrou npm est toujours ouvert : le `app/package-lock.json` historique n'est **pas synchronisé** avec les dépendances du socle TypeScript. Exécuter `npm --prefix app install`, versionner le lock puis vérifier `npm --prefix app ci` dans un environnement disposant de npm et du réseau. Aucun workflow GitHub Actions n'est requis.
+
+### Séparation de la distribution
+
+En développement, la version historique reste accessible localement à la racine pour comparaison. **Le build de production Vite n'embarque intentionnellement que `/observatory/`** : `app/public/` est exclu et un contrôle automatique (`app/scripts/verify-build.mjs`) rejette les artefacts suspects. Ce comportement est **implémenté mais pas encore vérifié par un build réel**, faute d'accès à npm. Il ne régularise pas les droits du contenu historique déjà présent dans le dépôt.
+
+**Validation partielle réelle (04/11/2026) :** 4/4 tests autonomes du garde-fou réussis sous Node 22.16.0 sur des copies identiques aux fichiers GitHub ; les tests métier, le build Vite et Playwright ne sont toujours pas exécutés. La PR #3 reste ouverte. Voir `PROJECT_HANDOFF.md` pour les SHA, les blocages réseau et le plan de reprise.
+
+### Consolidation pédagogique et accessibilité (PR #3)
+
+Le scénario SSH présente maintenant **14 échanges pédagogiques**, dont KEXINIT et NEWKEYS bilatéraux, authentification et confirmation de canal. La réponse HTTP/1.1 indique une longueur de corps cohérente avec ses octets. La progression est mémorisée **par identifiant d'événement** pour limiter les effets des réorganisations du catalogue.
+
+La topologie expose directement les états émetteur/récepteur au lieu de les masquer dans des pseudo-éléments CSS ; l'interface principale est localisée en français et en anglais, tandis que les récits restent en français. Les **69 clés de traduction FR/EN** et la cohérence des données HTTP/SSH ont été inspectées statiquement ; **la compilation et les E2E correspondants n'ont pas pu être exécutés**.
+
 ## Structure
 
 ```text
@@ -88,7 +101,7 @@ L'implémentation nouvelle est originale au niveau du code ajouté dans cette br
 
 ## Suite
 
-L'[audit priorisé](docs/AUDIT_2026-11-04.md), le [design system](docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md), les [références RFC](docs/PROTOCOL_REFERENCES.md) et le [handoff](PROJECT_HANDOFF.md) documentent les acquis et les vérifications restant à faire sans masquer les risques.
+L'[audit priorisé](docs/AUDIT_2026-11-04.md), le [design system](docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md), les [références RFC](docs/PROTOCOL_REFERENCES.md), les [conditions de livraison](docs/RELEASE_GATES.md) et le [handoff](PROJECT_HANDOFF.md) documentent les acquis et les vérifications restant à faire sans masquer les risques.
 
 **Licence :** [MIT](LICENSE) pour les contributions originales dont Neosoda possède les droits ; toute œuvre tierce reste soumise à ses propres droits.
 

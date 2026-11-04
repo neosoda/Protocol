@@ -1,11 +1,84 @@
 # PROJECT HANDOFF — Network Observatory (2026-11-04)
 
+## Suite du 4 novembre 2026 — lot de consolidation après `8ef3caf`
+
+**Dernière branche :** `fix/observatory-v2-hardening`. **Dernier commit du lot de code :** `e81fbb53a50f774aad0552e0bb85c10abbe65cf5`. PR [#3](https://github.com/neosoda/Protocol/pull/3) **ouverte, brouillon, non fusionnée**. `main` reste `9dbeea4877ec78ed40eb54d94350b346072db848`.
+
+### Modifications effectivement poussées
+
+1. `edddff73a01c2ff654cbf2eb391ced105f762da2` : 32 chaînes de navigation/inspector/diagrammes FR/EN ajoutées avec repli anglais sur les 13 autres locales ; test d'unicité/traduction des chaînes et test navigateur en anglais ajoutés.
+2. `8caec1d5139ba79e1d1cc6b937334f9113fedd40` : correction immédiate de deux templates d'inspecteur pour évaluer correctement les libellés localisés.
+3. `f78501c2f7d18a8921778a80820914127d95bf70` : HTTP/1.1 utilise désormais `Content-Length: 7` pour son corps texte de 7 octets ; SSH enrichi à **14 événements** (KEXINIT des deux pairs, deux NEWKEYS, SERVICE_REQUEST/ACCEPT, USERAUTH_SUCCESS, confirmation de canal) ; 2 tests d'invariants RFC ajoutés ; progression persistée par **ID d'événement** plutôt qu'index avec compatibilité des anciens entiers.
+4. `e81fbb53a50f774aad0552e0bb85c10abbe65cf5` : labels de topologie émetteur/récepteur rendus dans le DOM (plus de texte français en pseudo-éléments CSS), accessibles et traduisibles, ainsi que les légendes, titres de panneaux et thème FR/EN ; E2E et tests de dictionnaire ajustés.
+
+### Vérifications réellement effectuées, sans extrapolation
+
+- **4/4 tests Node autonomes** du contrôle `verify-build` réexécutés localement sur les scripts identiques aux blobs GitHub — réussite.
+- **Inspection programmatique des sources GitHub à ce commit** : **69 clés UI présentes dans `en` et `fr`**, aucun doublon ni clé manquante ; réponse HTTP `Content-Length: 7` = corps `Bonjour` (7 octets ASCII/UTF-8) ; **14 événements SSH consécutifs** ; vérification de l'absence d'étiquettes d'état statiques en CSS. **Ces contrôles sont statiques**, ils ne remplacent pas TypeScript ni les tests Node du catalogue.
+- **Retest réseau** : `git ls-remote` échoue sur `github.com` ; `npm view vite` échoue sur `EAI_AGAIN registry.npmjs.org`. Dépendances npm non installables ici.
+- **Toujours absents :** lockfile mis à jour, `npm ci`, typecheck du dépôt complet, tests d'invariants exécutés, build Vite, tests Playwright, captures, preview de production et audit WCAG 2.2 AA. Aucune CI GitHub Actions ni livraison n'a été déclenchée.
+- **Verrou juridique inchangé** : droits de l'historique non établis, malgré l'exclusion désormais programmée du build moderne ; vérifier `dist` réellement avant une fusion.
+
+### Ordre de reprise
+
+1. Sur une machine avec accès Git + npm, installer, régénérer/versionner `app/package-lock.json`, faire `npm ci` puis `typecheck`, `test`, `build`, `test:e2e`.
+2. Corriger **toute** compilation / assertion cassée ; inspecter `app/dist/` et vérifier que `/` ne redistribue aucun élément historique, puis valider `/observatory/` en preview.
+3. Vérifier captures FR/EN/AR × 390/768/1440 × thèmes, navigation clavier, focus, contraste, lecteurs d'écran, reduced motion, compatibilité RTL et contrôle de reprise SSH après changement de scénario.
+4. Conclure le verrou de redistribution et vérifier qu'un `main` fusionné ne déclenchera pas de publication non autorisée.
+5. **Fusionner PR #3 seulement après ces critères**, puis ouvrir `feat/network-observatory-v3` avec une PR non fusionnée : focus précision SMTP/IMAP/FTP/DNS, traduction des récits, revue détaillée des 14 protocoles, enrichissement des tests et améliorations de visualisation.
+
+## Reprise de stabilisation — 4 novembre 2026 (PR #3 en cours)
+
+**État réel GitHub :** la PR #3 est toujours ouverte en brouillon. Les deux premiers commits de correction du lot initial ont été poussés :
+
+- `997a90978c1205b3c7f268abf8984d59a219f005` : build Vite moderne seul (entrée `/observatory/`), `publicDir: false` en production pour exclure les bundles historiques, favicon moderne importé comme ressource, vérificateur des artefacts, navigation du ladder au clavier (flèches, Home, End), défilement interne du ladder et pause en onglet masqué ; test Playwright dédié ajouté.
+- `693aa26310c927690067e0728c45c556c4563a00` : 4 tests Node du garde-fou de sortie, intégrés à `npm test`, contrôle du nombre de bundles JS pour rejeter un ajout accidentel de l'historique.
+
+### Exécution constatée et portée exacte
+
+- **Node.js 22.16.0, npm 10.9.2 disponibles** dans l'environnement de travail.
+- **4/4 tests du seul garde-fou de build exécutés et réussis** avec `node --test` sur une copie locale des deux scripts ; l'identité octet pour octet des deux fichiers GitHub a été vérifiée via leurs SHA de blobs Git : `621fabd61df4786e7e61bea89e907ead9fb2a9d6` et `5922c09ed8d1b359cae8fff966e838623914399e`.
+- **Bloquant environnement :** `git ls-remote https://github.com/neosoda/Protocol.git HEAD` → `Could not resolve host: github.com` ; `npm view vite version --fetch-retries=0 --fetch-timeout=4000` → `EAI_AGAIN registry.npmjs.org`. Le dépôt complet n'a pas pu être cloné/exécuté ici.
+- **Toujours non exécutés sur le dépôt complet :** `npm install`, `npm ci`, TypeScript, tous les tests unitaires métier, build Vite, Playwright, captures 18 variantes, audit WCAG/contraste/lecteur d'écran et validation serveur preview. Ne pas extrapoler les 4 tests du garde-fou à toute l'application.
+- **Toujours P0 :** `app/package-lock.json` désynchronisé, droits de l'application historique non établis. Le nouveau build est conçu pour exclure les artefacts historiques **mais son résultat n'a pas encore été inspecté**. L'ancien code reste dans le dépôt public et accessible en développement ; l'isolation du build ne résout pas la question des droits à elle seule.
+
+**Décision : PR #3 laissée ouverte en brouillon, pas de fusion ; pas de branche ni de PR V3 créée tant que les conditions techniques de la fusion ne sont pas satisfaites. Aucun déploiement lancé et aucune GitHub Action exécutée.**
+
+### Reprise prioritaire (machine disposant de l'accès npm/Git)
+
+1. Cloner `fix/observatory-v2-hardening`, installer les dépendances avec `npm --prefix app install` ; examiner puis **versionner le nouveau `app/package-lock.json`**. Faire ensuite `npm --prefix app ci`.
+2. Exécuter `npm --prefix app run typecheck`, `npm --prefix app run test`, `npm --prefix app run build`. Le build appelle `scripts/verify-build.mjs` et **doit échouer** si les ressources publiques historiques se retrouvent dans `app/dist/`.
+3. Installer Chromium puis exécuter `npm --prefix app run test:e2e` ; conserver et examiner les captures FR/EN/AR × 390/768/1440 × clair/sombre et les journaux.
+4. Vérifier en `vite preview` que seul `/observatory/` est distribué, que le logo se charge, que `/` ne distribue plus le site historique, et examiner l'arborescence `dist` et les erreurs console. Faire les contrôles WCAG clavier, RTL, contrastes, lecteurs d'écran et reduced motion.
+5. Réexaminer les droits des éléments historiques, les risques d'hébergement/publication automatique et les références RFC. Mettre à jour les preuves sur PR #3. Fusionner dans `main` **uniquement si les critères techniques sont réellement établis et la publication non autorisée évitée**.
+6. **Après la fusion seulement**, créer une branche `feat/network-observatory-v3`, approfondir traductions FR/EN, topologies, 14 scénarios et tests, puis ouvrir une nouvelle PR non fusionnée.
+
+## Reprise après fusion PR #2
+
+- `main` : `9dbeea4877ec78ed40eb54d94350b346072db848` — PR #2 **fusionnée sur instruction explicite du propriétaire**, sans exécution des tests ni autorisation de distribution.
+- Nouvelle branche : `fix/observatory-v2-hardening`, issue de ce commit.
+- Nouvelle PR : [#3](https://github.com/neosoda/Protocol/pull/3), **brouillon non fusionné** ; correctifs prêts pour validations locales.
+- Critères de publication : `docs/RELEASE_GATES.md` (P0 droits historiques toujours bloquant).
+
+### Travaux du lot durcissement
+
+- Focus clavier conservé après réaffichage complet du mode, du thème et de la langue ; focus transféré au titre du laboratoire/catalogue lors du changement de page.
+- Focus de l'inspecteur repositionné par **identifiant de champ**, et non par position DOM (les champs sont regroupés par couche).
+- Typecheck élargi au code de test, à la configuration Vite et Playwright ; types Node inclus. Aucun résultat de typecheck revendiqué.
+- Script `npm test` : chemins explicites pour éviter la dépendance à l'expansion des globs sur Windows.
+- Tests Playwright ajoutés : focus, absence de débordement horizontal à 390 px, absence d'erreur console/page.
+- **Bug de la matrice de captures corrigé** : le script d'initialisation ne doit plus réécraser la langue et le thème sélectionnés au rechargement ; des assertions HTML vérifient maintenant chaque couple.
+- Documentation de lancement racine corrigée : commandes `npm --prefix app run ...`.
+
+**Validation : modifications poussées et sources inspectées, mais npm / tsc / navigateur et screenshots toujours non exécutés dans l'environnement actuel faute d'accès npm/Git direct. Ne pas afficher « passé » dans la PR.**
+
+
 ## Références Git
 
 - Dépôt : `neosoda/Protocol`
 - `main` au départ : `cebc6049d34d7856ddfe5eec967b6c7ba5816de3` (PR #1 fusionnée).
 - Branche de continuation : `feat/network-observatory-v2-consolidation`
-- PR : [#2](https://github.com/neosoda/Protocol/pull/2), **en brouillon, ne pas fusionner automatiquement**.
+- PR #2 : [fusionnée](https://github.com/neosoda/Protocol/pull/2) le 04/11/2026 ; la branche de suite est `fix/observatory-v2-hardening`.
 - Nouvelle application : `/observatory/`. Historique : `/`.
 
 ## Acquis confirmés par inspection des sources et commits (pas par navigateur)
@@ -54,7 +127,7 @@ npm --prefix app run test:e2e
 npm --prefix app run dev
 ```
 
-Ne déclarer aucun succès sans logs réels. Conserver la PR V2 en **draft** jusqu'à preuves de qualité et clarification des droits. Les modules TypeScript ajoutés ne suffisent pas à garantir la parité avec le site historique.
+Ne déclarer aucun succès sans logs réels. Ne pas publier/redistribuer l'historique non autorisé. Conserver la **PR de durcissement** en brouillon jusqu'aux tests reproductibles et au traitement des droits. Les modules TypeScript ajoutés ne suffisent pas à garantir la parité avec le site historique.
 
 ## Références
 
@@ -62,3 +135,4 @@ Ne déclarer aucun succès sans logs réels. Conserver la PR V2 en **draft** jus
 - `docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md`
 - `docs/PROTOCOL_REFERENCES.md`
 - `docs/RIGHTS_AND_ATTRIBUTIONS.md`
+- `docs/RELEASE_GATES.md`

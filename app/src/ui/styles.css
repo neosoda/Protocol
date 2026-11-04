@@ -234,8 +234,7 @@ select { min-height: 42px; min-width: 116px; padding: 7px 12px; }
 /* Nodes are differentiated by role and by explicit sender/receiver labels. */
 .actor { position: relative; }
 .actor-state { font-size: .65rem; font-weight: 750; color: var(--brand); min-height: 1em; }
-.actor.is-sender .actor-state::before { content: "ÉMISSION"; }
-.actor.is-receiver .actor-state::before { content: "RÉCEPTION"; color: var(--teal); }
+.actor.is-receiver .actor-state { color: var(--teal); }
 .flow-readout { text-align: start; }
 .packet-journey { display: grid; grid-template-columns: minmax(0, 1fr) minmax(45px, .7fr) minmax(0, 1fr); align-items: center; gap: 8px; }
 .journey-endpoint { min-width: 0; text-align: center; font-weight: 750; overflow-wrap: anywhere; font-size: .86rem; }

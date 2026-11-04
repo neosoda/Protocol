@@ -55,3 +55,34 @@ test('only valid byte ranges can point to the UTF-8 example, never synthetic hea
   const range = http.fields[0].sampleRange!;
   assert.equal(new TextDecoder().decode(new TextEncoder().encode(http.sample!).slice(range.offset, range.offset+range.length)), 'GET');
 });
+
+
+test('HTTP/1.1: Content-Length matches authored UTF-8 response body length', () => {
+  const response = get('http').events[1];
+  assert.ok(response.sample);
+  const [headers, body, ...extra] = response.sample.split('\r\n\r\n');
+  assert.equal(extra.length, 0, 'one header/body separator');
+  assert.match(headers, /^HTTP\/1\.1 200 OK\r\n/);
+  const declared = Number(headers.match(/(?:^|\r\n)Content-Length:\s*(\d+)/i)?.[1]);
+  const actual = new TextEncoder().encode(body).length;
+  assert.equal(declared, 7);
+  assert.equal(declared, actual);
+  assert.equal(response.fields.find(f => f.name === 'Content-Length')?.value, String(actual));
+});
+
+test('SSH: KEXINIT, NEWKEYS, user authentication and channel confirmation are in order', () => {
+  const events = get('ssh').events;
+  assert.equal(events.length, 14);
+  assert.deepEqual(events.map(e => e.id), Array.from({ length: 14 }, (_, i) => 'ssh-' + (i + 1)));
+  assert.deepEqual(events.slice(0, 4).map(e => e.from), ['client', 'auth', 'client', 'auth']);
+  const idx = (title: string) => events.findIndex(e => e.title.includes(title));
+  assert.ok(idx('KEXINIT serveur') < idx('NEWKEYS client'));
+  assert.ok(idx('NEWKEYS client') < idx('SERVICE_REQUEST'));
+  assert.ok(idx('NEWKEYS serveur') < idx('SERVICE_REQUEST'));
+  assert.ok(idx('SERVICE_ACCEPT') < idx('USERAUTH_REQUEST'));
+  assert.ok(idx('USERAUTH_REQUEST') < idx('USERAUTH_SUCCESS'));
+  assert.ok(idx('USERAUTH_SUCCESS') < idx('CHANNEL_OPEN'));
+  assert.ok(idx('CHANNEL_OPEN_CONFIRMATION') < idx('CHANNEL_REQUEST'));
+  assert.equal(events[idx('USERAUTH_SUCCESS')].from, 'auth');
+  assert.equal(events[idx('CHANNEL_OPEN_CONFIRMATION')].from, 'auth');
+});

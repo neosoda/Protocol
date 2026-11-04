@@ -91,7 +91,8 @@ export const catalog: readonly ProtocolScenario[] = [
         field('application', 'Host', 'example.test', 'Hôte HTTP demandé.')], 'GET / HTTP/1.1\r\nHost: example.test\r\n\r\n'),
       event('http-2', 'server', 'client', '200 OK', 'Le serveur retourne un statut et un petit corps texte fictif.', [
         field('application', 'Statut', '200', 'La requête a été traitée avec succès.'),
-        field('application', 'Content-Type', 'text/plain', 'Indique le type du corps.')], 'HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nBonjour')
+        field('application', 'Content-Type', 'text/plain', 'Indique le type du corps.'),
+        field('application', 'Content-Length', '7', '« Bonjour » contient exactement sept octets UTF-8 : cette valeur délimite la réponse en l’absence de Transfer-Encoding.')], 'HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 7\r\n\r\nBonjour')
     ]),
   scenario('https', 'HTTPS', 'web', 'intermediate', 5, 'HTTP protégé par une session TLS.', 'Distinguer HTTP du canal TLS qui le transporte.',
     [workstation, server], [
@@ -137,13 +138,22 @@ export const catalog: readonly ProtocolScenario[] = [
       event('ftp-4', 'server', 'client', '229 Entering Extended Passive Mode', 'Le serveur annonce le port dynamique à utiliser sur une connexion distincte.'),
       event('ftp-5', 'client', 'server', 'Canal données', 'Le client ouvre une seconde connexion TCP pour transférer les données ; détail condensé.')
     ]),
-  scenario('ssh', 'SSH', 'security', 'advanced', 6, 'Authentifier un serveur et ouvrir un canal protégé.', 'Comprendre négociation, échange de clés et authentification.',
+  scenario('ssh', 'SSH', 'security', 'advanced', 8, 'Authentifier un serveur et ouvrir un canal protégé.', 'Comprendre la négociation SSH, le basculement de clés, l’authentification et l’ouverture d’un canal.',
     [workstation, auth], [
-      event('ssh-1', 'client', 'auth', 'Identification de version', 'Les deux pairs échangent leurs chaînes d’identification SSH.'),
-      event('ssh-2', 'client', 'auth', 'KEXINIT', 'Le client propose les algorithmes supportés.'),
-      event('ssh-3', 'auth', 'client', 'Négociation / échange de clés', 'Un échange de clés partagé est effectué, puis le client vérifie la clé d’hôte ; algorithmes volontairement non figés.'),
-      event('ssh-4', 'client', 'auth', 'Authentification utilisateur', 'Après protection du transport, le client prouve son identité via une méthode autorisée.'),
-      event('ssh-5', 'client', 'auth', 'Ouverture de canal', 'Un canal de session peut transporter un shell ou une commande, toujours à l’intérieur du transport SSH.')
+      event('ssh-1', 'client', 'auth', 'Identification client', 'Le client transmet sa chaîne d’identification SSH-2.0 avant le protocole binaire.'),
+      event('ssh-2', 'auth', 'client', 'Identification serveur', 'Le serveur transmet sa propre chaîne d’identification ; chaque côté annonce sa version.'),
+      event('ssh-3', 'client', 'auth', 'KEXINIT client', 'Le client annonce ses algorithmes de négociation, clé d’hôte, chiffrement, MAC et compression.'),
+      event('ssh-4', 'auth', 'client', 'KEXINIT serveur', 'Le serveur annonce à son tour ses algorithmes ; les paramètres compatibles peuvent être sélectionnés.'),
+      event('ssh-5', 'auth', 'client', 'Échange de clés et clé d’hôte', 'Les messages propres à la méthode de key exchange sont condensés ici : le client vérifie la clé d’hôte et les clés de session sont dérivées.'),
+      event('ssh-6', 'client', 'auth', 'NEWKEYS client', 'Le client signale que ses prochains messages utiliseront les nouveaux algorithmes et clés négociés.'),
+      event('ssh-7', 'auth', 'client', 'NEWKEYS serveur', 'Le serveur effectue à son tour le basculement de clés ; aucun utilisateur n’est encore authentifié.'),
+      event('ssh-8', 'client', 'auth', 'SERVICE_REQUEST', 'Le client demande le service ssh-userauth, protégé par la couche transport SSH.'),
+      event('ssh-9', 'auth', 'client', 'SERVICE_ACCEPT', 'Le serveur accepte le service demandé avant le dialogue d’authentification.'),
+      event('ssh-10', 'client', 'auth', 'USERAUTH_REQUEST', 'Le client prouve son identité par une méthode autorisée, par exemple publickey ; les détails de cette méthode sont condensés.'),
+      event('ssh-11', 'auth', 'client', 'USERAUTH_SUCCESS', 'Le serveur confirme explicitement la réussite de l’authentification utilisateur.'),
+      event('ssh-12', 'client', 'auth', 'CHANNEL_OPEN', 'Le client demande un canal de type session ; cela ne lance pas automatiquement un shell.'),
+      event('ssh-13', 'auth', 'client', 'CHANNEL_OPEN_CONFIRMATION', 'Le serveur accepte le canal et transmet ses numéros de canal et paramètres de fenêtre.'),
+      event('ssh-14', 'client', 'auth', 'CHANNEL_REQUEST', 'Le client peut ensuite demander un shell ou une commande sur le canal confirmé ; les réponses éventuelles ne sont pas modélisées.')
     ]),
   scenario('tls', 'TLS 1.3', 'security', 'advanced', 6, 'Négocier une session chiffrée avec TLS 1.3.', 'Distinguer messages visibles, authentification et clés de trafic.',
     [workstation, server], [

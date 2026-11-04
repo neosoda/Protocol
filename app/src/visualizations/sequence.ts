@@ -1,12 +1,13 @@
 import type { ProtocolScenario } from '../protocols/model.ts';
 import { escapeHtml } from '../ui/escape.ts';
+import type { Label } from '../i18n/ui.ts';
 
 /**
  * Real ladder layout: each participant owns one vertical lifeline; horizontal
  * arrows represent events in the original chronological order. No inferred hops.
  * The HTML is a pure projection of scenario.events, not a second state store.
  */
-export function renderSequence(scenario: ProtocolScenario): string {
+export function renderSequence(scenario: ProtocolScenario, t: (key: Label) => string): string {
   const participants = scenario.participants;
   const count = participants.length;
   const lifelines = participants.map(() => '<span class="ladder-lifeline" aria-hidden="true"></span>').join('');
@@ -22,7 +23,7 @@ export function renderSequence(scenario: ProtocolScenario): string {
     const direction = from < to ? 'forward' : 'reverse';
     const source = participants[from]?.name ?? event.from;
     const destination = participants[to]?.name ?? event.to;
-    const accessibleName = `Étape ${index + 1} : ${event.title}, ${source} vers ${destination}`;
+    const accessibleName = `${t('inspectStep')} ${index + 1} : ${event.title}, ${source} ${t('inspectTo')} ${destination}`;
     return `<li class="ladder-step"><button class="ladder-button event-button" data-action="select" data-index="${index}"
       aria-label="${escapeHtml(accessibleName)}">
       <span class="ladder-row" style="--participant-count:${count}" aria-hidden="true">

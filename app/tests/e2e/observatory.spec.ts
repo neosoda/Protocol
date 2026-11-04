@@ -8,8 +8,12 @@ const open = async (page: import('@playwright/test').Page, id: string): Promise<
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(prefix => {
-    localStorage.setItem(prefix + 'language', 'fr');
-    localStorage.setItem(prefix + 'theme', 'dark');
+    if (localStorage.getItem(prefix + 'language') === null) {
+      localStorage.setItem(prefix + 'language', 'fr');
+    }
+    if (localStorage.getItem(prefix + 'theme') === null) {
+      localStorage.setItem(prefix + 'theme', 'dark');
+    }
   }, storagePrefix);
 });
 
@@ -18,6 +22,19 @@ test('shows 14 unique protocol cards on the catalogue', async ({ page }) => {
   await expect(page.locator('button.protocol-card')).toHaveCount(14);
   await expect(page.getByRole('heading', { name: 'Catalogue des protocoles' })).toBeVisible();
   await expect(page.locator('button.protocol-card[data-id="tcp"]')).toHaveCount(1);
+});
+
+test('observatory loads without page errors or console exceptions', async ({ page }) => {
+  const failures: string[] = [];
+  page.on('pageerror', error => failures.push('page: ' + error.message));
+  page.on('console', message => {
+    if (message.type() === 'error') failures.push('console: ' + message.text());
+  });
+  await open(page, 'dns');
+  await page.getByRole('button', { name: 'Suivant' }).click();
+  await page.getByRole('button', { name: 'Expert' }).click();
+  await page.locator('button[data-action="catalog"].back-link').click();
+  expect(failures).toEqual([]);
 });
 
 test('one selected event drives ladder, topology, inspector and progress', async ({ page }) => {
@@ -70,6 +87,7 @@ test('discovery and expert reveal different field depth, only sourced sample byt
   await expect(page.locator('.hex-view')).toBeVisible();
   await expect(page.locator('.byte-selected')).toHaveCount(6); // "GET": 3 HEX + 3 ASCII
   await page.locator('button[data-action="inspect-field"][data-field-index="1"]').click();
+  await expect(page.locator('button[data-action="inspect-field"][data-field-index="1"]')).toBeFocused();
   await expect(page.locator('.field-explanation')).toContainText('Hôte HTTP demandé');
   await expect(page.locator('.byte-selected')).toHaveCount(0);
   await expect(page.locator('.raw-caption')).toContainText('Pas une trame réseau capturée');
@@ -96,6 +114,60 @@ test('theme and RTL orientation preserve technical chart direction', async ({ pa
   await expect(page.locator('.ladder-list')).toHaveCSS('direction', 'ltr');
 });
 
+
+test('switching to English translates the navigation, diagram and inspector labels', async ({ page }) => {
+  await page.goto('/observatory/');
+  await page.locator('#language-select').selectOption('en');
+  await expect(page.getByRole('heading', { name: /Internet, event by event/ })).toBeVisible();
+  await page.locator('button.protocol-card[data-id="http"]').click();
+  await expect(page.getByRole('group', { name: 'Exploration mode' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Next' })).toBeVisible();
+  await expect(page.locator('#flow-readout')).toContainText('LOGICAL FLOW');
+  await expect(page.locator('.actor.is-sender .actor-state')).toHaveText('SENDER');
+  await expect(page.locator('.actor.is-receiver .actor-state')).toHaveText('RECEIVER');
+  await page.getByRole('button', { name: 'Expert' }).click();
+  await expect(page.locator('.raw-panel')).toContainText('AUTHORED SAMPLE');
+  await expect(page.locator('.raw-caption')).toContainText('Not a captured network frame');
+});
+
+test('keyboard focus survives mode/theme/language rerenders and navigation', async ({ page }) => {
+  await open(page, 'tcp');
+  await expect(page.locator('#lab-title')).toBeFocused();
+  await page.getByRole('button', { name: 'Expert' }).click();
+  await expect(page.getByRole('button', { name: 'Expert' })).toBeFocused();
+  await page.getByRole('button', { name: 'Thème' }).click();
+  await expect(page.getByRole('button', { name: 'Thème' })).toBeFocused();
+  await page.locator('#language-select').selectOption('en');
+  await expect(page.locator('#language-select')).toBeFocused();
+  await page.locator('button[data-action="catalog"].back-link').click();
+  await expect(page.locator('#home-title')).toBeFocused();
+});
+
+test('mobile layout does not scroll horizontally at 390px', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await open(page, 'http');
+  await page.getByRole('button', { name: 'Expert' }).click();
+  await expect.poll(async () => page.evaluate(() =>
+    document.documentElement.scrollWidth <= window.innerWidth
+  )).toBe(true);
+});
+
+test('ladder keyboard navigation follows event order and keeps the active step in view', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page, 'tls');
+  await page.locator('#event-list button[data-index="0"]').focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.locator('#event-list button[data-index="1"]')).toBeFocused();
+  await expect(page.locator('#progress-text')).toContainText('2 / 7');
+  await page.keyboard.press('End');
+  await expect(page.locator('#event-list button[data-index="6"]')).toBeFocused();
+  await expect(page.locator('#progress-text')).toContainText('7 / 7');
+  await expect.poll(() => page.locator('#event-list').evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+  await page.keyboard.press('Home');
+  await expect(page.locator('#event-list button[data-index="0"]')).toBeFocused();
+  await expect(page.locator('#progress-text')).toContainText('1 / 7');
+});
+
 for (const width of [390, 768, 1440]) {
   for (const theme of ['dark', 'light']) {
     for (const language of ['fr', 'en', 'ar']) {
@@ -109,6 +181,8 @@ for (const width of [390, 768, 1440]) {
         await page.reload();
         await page.locator('button.protocol-card[data-id="tcp"]').click();
         await expect(page.locator('#inspector-title')).toBeVisible();
+        await expect(page.locator('html')).toHaveAttribute('lang', language);
+        await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
         await expect(page.locator('.ladder-step')).toHaveCount(5);
         await page.screenshot({ path: `test-results/observatory-${width}-${theme}-${language}.png`, fullPage: true });
       });
