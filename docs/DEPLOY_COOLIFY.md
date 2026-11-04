@@ -1,38 +1,33 @@
-# Déploiement Coolify — design classique restauré
+# Déploiement Coolify
 
-La refonte V4 a été annulée pour retrouver les **animations d'origine**. Le service est redevenu un **site statique Nginx** : aucune compilation Vite, installation npm, base de données, variable ni volume requis.
-
-## Application Coolify
+## Application
 
 | Paramètre | Valeur |
 |---|---|
 | Source | `https://github.com/neosoda/Protocol` |
-| Branche | `main` après fusion du rollback |
+| Branche | `main` |
 | Build Pack | **Dockerfile** |
 | Base Directory / Build Context | `/` |
 | Dockerfile Location | `Dockerfile` |
 | Ports Exposes | `80` |
-| Healthcheck | `GET /healthz` via le Dockerfile |
-| Variables et volumes | Aucun nécessaire |
+| Healthcheck | `GET /healthz` (défini dans le Dockerfile) |
+| Variables et volumes | Aucun |
 
-Le `Dockerfile` utilise `nginx:stable-alpine`, copie le fichier `app/index.html` historique et l'intégralité de `app/public/` dans `/usr/share/nginx/html/`. Il conserve les mêmes bundles JS/CSS que la version initiale, **sans recompilation**. `.dockerignore` n'exclut plus `app/public/`.
+## Ce que fait l’image
+
+1. **Étape `build`** (`node:22-alpine`) : `npm ci`, puis `npm run typecheck`, `npm test` et `npm run build`. Un échec de test ou de type arrête le déploiement. `scripts/verify-build.mjs` refuse tout fichier inattendu dans `dist/`.
+2. **Étape finale** (`nginx:stable-alpine`) : copie `app/dist/` et `deploy/nginx.conf`, vérifie la configuration.
 
 ## Routes
 
-- `/` : page historique et ses animations.
-- `/assets/*` : JS/CSS, animations, traductions et typographies historiques.
-- `/favicon.ico`, `/site.webmanifest`, etc. : fichiers statiques de `app/public/`.
+- `/` : l’application. Les ancres `#/tcp`, `#/dns`… ouvrent une leçon.
+- `/assets/*` : JS et CSS versionnés, cache d’un an.
+- `/fonts/*` : police Inter, cache de 30 jours.
 - `/observatory/` : redirection 308 vers `/`.
-- `/healthz` : réponse HTTP 200.
+- `/healthz` : réponse 200.
 
-Le proxy Coolify s'occupe du domaine et du HTTPS. La configuration Nginx ne doit pas réécrire les liens statiques ni transformer les bundles.
+## Après un déploiement
 
-## Vérifications après déploiement
-
-1. Dans Coolify, vérifier que l'application suit bien la branche `main` et qu'un nouveau déploiement est en statut **Healthy** ; aucun déploiement n'a été lancé depuis ChatGPT.
-2. Faire un rechargement complet du navigateur ; la racine doit retrouver l'ancienne présentation et non le rail V4.
-3. Dans l'onglet Réseau, vérifier HTTP 200 pour `/assets/index-l76eMM6E.js` et `/assets/index-C1vckX_Q.css`, ainsi que l'absence d'erreurs de chargement.
-4. Tester plusieurs animations originales (TCP, DNS, TLS/HTTPS), desktop et mobile.
-5. Confirmer les droits de publication du contenu historique avec son auteur si nécessaire : voir `RIGHTS_AND_ATTRIBUTIONS.md`.
-
-**QA connue :** le blob historique de l'HTML et les bundles JS/CSS ont des SHA identiques à ceux d'avant PR #5 ; les 8 références statiques absolues repérées dans l'HTML existent. Aucun build Docker ni test des animations dans un vrai navigateur n'a pu être exécuté ici.
+1. Statut **Healthy** dans Coolify.
+2. Rechargement complet du navigateur : la page affiche « Network Observatory ».
+3. Lancer une leçon (TCP, DNS, TLS 1.3) sur ordinateur et sur mobile.

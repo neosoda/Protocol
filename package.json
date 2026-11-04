@@ -1,5 +1,5 @@
 {
-  "name": "protocol-explorer",
+  "name": "network-observatory",
   "version": "1.0.0",
   "private": true,
   "description": "Visualiseur interactif des protocoles Internet paquet par paquet (TCP/IP, DNS, HTTP, TLS, SSH...) avec décodage des trames au niveau octet.",

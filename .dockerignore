@@ -9,5 +9,3 @@
 **/.env
 **/.env.*
 .DS_Store
-# app/public is intentionally included: it contains the original
-# animations, styles, languages, fonts, icons, and manifest.

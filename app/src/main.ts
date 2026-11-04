@@ -1,320 +1,291 @@
-import { catalog, categories, findScenario } from './protocols/catalog.ts';
-import type { Category, ProtocolScenario } from './protocols/model.ts';
-import { createTimeline } from './engine/timeline.ts';
-import type { Speed, TimelineState } from './engine/timeline.ts';
-import { isRtl, label, languages, languageSupported } from './i18n/ui.ts';
-import type { Label, Language } from './i18n/ui.ts';
-import { escapeHtml } from './ui/escape.ts';
-import { renderActors, renderFlow } from './visualizations/topology.ts';
-import { renderSequence } from './visualizations/sequence.ts';
-import { renderInspector } from './inspector/view.ts';
+import type { Lang, Scenario } from './model.ts';
+import { categories, findScenario, scenarios } from './scenarios/index.ts';
+import { category, lang, setLang, t, tx } from './i18n.ts';
+import { Player, schedule, type Frame } from './engine/player.ts';
+import { hops } from './views/geometry.ts';
+import { TopologyView } from './views/topology.ts';
+import { SequenceView } from './views/sequence.ts';
+import { InspectorView } from './views/inspector.ts';
+import { icon, mark, ui } from './views/icons.ts';
+import { escapeHtml as esc } from './views/escape.ts';
 import './ui/styles.css';
 
-type Mode = 'discovery' | 'expert';
+type View = 'network' | 'sequence' | 'both';
 type Theme = 'light' | 'dark';
-const storagePrefix = 'network-observatory:v1:';
-const read = (key: string): string | null => { try { return localStorage.getItem(storagePrefix + key); } catch { return null; } };
-const store = (key: string, value: string): void => { try { localStorage.setItem(storagePrefix + key, value); } catch { /* storage not available: stay usable */ } };
-const t = (key: Label): string => label(language, key);
-const $ = (id: string): HTMLElement | null => document.getElementById(id);
-const readStep = (scenario: ProtocolScenario): number => {
-  const saved = read('progress:' + scenario.id);
-  // Event IDs survive editorial insertion of earlier timeline steps.
-  const matched = saved === null ? -1 : scenario.events.findIndex(event => event.id === saved);
-  if (matched !== -1) return matched;
-  // Backward compatibility with the original alpha's numeric bookmarks.
-  const legacy = saved === null ? NaN : Number(saved);
-  return Number.isInteger(legacy) && legacy >= 0 && legacy < scenario.events.length ? legacy : 0;
-};
-const languageFromBrowser = (): Language => {
-  const configured = read('language');
-  if (configured && languageSupported(configured)) return configured;
-  const browser = navigator.language;
-  if (languageSupported(browser)) return browser;
-  const short = browser.split('-')[0];
-  return languageSupported(short) ? short : 'fr';
-};
-let language: Language = languageFromBrowser();
-let theme: Theme = read('theme') === 'light' ? 'light' : 'dark';
-let mode: Mode = read('mode') === 'expert' ? 'expert' : 'discovery';
-let onCatalog = true;
-let catalogQuery = '';
-let selectedField = 0;
-let inspectedEventId = "";
-let active: ProtocolScenario = findScenario(read('last-protocol') ?? 'tcp');
-const app = $('app');
-if (!app) throw new Error('Missing application mount');
-const timeline = createTimeline(active, () => update());
-timeline.setProtocol(active, readStep(active));
+const SPEEDS = [0.5, 1, 2] as const;
 
-function applyPreferences(): void {
-  document.documentElement.lang = language;
-  document.documentElement.dir = isRtl(language) ? 'rtl' : 'ltr';
+const store = {
+  get(key: string): string | null { try { return localStorage.getItem('observatory:' + key); } catch { return null; } },
+  set(key: string, value: string): void { try { localStorage.setItem('observatory:' + key, value); } catch { /* private mode: stay usable */ } }
+};
+const readProgress = (): Record<string, number> => {
+  try { return JSON.parse(store.get('progress') ?? '{}') as Record<string, number>; } catch { return {}; }
+};
+
+const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+const prefersDark = matchMedia('(prefers-color-scheme: dark)');
+const savedLang = store.get('lang');
+setLang(savedLang === 'fr' || savedLang === 'en' ? savedLang : navigator.language.toLowerCase().startsWith('fr') ? 'fr' : 'en');
+let theme: Theme = store.get('theme') === 'dark' ? 'dark' : store.get('theme') === 'light' ? 'light' : prefersDark.matches ? 'dark' : 'light';
+let view: View = (['network', 'sequence', 'both'] as const).find(v => v === store.get('view')) ?? 'both';
+let speed: number = SPEEDS.find(s => String(s) === store.get('speed')) ?? 1;
+let progress = readProgress();
+let scenario: Scenario = findScenario(location.hash.slice(2)) ?? findScenario(store.get('last')) ?? scenarios[3];
+
+const app = document.getElementById('app')!;
+app.innerHTML = `
+  <a class="skip" href="#stage" data-t="skip"></a>
+  <header class="top">
+    <button class="icon-btn rail-toggle" type="button" data-action="rail" aria-expanded="false">${icon(ui.menu)}</button>
+    <div class="brand">${mark}<span><strong data-t="brand"></strong><small data-t="brandTag"></small></span></div>
+    <div class="top-progress" role="img"><span class="tp-label" data-t="progress"></span><span class="tp-bar"><i></i></span><span class="tp-value"></span></div>
+    <div class="top-actions">
+      <div class="seg lang" role="group">
+        <button type="button" data-lang="fr" lang="fr">FR</button><button type="button" data-lang="en" lang="en">EN</button>
+      </div>
+      <button class="icon-btn" type="button" data-action="theme"></button>
+    </div>
+  </header>
+  <div class="shell">
+    <nav class="rail" id="rail"></nav>
+    <div class="scrim" data-action="rail"></div>
+    <main class="stage" id="stage" tabindex="-1">
+      <section class="lesson"></section>
+      <section class="viz" data-view="${view}">
+        <div class="viz-bar">
+          <div class="seg views" role="group">
+            <button type="button" data-view="network"></button><button type="button" data-view="sequence"></button><button type="button" data-view="both"></button>
+          </div>
+          <span class="viz-caption" aria-live="polite"></span>
+        </div>
+        <div class="viz-body">
+          <div class="pane pane-network"><svg class="topology" role="img"></svg></div>
+          <div class="pane pane-sequence"><svg class="sequence"></svg></div>
+        </div>
+      </section>
+      <section class="transport">
+        <div class="buttons">
+          <button class="icon-btn" type="button" data-action="restart">${icon(ui.restart)}</button>
+          <button class="icon-btn" type="button" data-action="previous">${icon(ui.previous)}</button>
+          <button class="play" type="button" data-action="play"></button>
+          <button class="icon-btn" type="button" data-action="next">${icon(ui.next)}</button>
+        </div>
+        <div class="scrub"><div class="ticks"></div><div class="scrub-track"><i></i></div></div>
+        <span class="counter"></span>
+        <div class="seg speed" role="group">${SPEEDS.map(s => `<button type="button" data-speed="${s}">${s}×</button>`).join('')}</div>
+      </section>
+      <p class="hint"></p>
+    </main>
+    <aside class="inspector" aria-live="off"></aside>
+  </div>`;
+
+const $ = <T extends Element = HTMLElement>(selector: string): T => app.querySelector<T>(selector)!;
+const topology = new TopologyView($<SVGSVGElement>('.topology'));
+const sequence = new SequenceView($<SVGSVGElement>('.sequence'), $('.pane-sequence'), i => { player.replay(i); });
+const inspector = new InspectorView($('.inspector'));
+const player = new Player(draw, () => reduced.matches);
+player.speed = speed;
+let shownIndex = -1;
+
+function draw(frame: Frame): void {
+  const event = scenario.events[frame.index];
+  if (!event) return;
+  topology.update(event, frame.index, frame.progress);
+  sequence.update(frame.index, frame.progress);
+  inspector.render(scenario, event, frame.index, frame.progress >= 1);
+  const arrived = frame.progress >= 1;
+  if (arrived && frame.index > (progress[scenario.id] ?? -1)) {
+    progress = { ...progress, [scenario.id]: frame.index };
+    store.set('progress', JSON.stringify(progress));
+    renderProgress();
+  }
+  const play = $<HTMLButtonElement>('.play');
+  if (play.dataset.state !== String(frame.playing)) {
+    play.dataset.state = String(frame.playing);
+    play.innerHTML = icon(frame.playing ? ui.pause : ui.play) + `<span>${t(frame.playing ? 'pause' : 'play')}</span>`;
+    play.setAttribute('aria-label', t(frame.playing ? 'pause' : 'play'));
+  }
+  $('.scrub-track i').style.width = `${(100 * frame.time / (frame.total || 1)).toFixed(2)}%`;
+  if (frame.index !== shownIndex) {
+    shownIndex = frame.index;
+    $('.counter').textContent = `${t('step')} ${frame.index + 1} ${t('of')} ${scenario.events.length}`;
+    $('.viz-caption').textContent = tx(event.title);
+    app.querySelectorAll<HTMLElement>('.tick').forEach((tick, i) => {
+      tick.classList.toggle('is-done', i < frame.index);
+      tick.classList.toggle('is-current', i === frame.index);
+    });
+  }
+}
+
+function renderRail(): void {
+  const levels = ['', t('level1'), t('level2'), t('level3')];
+  $('#rail').innerHTML = `<div class="rail-head"><h2>${t('lessons')}</h2>
+    <button class="icon-btn rail-close" type="button" data-action="rail" aria-label="${esc(t('close'))}">${icon(ui.close)}</button></div>` +
+    categories.map(c => `<section><h3>${esc(category(c))}</h3><ul>${scenarios.filter(s => s.category === c).map(s => {
+      const done = Math.round(100 * ((progress[s.id] ?? -1) + 1) / s.events.length);
+      return `<li><a href="#/${s.id}" class="lesson-link${s.id === scenario.id ? ' is-active' : ''}" data-id="${s.id}"
+        ${s.id === scenario.id ? 'aria-current="page"' : ''} style="--done:${done}">
+        <span class="ring" aria-hidden="true">${done === 100 ? icon(ui.check) : ''}</span>
+        <span class="ll-text"><strong>${esc(s.name)}</strong><small>${esc(tx(s.tagline))}</small></span>
+        <span class="ll-level" title="${esc(levels[s.level])}">${'●'.repeat(s.level)}${'○'.repeat(3 - s.level)}</span></a></li>`;
+    }).join('')}</ul></section>`).join('');
+}
+
+function renderProgress(): void {
+  const total = scenarios.reduce((n, s) => n + s.events.length, 0);
+  const seen = scenarios.reduce((n, s) => n + (progress[s.id] ?? -1) + 1, 0);
+  const pct = Math.round(100 * seen / total);
+  $('.tp-bar i').style.width = pct + '%';
+  $('.tp-value').textContent = pct + ' %';
+  $('.top-progress').setAttribute('aria-label', `${t('progress')} ${pct} %`);
+  app.querySelectorAll<HTMLElement>('.lesson-link').forEach(link => {
+    const s = findScenario(link.dataset.id)!;
+    const done = Math.round(100 * ((progress[s.id] ?? -1) + 1) / s.events.length);
+    link.style.setProperty('--done', String(done));
+    link.querySelector('.ring')!.innerHTML = done === 100 ? icon(ui.check) : '';
+  });
+}
+
+function renderLesson(): void {
+  const levels = ['', t('level1'), t('level2'), t('level3')];
+  $('.lesson').innerHTML = `<div class="lesson-meta"><span>${esc(category(scenario.category))}</span><span class="dot">·</span><span>${levels[scenario.level]}</span>
+    <span class="dot">·</span><span>${scenario.events.length} ${t('step').toLowerCase()}s</span></div>
+    <h1>${esc(scenario.name)} <span>${esc(tx(scenario.tagline))}</span></h1>
+    <p>${esc(tx(scenario.intro))}</p>`;
+  $('.ticks').innerHTML = scenario.events.map((e, i) =>
+    `<button type="button" class="tick tone-${e.tone}" data-index="${i}" aria-label="${esc(`${t('step')} ${i + 1} : ${tx(e.title)}`)}" title="${esc(`${i + 1}. ${tx(e.title)}`)}"></button>`).join('');
+}
+
+function renderChrome(): void {
+  document.documentElement.lang = lang();
   document.documentElement.dataset.theme = theme;
-  document.documentElement.dataset.mode = mode;
-  document.documentElement.style.colorScheme = theme;
-}
-
-function brand(): string {
-  return `<span class="brand-mark" aria-hidden="true">
-    <svg viewBox="0 0 64 64" focusable="false"><path d="M12 18h15l13 14H52" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/><path d="M12 46h15l13-14H52" fill="none" stroke="var(--teal)" stroke-width="4.5" stroke-linecap="round"/><circle cx="12" cy="18" r="5" fill="currentColor"/><circle cx="12" cy="46" r="5" fill="var(--teal)"/><circle cx="52" cy="32" r="5.5" fill="var(--surface)" stroke="currentColor" stroke-width="3"/></svg>
-    </span>`;
-}
-
-function selectOptions(): string {
-  return languages.map(lang => `<option value="${lang.code}" ${lang.code === language ? 'selected' : ''}>${escapeHtml(lang.name)}</option>`).join('');
-}
-
-function header(): string {
-  return `<header class="masthead">
-    <button class="brand" data-action="catalog" aria-label="${escapeHtml(t('catalog'))}">${brand()}<span><strong>NETWORK<span class="brand-divider"> / </span>OBSERVATORY</strong><small>${escapeHtml(t('brandSubtitle'))}</small></span></button>
-    <div class="masthead-actions">
-      <label class="select-wrap"><span>${escapeHtml(t('language'))}</span><select id="language-select" aria-label="${escapeHtml(t('language'))}">${selectOptions()}</select></label>
-      <button class="plain-button" data-action="theme" title="${escapeHtml(t('theme'))}" aria-label="${escapeHtml(t('theme'))}">${theme === 'dark' ? '☀︎' : '☾'} <span class="theme-name">${escapeHtml(t(theme === 'dark' ? 'themeLight' : 'themeDark'))}</span></button>
-    </div>
-  </header>`;
-}
-
-function formatLevel(level: ProtocolScenario['level']): string {
-  return level === 'initial' ? '01 · ' + t('levelInitial') : level === 'intermediate' ? '02 · ' + t('levelIntermediate') : '03 · ' + t('levelAdvanced');
-}
-const categoryName = (category: Category): string => t(category);
-function catalogue(): string {
-  const last = findScenario(read('last-protocol') ?? 'tcp');
-  return `<main id="main-content" class="page home">
-    <section class="intro" aria-labelledby="home-title">
-      <div><span class="eyebrow"><span class="pulse" aria-hidden="true"></span> ${escapeHtml(t('labEyebrow'))}</span>
-      <h1 id="home-title" tabindex="-1">${escapeHtml(t('heroLead'))} <em>${escapeHtml(t('heroAccent'))}</em></h1>
-      <p>${escapeHtml(t('heroDescription'))}</p>
-      <div class="intro-actions"><button class="primary-button" data-action="open" data-id="tcp">${escapeHtml(t('start'))} TCP <span aria-hidden="true">→</span></button>
-      <button class="secondary-button" data-action="open" data-id="${escapeHtml(last.id)}">${escapeHtml(t('resume'))} ${escapeHtml(last.name)}</button></div><p class="hero-footnote">${escapeHtml(t('heroFootnote'))}</p></div>
-      <div class="intro-instrument" aria-label="${escapeHtml(t('diagramTcp'))}">
-        <span class="instrument-caption"><span class="instrument-live"></span> ${escapeHtml(t('diagramLabel'))} / 001</span>
-        <div class="mini-network"><span class="instrument-node">CLIENT</span><span class="mini-link">SYN <b>→</b></span><span class="instrument-node">SERVER</span></div>
-        <div class="mini-network reverse"><span class="instrument-node">CLIENT</span><span class="mini-link"><b>←</b> SYN · ACK</span><span class="instrument-node">SERVER</span></div>
-        <div class="mini-network"><span class="instrument-node">CLIENT</span><span class="mini-link">ACK <b>→</b></span><span class="instrument-node">SERVER</span></div>
-        <div class="instrument-footer"><span>${escapeHtml(t('handshake'))}</span><span>03 ${escapeHtml(t('events'))}</span></div>
-      </div>
-    </section>
-    <section class="catalogue" aria-labelledby="catalogue-title"><div class="section-heading">
-      <div><p class="eyebrow">${escapeHtml(t('exploreEyebrow'))}</p><h2 id="catalogue-title">${escapeHtml(t('catalog'))}</h2></div>
-      <span class="note-tag">${escapeHtml(t('modelled'))}</span></div>
-      <div class="catalogue-tools">
-        <label class="search-control" for="protocol-search"><span class="search-label">${escapeHtml(t('searchLabel'))}</span>
-          <span class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
-            <input id="protocol-search" type="search" autocomplete="off" placeholder="${escapeHtml(t('searchPlaceholder'))}" value="${escapeHtml(catalogQuery)}"></span></label>
-        <button type="button" class="search-clear" data-action="clear-search" ${catalogQuery ? '' : 'hidden'}>${escapeHtml(t('searchClear'))}</button>
-        <span id="search-count" class="search-count" role="status" aria-live="polite"></span>
-      </div>
-      <p id="search-empty" class="search-empty" hidden>${escapeHtml(t('searchEmpty'))}</p>
-      ${categories.map(category => `<section class="category" data-category="${category}" aria-labelledby="group-${category}"><h3 id="group-${category}">${escapeHtml(categoryName(category))}</h3>
-      <div class="protocol-grid">${catalog.filter(p => p.category === category).map(p => `<button class="protocol-card" data-action="open" data-id="${p.id}" data-search="${escapeHtml([p.name, p.summary, categoryName(p.category), p.category, p.id].join(' ').toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))}">
-        <span class="protocol-top"><strong>${escapeHtml(p.name)}</strong><span class="protocol-arrow" aria-hidden="true">↗</span></span>
-        <span class="protocol-summary">${escapeHtml(p.summary)}</span><span class="protocol-meta">${escapeHtml(formatLevel(p.level))} <span aria-hidden="true">·</span> ~${p.minutes} ${escapeHtml(t('minutes'))}</span>
-      </button>`).join('')}</div></section>`).join('')}
-    </section></main>`;
-}
-
-function updateCatalogueFilter(): void {
-  if (!onCatalog) return;
-  const query = catalogQuery.trim().toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  let matches = 0;
-  app!.querySelectorAll<HTMLElement>('.category').forEach(section => {
-    let sectionMatches = 0;
-    section.querySelectorAll<HTMLButtonElement>('.protocol-card').forEach(card => {
-      const match = (card.dataset.search ?? '').includes(query);
-      card.hidden = !match;
-      if (match) { sectionMatches++; matches++; }
-    });
-    section.hidden = sectionMatches === 0;
+  document.title = `${scenario.name} · ${t('brand')}`;
+  app.querySelectorAll<HTMLElement>('[data-t]').forEach(n => { n.textContent = t(n.dataset.t as Parameters<typeof t>[0]); });
+  app.querySelectorAll<HTMLElement>('[data-lang]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang())));
+  $('.lang').setAttribute('aria-label', t('language'));
+  const themeBtn = $('[data-action="theme"]');
+  themeBtn.innerHTML = icon(theme === 'dark' ? ui.sun : ui.moon);
+  themeBtn.setAttribute('aria-label', t('theme'));
+  themeBtn.title = t('theme');
+  $('.rail-toggle').setAttribute('aria-label', t('openLessons'));
+  const names: Record<View, string> = { network: t('viewNetwork'), sequence: t('viewSequence'), both: t('viewBoth') };
+  app.querySelectorAll<HTMLElement>('.views [data-view]').forEach(b => {
+    const v = b.dataset.view as View;
+    b.textContent = names[v];
+    b.setAttribute('aria-pressed', String(v === view));
   });
-  const count = $('search-count');
-  if (count) count.textContent = `${matches} / ${catalog.length} ${t('searchResults')}`;
-  const empty = $('search-empty');
-  if (empty) empty.hidden = matches !== 0;
-  const clear = app!.querySelector<HTMLButtonElement>('.search-clear');
-  if (clear) clear.hidden = !catalogQuery;
+  $('.views').setAttribute('aria-label', t('views'));
+  $('.viz').dataset.view = view;
+  app.querySelectorAll<HTMLElement>('[data-speed]').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.speed) === speed)));
+  $('.speed').setAttribute('aria-label', t('speed'));
+  for (const [action, key] of [['restart', 'restart'], ['previous', 'previous'], ['next', 'next']] as const) {
+    const b = $(`[data-action="${action}"]`);
+    b.setAttribute('aria-label', t(key));
+    b.title = t(key);
+  }
+  $('.scrub').setAttribute('aria-label', t('timeline'));
+  $('.hint').textContent = t('shortcuts');
+  $('.play').dataset.state = '';
 }
 
-function simulation(): string {
-  const state = timeline.getState();
-  const progress = Math.round(((state.index + 1) / active.events.length) * 100);
-  return `<main id="main-content" class="page lab">
-    <div class="lab-overview">
-      <div class="lab-heading"><button data-action="catalog" class="back-link">← ${escapeHtml(t('back'))}</button>
-      <div class="eyebrow">LAB / ${escapeHtml(active.category.toUpperCase())} / ${escapeHtml(active.id.toUpperCase())}</div>
-      <h1 id="lab-title" tabindex="-1">${escapeHtml(active.name)} <span class="muted">/ ${escapeHtml(t('experiment'))}</span></h1>
-      <p>${escapeHtml(active.summary)}</p>
-      </div><div class="mode-switch" role="group" aria-label="${escapeHtml(t('groupMode'))}">
-      <button data-action="mode" data-mode="discovery" aria-pressed="${mode === 'discovery'}" class="${mode === 'discovery' ? 'chosen' : ''}">${escapeHtml(t('discovery'))}</button>
-      <button data-action="mode" data-mode="expert" aria-pressed="${mode === 'expert'}" class="${mode === 'expert' ? 'chosen' : ''}">${escapeHtml(t('expert'))}</button>
-      </div>
-    </div>
-    <section class="goalbar"><span class="eyebrow">${escapeHtml(t('objective'))}</span><strong>${escapeHtml(active.objective)}</strong><span class="note-tag">${escapeHtml(t('modelled'))}</span></section>
-    <section class="toolbar" aria-label="${escapeHtml(t('groupControls'))}">
-      <div class="transport-controls"><button data-action="reset" aria-label="${escapeHtml(t('reset'))}">↺</button>
-      <button data-action="prev" id="prev-control" aria-label="${escapeHtml(t('previous'))}">←</button>
-      <button class="play-button" data-action="toggle" id="play-control">${escapeHtml(t('play'))}</button>
-      <button data-action="next" id="next-control" aria-label="${escapeHtml(t('next'))}">→</button></div>
-      <label class="select-wrap speed-wrap"><span>${escapeHtml(t('speed'))}</span><select id="speed-select">
-      ${([0.5, 1, 1.5, 2] as Speed[]).map(s => `<option value="${s}" ${state.speed === s ? 'selected' : ''}>${s}×</option>`).join('')}</select></label>
-      <div class="progress-wrap"><span id="progress-text" class="mono"></span><div class="progress-track" role="progressbar" id="progress-bar" aria-label="${escapeHtml(t('status'))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}"><span id="progress-fill"></span></div></div>
-    </section>
-    <section class="workspace" aria-label="${escapeHtml(t('groupWorkspace'))}">
-      <div class="panel topology-panel"><div class="panel-heading"><div><span class="eyebrow">01 / ${escapeHtml(t('panelNetwork'))}</span><h2>${escapeHtml(t('topology'))}</h2></div><span class="legend-key">${escapeHtml(t('flowLegend'))}</span></div>
-        <div class="topology-actors" id="topology-actors" aria-label="${escapeHtml(t('groupParticipants'))}">${renderActors(active)}</div>
-        <div class="flow-readout" id="flow-readout" aria-live="polite"></div>
-      </div>
-      <div class="panel sequence-panel"><div class="panel-heading"><div><span class="eyebrow">02 / ${escapeHtml(t('panelTimeline'))}</span><h2>${escapeHtml(t('sequence'))}</h2></div><span class="legend-key">${active.events.length} ${escapeHtml(t('events'))}</span></div>
-        <ol class="event-list ladder-list" id="event-list" aria-label="${escapeHtml(t('eventListLabel'))}">${renderSequence(active, t)}</ol>
-      </div>
-    </section>
-    <section class="panel inspector-panel" aria-labelledby="inspector-title"><div class="panel-heading"><div><span class="eyebrow">03 / ${escapeHtml(t('panelAnalysis'))}</span><h2 id="inspector-title">${escapeHtml(t('inspector'))}</h2></div><span class="legend-key">${escapeHtml(t('sampleLegend'))}</span></div>
-      <div id="inspector-body"></div>
-    </section>
-  </main>`;
+function open(next: Scenario, keepPlace = false): void {
+  scenario = next;
+  store.set('last', scenario.id);
+  if (location.hash !== `#/${scenario.id}`) history.replaceState(null, '', `#/${scenario.id}`);
+  shownIndex = -1;
+  renderChrome();
+  renderRail();
+  renderLesson();
+  renderProgress();
+  topology.render(scenario);
+  sequence.render(scenario);
+  const slots = schedule(scenario.events, e => hops(scenario.topology, e));
+  const seen = progress[scenario.id] ?? -1;
+  player.load(slots, keepPlace ? player.frame().index : seen >= scenario.events.length - 1 ? -1 : seen);
 }
 
-function render(focusSelector?: string): void {
-  applyPreferences();
-  app!.innerHTML = `<a class="skip-link" href="#main-content">${escapeHtml(t('skipLink'))}</a><div class="shell">${header()}${onCatalog ? catalogue() : simulation()}
-    <footer class="footer"><span>Network Observatory · ${escapeHtml(t('footerAlpha'))}</span>
-    <span>${escapeHtml(t('footerAttribution'))} <a href="https://protocol-explorer-alpha.vercel.app/" target="_blank" rel="noopener noreferrer">Protocol Explorer — Dilum Sanjaya</a> · ${escapeHtml(t('footerRights'))}</span></footer></div>`;
-  if (onCatalog) updateCatalogueFilter(); else update();
-  // Full view replacements must not silently discard keyboard focus.
-  if (focusSelector) app!.querySelector<HTMLElement>(focusSelector)?.focus();
+
+function setRail(openRail: boolean): void {
+  document.body.classList.toggle('rail-open', openRail);
+  $('.rail-toggle').setAttribute('aria-expanded', String(openRail));
 }
 
-function update(): void {
-  if (onCatalog || !$('event-list')) return;
-  const state: TimelineState = timeline.getState();
-  const current = active.events[state.index];
-  if (inspectedEventId !== current.id) { selectedField = 0; inspectedEventId = current.id; }
-  const progress = Math.round(((state.index + 1) / active.events.length) * 100);
-  const progressText = $('progress-text');
-  if (progressText) progressText.textContent = `${t('step')} ${state.index + 1} / ${active.events.length}`;
-  const fill = $('progress-fill');
-  if (fill) fill.style.width = progress + '%';
-  $('progress-bar')?.setAttribute('aria-valuenow', String(progress));
-  const prev = $('prev-control') as HTMLButtonElement | null;
-  const next = $('next-control') as HTMLButtonElement | null;
-  if (prev) prev.disabled = state.index === 0;
-  if (next) next.disabled = state.index === active.events.length - 1;
-  const play = $('play-control');
-  if (play) { play.textContent = t(state.playing ? 'pause' : 'play'); play.setAttribute('aria-pressed', String(state.playing)); }
-  const list = $('event-list');
-  if (list) {
-    list.querySelectorAll<HTMLButtonElement>('button[data-index]').forEach(button => {
-      const selected = Number(button.dataset.index) === state.index;
-      button.classList.toggle('is-active', selected);
-      if (selected) button.setAttribute('aria-current', 'step'); else button.removeAttribute('aria-current');
-    });
-    // Scroll only within the ladder, without moving keyboard focus or the page.
-    // This also keeps the final event visible when playback stops on the last tick.
-    const selected = list.querySelector<HTMLButtonElement>(`button[data-index="${state.index}"]`);
-    if (selected) {
-      const viewport = list.getBoundingClientRect();
-      const item = selected.getBoundingClientRect();
-      const stickyHeader = list.querySelector('.ladder-head')?.getBoundingClientRect().height ?? 0;
-      const upperEdge = viewport.top + stickyHeader + 8;
-      const lowerEdge = viewport.bottom - 8;
-      if (item.top < upperEdge) list.scrollTop -= upperEdge - item.top;
-      else if (item.bottom > lowerEdge) list.scrollTop += item.bottom - lowerEdge;
-    }
+app.addEventListener('click', e => {
+  const target = e.target as Element;
+  const link = target.closest<HTMLAnchorElement>('.lesson-link');
+  if (link) {
+    e.preventDefault();
+    setRail(false);
+    const next = findScenario(link.dataset.id);
+    if (next && next !== scenario) { open(next); player.play(); }
+    $('#stage').focus({ preventScroll: true });
+    return;
   }
-  $('topology-actors')?.querySelectorAll<HTMLElement>('[data-actor]').forEach(element => {
-    const sender = element.dataset.actor === current.from;
-    const receiver = element.dataset.actor === current.to;
-    element.classList.toggle('is-sender', sender);
-    element.classList.toggle('is-receiver', receiver);
-    const status = element.querySelector<HTMLElement>('.actor-state');
-    if (status) status.textContent = sender ? t('sender') : receiver ? t('receiver') : '';
-  });
-  const flow = $('flow-readout');
-  if (flow) flow.innerHTML = renderFlow(active, current, t);
-  const body = $('inspector-body');
-  if (body) body.innerHTML = renderInspector(current, mode, t, selectedField);
-  store('progress:' + active.id, current.id);
+  const button = target.closest<HTMLElement>('[data-action],[data-lang],[data-view],[data-speed],.tick');
+  if (!button) return;
+  if (button.classList.contains('tick')) { player.replay(Number(button.dataset.index)); return; }
+  if (button.dataset.lang) { setLang(button.dataset.lang as Lang); store.set('lang', lang()); open(scenario, true); return; }
+  if (button.dataset.view && button.closest('.views')) { setView(button.dataset.view as View); return; }
+  if (button.dataset.speed) {
+    speed = Number(button.dataset.speed);
+    player.speed = speed;
+    store.set('speed', String(speed));
+    renderChrome();
+    return;
+  }
+  switch (button.dataset.action) {
+    case 'theme': theme = theme === 'dark' ? 'light' : 'dark'; store.set('theme', theme); renderChrome(); break;
+    case 'rail': setRail(!document.body.classList.contains('rail-open')); break;
+    case 'restart': player.seek(0); player.play(); break;
+    case 'previous': player.previous(); break;
+    case 'next': player.next(); break;
+    case 'play': player.toggle(); break;
+  }
+});
+
+function setView(next: View): void {
+  view = next;
+  store.set('view', view);
+  renderChrome();
 }
 
-function openScenario(id: string): void {
-  active = findScenario(id);
-  store('last-protocol', active.id);
-  onCatalog = false;
-  timeline.setProtocol(active, readStep(active));
-  render('#lab-title');
-}
-app.addEventListener('click', ev => {
-  const target = (ev.target as Element).closest<HTMLElement>('[data-action]');
-  if (!target || !app.contains(target)) return;
-  switch (target.dataset.action) {
-    case 'catalog': timeline.dispatch({ type: 'PAUSE' }); onCatalog = true; render('#home-title'); break;
-    case 'open': openScenario(target.dataset.id ?? 'tcp'); break;
-    case 'clear-search': {
-      catalogQuery = '';
-      const input = $('protocol-search') as HTMLInputElement | null;
-      if (input) { input.value = ''; updateCatalogueFilter(); input.focus(); }
-      break;
-    }
-    case 'theme': theme = theme === 'dark' ? 'light' : 'dark'; store('theme', theme); render('[data-action="theme"]'); break;
-    case 'mode': mode = target.dataset.mode === 'expert' ? 'expert' : 'discovery'; store('mode', mode); render('[data-action="mode"][data-mode="' + mode + '"]'); break;
-    case 'toggle': timeline.dispatch({ type: 'TOGGLE' }); break;
-    case 'prev': timeline.dispatch({ type: 'PREVIOUS' }); break;
-    case 'next': timeline.dispatch({ type: 'NEXT' }); break;
-    case 'reset': timeline.dispatch({ type: 'RESET' }); break;
-    case 'select': timeline.dispatch({ type: 'SELECT', index: Number(target.dataset.index) }); break;
-    case 'inspect-field': {
-      const index = Number(target.dataset.fieldIndex);
-      if (Number.isInteger(index) && index >= 0 && index < active.events[timeline.getState().index].fields.length) {
-        selectedField = index;
-        update();
-        $('inspector-body')?.querySelector<HTMLButtonElement>(`button[data-field-index="${index}"]`)?.focus();
-      }
-      break;
-    }
-  }
+$('.scrub-track').addEventListener('pointerdown', e => {
+  const track = e.currentTarget as HTMLElement;
+  const seek = (x: number) => {
+    const box = track.getBoundingClientRect();
+    player.seek(((x - box.left) / box.width) * player.total);
+  };
+  seek(e.clientX);
+  const move = (m: PointerEvent) => seek(m.clientX);
+  const up = () => { removeEventListener('pointermove', move); removeEventListener('pointerup', up); };
+  addEventListener('pointermove', move);
+  addEventListener('pointerup', up);
 });
-app.addEventListener('input', ev => {
-  const target = ev.target;
-  if (target instanceof HTMLInputElement && target.id === 'protocol-search') {
-    catalogQuery = target.value;
-    updateCatalogueFilter();
-  }
+
+document.addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  const target = e.target as HTMLElement;
+  if (target.closest('input, textarea, select, [contenteditable]')) return;
+  const onControl = !!target.closest('button, a, [role="button"]');
+  if (e.key === ' ' && !onControl) { e.preventDefault(); player.toggle(); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); player.next(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); player.previous(); }
+  else if (e.key === 'Home' && !onControl) { player.seek(0); }
+  else if (e.key === 'Escape') { setRail(false); }
+  else if (e.key === '1') setView('network');
+  else if (e.key === '2') setView('sequence');
+  else if (e.key === '3') setView('both');
 });
-app.addEventListener('change', ev => {
-  const target = ev.target as HTMLSelectElement;
-  if (target.id === 'language-select' && languageSupported(target.value)) {
-    language = target.value; store('language', language); render('#language-select');
-  }
-  if (target.id === 'speed-select') {
-    const speed = Number(target.value);
-    if ([0.5, 1, 1.5, 2].includes(speed)) timeline.dispatch({ type: 'SPEED', speed: speed as Speed });
-  }
+
+addEventListener('hashchange', () => {
+  const next = findScenario(location.hash.slice(2));
+  if (next && next !== scenario) open(next);
 });
-// The ladder is a keyboard-operable timeline: physical arrows stay LTR even
-// inside RTL interfaces, matching the diagram's chronological layout.
-app.addEventListener('keydown', event => {
-  const target = event.target;
-  if (!(target instanceof HTMLButtonElement) || !target.matches('#event-list button[data-action="select"]')) return;
-  const index = Number(target.dataset.index);
-  const last = active.events.length - 1;
-  let next: number;
-  switch (event.key) {
-    case 'ArrowDown':
-    case 'ArrowRight': next = Math.min(last, index + 1); break;
-    case 'ArrowUp':
-    case 'ArrowLeft': next = Math.max(0, index - 1); break;
-    case 'Home': next = 0; break;
-    case 'End': next = last; break;
-    default: return;
-  }
-  event.preventDefault();
-  timeline.dispatch({ type: 'SELECT', index: next });
-  $('event-list')?.querySelector<HTMLButtonElement>(`button[data-index="${next}"]`)?.focus();
+prefersDark.addEventListener('change', e => {
+  if (store.get('theme')) return;
+  theme = e.matches ? 'dark' : 'light';
+  renderChrome();
 });
-// Background tabs should not consume timer resources or silently advance lessons.
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden && timeline.getState().playing) timeline.dispatch({ type: 'PAUSE' });
-});
-window.addEventListener('pagehide', () => timeline.dispose());
-render();
+document.addEventListener('visibilitychange', () => { if (document.hidden) player.pause(); });
+
+open(scenario);

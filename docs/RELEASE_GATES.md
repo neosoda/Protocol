@@ -1,29 +1,15 @@
-# Release gates — retour au design classique
+# Contrôles avant mise en production
 
-L'objectif du rollback est de **restituer fidèlement les animations et l'interface d'origine**, sans nouvelle refonte du moteur de visualisation.
+## Automatiques (bloquants dans l’image Docker)
 
-## Contrôles statiques effectués
+- `npm run typecheck` : TypeScript strict, sans erreur.
+- `npm test` : sommes de contrôle IP/TCP/UDP/ICMP, numéros TCP, DNS, DHCP, TLS, SSH, chemins des topologies, textes FR/EN complets, horloge de lecture, contrôle de l’artefact.
+- `npm run build` puis `scripts/verify-build.mjs` : un seul bundle JS, uniquement les fichiers attendus.
 
-- L'HTML racine correspond exactement au blob `043fb1c6b2ecd3d607cea3ecbfffe617da89903b` de `main` avant la PR #5.
-- Les blobs du JavaScript animé `app/public/assets/index-l76eMM6E.js` et du CSS `app/public/assets/index-C1vckX_Q.css` sont inchangés.
-- Les scripts `style-switcher.js` et `alternate-style.css` étaient eux aussi inchangés. *(v5 : remplacés par `studio.css` et `skin.js`, les bundles restant intacts.)*
-- Les **8 références absolues locales** (`src`/`href`) de `app/index.html` pointent vers des fichiers existants dans `app/public/`.
-- `Dockerfile` fournit directement `app/index.html` et `app/public/` avec Nginx, port 80, sans Vite. `/healthz` est conservé.
+## Manuels
 
-## Habillage Studio v5
-
-- `index-l76eMM6E.js` et `index-C1vckX_Q.css` restent bit à bit identiques ; `studio.css` est une couche par-dessus.
-- Comparer `/?skin=classic` et `/?skin=studio` sur TCP, DNS et HTTPS, sur ordinateur et mobile, en clair et en sombre, et en RTL (arabe et hébreu).
-- Vérifier que le canevas `.simulation` est identique dans les deux habillages (couleurs, police, timing).
-
-## Validation encore nécessaire
-
-- Build de l'image Docker sous Coolify et contrôle de l'état de santé.
-- HTTP 200 et bonnes réponses MIME pour le HTML, JS, CSS, polices et manifest.
-- Captures et animations réelles pour TCP, DNS, TLS/HTTPS sur desktop/mobile ; absence de déformations, sauts ou erreurs JS.
-- Vérification du cache après rollback (`index.html` non mis en cache, assets inchangés).
-- Vérification des licences : la version historique attribuée à Dilum Sanjaya reste soumise à ses propres droits. Le retour arrière ne vaut pas autorisation de redistribution.
-
-Le laboratoire Vite/TypeScript reste dans le dépôt mais n'est **pas compilé dans l'image Docker**. Ses tests ne prouvent donc rien concernant l'interface classique restaurée.
-
-Pas de GitHub Actions ni de Vercel.
+- Parcourir au moins TCP, DNS, DHCP (diffusion), TLS 1.3 (chiffré) et UDP (perte) : animation fluide, carte, séquence et inspecteur synchronisés.
+- Ordinateur (1440 × 900) et mobile (375 × 812), thèmes clair et sombre, français et anglais.
+- Pas de défilement horizontal de la page, pas d’erreur dans la console.
+- Clavier : Espace, ← →, 1 2 3, Échap ; focus visible.
+- `prefers-reduced-motion` : les étapes s’affichent sans animation.

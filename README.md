@@ -1,35 +1,41 @@
-# Protocol Explorer — design classique restauré
+# Network Observatory
 
-> **Retour au rendu et aux animations d'origine.** La refonte Workbench V4 a été annulée : l'accueil, le moteur d'animation, les styles et les interactions proviennent de la version historique sauvegardée avant la PR #5. **Coolify est conservé**, sans Vercel et sans GitHub Actions.
+**Les protocoles d’Internet, paquet par paquet.** 14 leçons animées où l’on suit chaque message sur une carte du réseau et dans un diagramme de séquence, avec le paquet complet décodé octet par octet. En français et en anglais.
 
-## Habillage « Studio » (v5)
+![Network Observatory](docs/preview-desktop.png)
 
-L'interface est redessinée par une couche CSS, `app/public/assets/studio.css`, posée au-dessus du bundle d'origine. Le **canevas animé (vues réseau et séquence) n'est pas modifié** : moteur, palette, typographie et timing restent ceux de la version historique. Autour, l'interface est entièrement revue : typographie Inter et Iosevka pour les données, panneaux et contrôles, thèmes clair et sombre, et mise en scène des transitions.
+## Leçons
 
-- Comparer avec l'original : `/?skin=classic`. Revenir au nouveau : `/?skin=studio`.
-- En local : `cd app && npm ci && npx vite`, puis ouvrir `http://localhost:5173/`.
+| Fondations | Services réseau | Web et sécurité | Messagerie | Accès distant et fichiers |
+|---|---|---|---|---|
+| IP, ICMP, UDP, TCP | DHCP, DNS | HTTP, TLS 1.3, HTTPS | SMTP, POP3, IMAP | SSH, FTP |
 
-## État actuel
+Chaque leçon propose :
 
-Le site servi à `/` reprend **exactement** l'ancien `app/index.html` et les fichiers statiques correspondants (`app/public/assets/` : JS animé, CSS, traductions et typographies). Les paquets animés, les cartes protocoles et les vues ont donc leur comportement de référence ; ils ne sont plus remplacés par le laboratoire simplifié de la V4.
+- **une carte réseau animée** : le paquet voyage de saut en saut, les pertes et les diffusions sont représentées ;
+- **un diagramme de séquence** synchronisé, où chaque flèche se trace au rythme du paquet ;
+- **un inspecteur** qui reconstruit le paquet (IPv4, TCP/UDP/ICMP, puis DNS, DHCP, HTTP, TLS, SSH…) : survoler un champ allume ses octets dans le dump hexadécimal, et inversement ;
+- lecture, pas à pas, vitesse, raccourcis clavier (Espace, ← →, 1 2 3), progression mémorisée, thème clair ou sombre.
 
-Le code expérimental Vite/TypeScript de Network Observatory reste dans `app/src/` et `app/observatory/` pour la recherche et l'évolution future, mais il **n'est pas déployé** par le Dockerfile de production.
+Les paquets sont **construits par le code** à partir de leurs champs : sommes de contrôle IP, TCP, UDP et ICMP réelles, numéros de séquence TCP cohérents d’un bout à l’autre, messages DNS et DHCP conformes, enregistrements TLS et paquets SSH aux bonnes longueurs. Les adresses sont des plages de documentation (RFC 5737) ou privées (RFC 1918). Les tests vérifient ces invariants.
 
-## Coolify
+## Développement
 
-- Dépôt : `https://github.com/neosoda/Protocol`
-- Branche : `main` après fusion du rollback.
-- Stratégie : **Dockerfile** depuis la racine du dépôt.
-- Contexte : `/`, emplacement : `Dockerfile`, port exposé : **80**.
-- Nginx fournit le HTML et les bundles existants, sans Vite ni serveur Node.
-- Santé : `GET /healthz` ; `/observatory/` redirige vers `/`.
+```bash
+cd app
+npm ci
+npm run dev        # http://localhost:5173
+npm run typecheck
+npm test
+npm run build      # build + contrôle de l'artefact
+```
 
-Voir le [guide Coolify](docs/DEPLOY_COOLIFY.md). **La fusion Git ne garantit pas le redéploiement de Coolify** : vérifier l'instance et ses logs. Le build Docker et les animations dans un vrai navigateur ne sont pas attestés ici.
+Node 22 ou plus récent. Détails techniques : [app/README.md](app/README.md).
 
-## Reprise des améliorations
+## Déploiement
 
-Conserver les animations d'origine comme *référence non négociable*. Toute future modification doit passer par une comparaison avant/après sur plusieurs protocoles, sur ordinateur et mobile, sans remplacer les animations par des maquettes simplifiées. Consulter le [handoff](PROJECT_HANDOFF.md).
+Coolify, stratégie **Dockerfile** à la racine, port **80**. L’image compile l’application (typecheck, tests, build) puis la sert avec Nginx. Voir [docs/DEPLOY_COOLIFY.md](docs/DEPLOY_COOLIFY.md).
 
-## Origine et droits
+## Licence
 
-La version historique contient l'attribution à [Dilum Sanjaya](https://protocol-explorer-alpha.vercel.app/). Sa présence dans le dépôt ne confirme **pas** les droits de redistribution ou une licence pour les bundles tiers. Il faut clarifier ce point avant toute publication autorisée : [droits et attributions](docs/RIGHTS_AND_ATTRIBUTIONS.md). La licence propre au projet ne couvre que ses contributions originales.
+Code et contenus : [MIT](LICENSE), © 2026 Neosoda. Police Inter : SIL Open Font License 1.1 ([détails](docs/RIGHTS_AND_ATTRIBUTIONS.md)).
