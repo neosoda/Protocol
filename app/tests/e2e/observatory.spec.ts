@@ -189,3 +189,26 @@ for (const width of [390, 768, 1440]) {
     }
   }
 }
+
+test('protocol search filters the catalogue without losing focus', async ({ page }) => {
+  await page.goto('/observatory/');
+  const input = page.locator('#protocol-search');
+  await input.fill('tls');
+  await expect(input).toBeFocused();
+  await expect(page.locator('.protocol-card:visible')).toHaveCount(1);
+  await expect(page.locator('#search-count')).toContainText('1 / 14');
+  await page.locator('[data-action="clear-search"]').click();
+  await expect(input).toHaveValue('');
+  await expect(input).toBeFocused();
+  await expect(page.locator('.protocol-card:visible')).toHaveCount(14);
+});
+
+test('empty catalogue search has a meaningful empty state', async ({ page }) => {
+  await page.goto('/observatory/');
+  const input = page.locator('#protocol-search');
+  await input.fill('unavailable-protocol-xyz');
+  await expect(page.locator('#search-empty')).toBeVisible();
+  await input.fill('DNS');
+  await expect(page.locator('#search-empty')).toBeHidden();
+  await expect(page.locator('.protocol-card:visible')).toHaveCount(1);
+});
