@@ -1,0 +1,12 @@
+.git/
+.github/
+**/node_modules/
+**/dist/
+**/.vite/
+**/test-results/
+**/playwright-report/
+**/coverage/
+**/.env
+**/.env.*
+app/public/
+.DS_Store
