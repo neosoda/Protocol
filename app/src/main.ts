@@ -41,6 +41,7 @@ function applyPreferences(): void {
   document.documentElement.lang = language;
   document.documentElement.dir = isRtl(language) ? 'rtl' : 'ltr';
   document.documentElement.dataset.theme = theme;
+  document.documentElement.dataset.mode = mode;
   document.documentElement.style.colorScheme = theme;
 }
 
@@ -148,9 +149,10 @@ function description(event: NetworkEvent): string {
    <h3>${escapeHtml(event.title)}</h3><p>${escapeHtml(event.description)}</p></div>`;
 }
 function inspector(event: NetworkEvent): string {
-  const grouped = Array.from(new Set(event.fields.map(f => f.layer)));
+  const visibleFields = mode === 'discovery' ? event.fields.slice(0, 1) : event.fields;
+  const grouped = Array.from(new Set(visibleFields.map(f => f.layer)));
   const fields = grouped.length ? grouped.map(layer => `<section class="field-group"><h4>${escapeHtml(layer.toUpperCase())}</h4>
-    <dl>${event.fields.filter(f => f.layer === layer).map(f => `<div><dt>${escapeHtml(f.name)}</dt><dd><code>${escapeHtml(f.value)}</code><small>${escapeHtml(f.explanation)}</small></dd></div>`).join('')}</dl></section>`).join('') :
+    <dl>${visibleFields.filter(f => f.layer === layer).map(f => `<div><dt>${escapeHtml(f.name)}</dt><dd><code>${escapeHtml(f.value)}</code><small>${escapeHtml(f.explanation)}</small></dd></div>`).join('')}</dl></section>`).join('') :
     `<p class="empty-fields">Pas de champs techniques individuels validés pour cette étape.</p>`;
   const raw = event.sample === undefined ? `<p class="empty-fields">${escapeHtml(t('noBytes'))}</p>` :
     renderSample(event.sample);
