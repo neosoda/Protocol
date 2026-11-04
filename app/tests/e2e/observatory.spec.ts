@@ -8,8 +8,12 @@ const open = async (page: import('@playwright/test').Page, id: string): Promise<
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(prefix => {
-    localStorage.setItem(prefix + 'language', 'fr');
-    localStorage.setItem(prefix + 'theme', 'dark');
+    if (localStorage.getItem(prefix + 'language') === null) {
+      localStorage.setItem(prefix + 'language', 'fr');
+    }
+    if (localStorage.getItem(prefix + 'theme') === null) {
+      localStorage.setItem(prefix + 'theme', 'dark');
+    }
   }, storagePrefix);
 });
 
@@ -133,6 +137,8 @@ for (const width of [390, 768, 1440]) {
         await page.reload();
         await page.locator('button.protocol-card[data-id="tcp"]').click();
         await expect(page.locator('#inspector-title')).toBeVisible();
+        await expect(page.locator('html')).toHaveAttribute('lang', language);
+        await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
         await expect(page.locator('.ladder-step')).toHaveCount(5);
         await page.screenshot({ path: `test-results/observatory-${width}-${theme}-${language}.png`, fullPage: true });
       });
