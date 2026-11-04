@@ -55,6 +55,10 @@
 
 ### Livraison et validation
 
-La V4 remplace l'ancien HTML `app/index.html` par le **vrai point d'entrée moderne**. Vite ne compile que la racine, ne copie pas le répertoire `public/`, et le script `verify-build.mjs` rejette les artefacts historiques. Vercel autorise les **previews uniquement** si typecheck, tests Node et build passent ; la production reste ignorée. Les droits du contenu tiers historiques restent à vérifier.
+La V4 remplace l'ancien HTML `app/index.html` par le **vrai point d'entrée moderne**. Vite ne compile que la racine, ne copie pas le répertoire `public/`, et le script `verify-build.mjs` rejette les artefacts historiques. Coolify autorise les **previews uniquement** si typecheck, tests Node et build passent ; le déploiement de production reste soumis à validation. Les droits du contenu tiers historiques restent à vérifier.
 
 **Aucun rendu navigateur ni audit WCAG 2.2 AA attesté dans cet environnement.** Les contrôles statiques ont vérifié 85 clés i18n FR/EN sans doublons, la structure de l'écran et les entrées de build ; les tests E2E V4 ont été écrits, pas exécutés. Contrôler les captures FR/EN/AR à 390, 768, 1440 px, clair/sombre, avant fusion.
+
+## Déploiement opérationnel
+
+La V4 se prépare pour Coolify, via `Dockerfile` multi-stage et Nginx sur le port interne 80 ; voir [DEPLOY_COOLIFY.md](DEPLOY_COOLIFY.md). Aucune nécessité de Vercel, de GitHub Actions, de Docker Compose ou d'un serveur Node en production.
