@@ -1,5 +1,15 @@
 # PROJECT HANDOFF — Network Observatory (2026-11-04)
 
+## État courant après fusion PR #5 — 04/11/2026
+
+- **PR [#5](https://github.com/neosoda/Protocol/pull/5) fusionnée dans `main`**, merge commit `0b7b737a699ed0f4a6f28f391f4dbdf8d0b54e98`. Les sections de travail antérieures marquées « PR en brouillon » sont historiques.
+- **V4 Workbench** maintenant dans `main` : entrée `/` moderne, rail de 14 protocoles, grand moniteur TCP, séquence prioritaire, topologie et inspecteur latéraux, identité N/O et palette ivoire/corail.
+- **Cible d'hébergement : Coolify exclusivement.** `vercel.json` supprimé ; `Dockerfile` à la racine, `deploy/nginx.conf` (port interne **80**, `/healthz`, redirection `/observatory/` vers `/`) et `.dockerignore` présents. Voir `docs/DEPLOY_COOLIFY.md`.
+- **Fusion ≠ validation ou déploiement** : la compilation TypeScript, les tests complets, le build Vite/Docker, Playwright, la revue WCAG et les droits des ressources historiques restent non attestés. `app/package-lock.json` est périmé, Dockerfile utilise provisoirement `npm install`.
+- **Prochaine action :** vérifier dans Coolify si un déploiement automatique de `main` a été déclenché, examiner ses logs ; exécuter les gates avant de considérer le rendu V4 opérationnel. Aucun accès direct à l'instance Coolify dans cette intervention.
+
+Cette section prévaut sur les statuts historiques ci-dessous.
+
 ## Plateforme confirmée : Coolify — 04/11/2026
 
 **Le site est hébergé par Coolify personnel, pas par Vercel.** Les travaux précédents qui supposaient Vercel étaient mal orientés. Cette section prévaut sur les mentions historiques plus bas.
