@@ -28,10 +28,13 @@ Remplacer progressivement la reproduction historique, sous réserve de droits, p
 - [x] Direction et tokens du design system définis.
 - [ ] Confirmation des droits avec Dilum Sanjaya ou retrait complet des éléments non autorisés avant diffusion.
 - [ ] Comparaison navigateur du produit historique par protocole, langue et action.
-- [ ] Scénarios complets et vérifiés techniquement pour les 14 protocoles (références RFC et tests par champ).
+- [x] Premier catalogue éditable de 14 protocoles modélisés et tests d'invariants **écrits (non exécutés)**.
+- [ ] Vérification RFC exhaustive des 14 protocoles (références et tests de chaque champ).
+- [x] Libellés UI partiels dans 15 langues, ar/he avec direction RTL ; repli anglais explicite.
 - [ ] Traductions pédagogiques intégrales dans les 15 langues, RTL compris, avec relecture.
 - [ ] Captures avant/après à 390, 768, 1440 px, FR/EN/AR, clair/sombre.
-- [ ] Tests moteur, `tsc`, build, Playwright, accessibilité clavier/contrastes, console et CSP en local.
+- [x] Tests unitaires et scénarios Playwright de base **rédigés**, dont captures 390/768/1440 clair/sombre (non exécutés).
+- [ ] Exécuter `tsc`, tests unitaires, build et Playwright en local ; auditer accessibilité clavier/contrastes, console et CSP.
 - [ ] Vérifier manifest/icônes, URLs OG, PWA/offline avant tout changement de revendication.
 - [ ] Revue des dépendances et licences avant une PR non draft ou un déploiement.
 
@@ -42,9 +45,10 @@ npm --prefix app install
 npm --prefix app run typecheck
 npm --prefix app run test
 npm --prefix app run build
+npm --prefix app run test:e2e
 npm --prefix app run dev
 ```
 
 Inspecter ensuite `/observatory/` sur `http://localhost:5173` et comparer avec `/`.
 
-**Remarque :** les tests et captures ne peuvent être considérés « OK » qu'après un journal réel de leur exécution. Ce document doit être mis à jour à chaque lot.
+**Remarque :** la branche contient du code et des scripts de test, mais **aucune exécution locale probante ni capture générée n'a été obtenue**. `app/package-lock.json` doit être régénéré et vérifié. Les tests et captures ne peuvent être considérés « OK » qu'après un journal réel de leur exécution. Ce document doit être mis à jour à chaque lot.
