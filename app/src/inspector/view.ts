@@ -45,9 +45,9 @@ export function renderInspector(event: NetworkEvent, mode: InspectorMode, t: (ke
       `<button class="field-option ${current === f ? 'is-selected' : ''}" data-action="inspect-field"
         data-field-index="${i}" aria-pressed="${current === f}">
         <span>${escapeHtml(f.name)}</span><code dir="ltr"><bdi>${escapeHtml(f.value)}</bdi></code></button>`).join('')}</div></section>`).join('')
-    : '<p class="empty-fields">${escapeHtml(t('noFields'))}</p>';
+    : `<p class="empty-fields">${escapeHtml(t('noFields'))}</p>`;
   const raw = mode === 'discovery'
-    ? '<p class="empty-fields">${escapeHtml(t('discoveryHint'))}</p>'
+    ? `<p class="empty-fields">${escapeHtml(t('discoveryHint'))}</p>`
     : event.sample === undefined
       ? `<p class="empty-fields">${escapeHtml(t('noBytes'))}</p>`
       : renderSample(event.sample, t, current?.sampleRange);
