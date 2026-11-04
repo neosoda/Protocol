@@ -54,6 +54,12 @@ npm --prefix app run preview
 ```
 
 **État de validation (04/11/2026) :** les nouveaux tests unitaires et Playwright sont **rédigés mais non exécutés** ; aucun résultat de build, typecheck ou capture navigateur n'est revendiqué. Le verrou npm est toujours ouvert : le `app/package-lock.json` historique n'est **pas synchronisé** avec les dépendances du socle TypeScript. Exécuter `npm --prefix app install`, versionner le lock puis vérifier `npm --prefix app ci` dans un environnement disposant de npm et du réseau. Aucun workflow GitHub Actions n'est requis.\n
+### Séparation de la distribution
+
+En développement, la version historique reste accessible localement à la racine pour comparaison. **Le build de production Vite n'embarque intentionnellement que `/observatory/`** : `app/public/` est exclu et un contrôle automatique (`app/scripts/verify-build.mjs`) rejette les artefacts suspects. Ce comportement est **implémenté mais pas encore vérifié par un build réel**, faute d'accès à npm. Il ne régularise pas les droits du contenu historique déjà présent dans le dépôt.
+
+**Validation partielle réelle (04/11/2026) :** 4/4 tests autonomes du garde-fou réussis sous Node 22.16.0 sur des copies identiques aux fichiers GitHub ; les tests métier, le build Vite et Playwright ne sont toujours pas exécutés. La PR #3 reste ouverte. Voir `PROJECT_HANDOFF.md` pour les SHA, les blocages réseau et le plan de reprise.
+
 ## Structure
 
 ```text

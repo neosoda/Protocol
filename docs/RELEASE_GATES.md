@@ -30,3 +30,13 @@ Une fusion Git dans `main` n'est **pas** une autorisation de publication. Conser
 - Focus : correctifs et scénarios Playwright ajoutés dans la branche de durcissement, **à exécuter**.
 
 Ne remplacer ces statuts que par des résultats et des logs d'exécution vérifiables. Pas de CI GitHub Actions pour cette phase ; utiliser un terminal local.
+
+## Stabilisation PR #3 — contrôle provisoire du 04/11/2026
+
+**Correction de livraison poussée, non validée en build :** la configuration Vite exclut maintenant l'entrée historique et désactive la copie de `app/public/` en production. L'icône originale de l'Observatory est importée par `app/observatory/index.html`. Le script `app/scripts/verify-build.mjs` échoue si `dist` contient une entrée racine historique, des fichiers inattendus ou plusieurs bundles JavaScript.
+
+**Preuve réellement obtenue :** les quatre tests indépendants de `verify-build` passent sur une copie strictement identique aux blobs de la PR #3 (SHA Git vérifiés, Node 22.16.0). Cela **ne prouve pas** que Vite a produit un artefact conforme. `npm view vite version` échoue avec `EAI_AGAIN` sur `registry.npmjs.org`, et `git ls-remote` échoue sur la résolution de `github.com` : impossible de cloner ou d'installer la suite complète dans cet environnement.
+
+En production, l'URL racine `/` **ne doit plus servir le site historique** ; vérifier cette propriété sur un vrai build avant une éventuelle fusion. Les fichiers historiques demeurent dans le dépôt et restent soumis à leurs droits ; l'absence de ces fichiers dans une distribution à vérifier ne constitue pas une licence pour le reste.
+
+**État de décision :** `npm ci`, `typecheck`, tests métier, build, Playwright, captures et conformité restent **NON VÉRIFIÉS**. Lockfile **NON synchronisé**. PR #3 **ouverte en brouillon**, sans fusion ni publication. Les captures doivent être examinées et conservées comme preuves avant toute déclaration de qualité.
