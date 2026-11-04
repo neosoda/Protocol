@@ -212,3 +212,19 @@ test('empty catalogue search has a meaningful empty state', async ({ page }) => 
   await expect(page.locator('#search-empty')).toBeHidden();
   await expect(page.locator('.protocol-card:visible')).toHaveCount(1);
 });
+
+// Design smoke tests supplement, but do not replace, visual review.
+test('V3 search and lab controls stay accessible at narrow mobile width', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/observatory/');
+  await expect(page.locator('#protocol-search')).toBeVisible();
+  await expect.poll(() => page.evaluate(() =>
+    document.documentElement.scrollWidth <= window.innerWidth
+  )).toBe(true);
+  await page.locator('button.protocol-card[data-id="tcp"]').click();
+  await expect(page.locator('#play-control')).toBeVisible();
+  await expect(page.locator('#event-list button[aria-current="step"]')).toHaveCount(1);
+  await expect.poll(() => page.evaluate(() =>
+    document.documentElement.scrollWidth <= window.innerWidth
+  )).toBe(true);
+});
