@@ -18,8 +18,13 @@ const store = (key: string, value: string): void => { try { localStorage.setItem
 const t = (key: Label): string => label(language, key);
 const $ = (id: string): HTMLElement | null => document.getElementById(id);
 const readStep = (scenario: ProtocolScenario): number => {
-  const value = Number(read('progress:' + scenario.id));
-  return Number.isInteger(value) && value >= 0 && value < scenario.events.length ? value : 0;
+  const saved = read('progress:' + scenario.id);
+  // Event IDs survive editorial insertion of earlier timeline steps.
+  const matched = saved === null ? -1 : scenario.events.findIndex(event => event.id === saved);
+  if (matched !== -1) return matched;
+  // Backward compatibility with the original alpha's numeric bookmarks.
+  const legacy = saved === null ? NaN : Number(saved);
+  return Number.isInteger(legacy) && legacy >= 0 && legacy < scenario.events.length ? legacy : 0;
 };
 const languageFromBrowser = (): Language => {
   const configured = read('language');
@@ -195,7 +200,7 @@ function update(): void {
   if (flow) flow.innerHTML = renderFlow(active, current, t);
   const body = $('inspector-body');
   if (body) body.innerHTML = renderInspector(current, mode, t, selectedField);
-  store('progress:' + active.id, String(state.index));
+  store('progress:' + active.id, current.id);
 }
 
 function openScenario(id: string): void {
