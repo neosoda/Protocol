@@ -1,244 +1,92 @@
 <div align="center">
 
-# 🌐 Protocol Explorer
+<img src="app/public/observatory-mark.svg" width="72" height="72" alt="Network Observatory">
 
-<p align="center">
-  <strong>Comprenez le fonctionnement d'Internet, paquet par paquet.</strong><br>
-  Visualiseur réseau interactif et pédagogique avec décodage des trames au niveau octet, animations bidirectionnelles et double vue (topologie & diagramme de séquence).
-</p>
+# Network Observatory
+### Comprendre les échanges Internet, événement par événement.
 
-[![GitHub stars](https://img.shields.io/github/stars/neosoda/Protocol?style=for-the-badge&logo=github&logoColor=white&label=Stars&color=2563EB)](https://github.com/neosoda/Protocol/stargazers)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev/)
-[![Offline First](https://img.shields.io/badge/Offline-100%25%20Client-10B981?style=for-the-badge&logo=pwa&logoColor=white)](#)
-[![i18n](https://img.shields.io/badge/i18n-15%20Langues%20(dont%20RTL)-8B5CF6?style=for-the-badge)](#-support-multilingue)
+Laboratoire interactif des protocoles réseau, avec deux vues synchronisées, contrôle pas à pas et inspection pédagogique.
 
-<br />
+**14 protocoles modélisés** · **Vite + TypeScript** · **UI claire/sombre** · **Sans backend**
 
-<img src="docs/preview-desktop.png" alt="Aperçu Protocol Explorer" width="100%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);" />
-
-<br /><br />
-
-[**Fonctionnalités**](#-fonctionnalités-clés) · [**Protocoles couverts**](#-14-protocoles-détaillés) · [**Moteur de simulation**](#-moteur-de-simulation) · [**Démarrage rapide**](#-démarrage-rapide) · [**Déploiement**](#-déploiement) · [**Architecture**](#-architecture)
+[Découvrir le laboratoire](#nouvelle-expérience--network-observatory) · [Installation](#installation) · [Limites-et-droits](#limites-et-droits)
 
 </div>
 
 ---
 
-## 💡 Présentation
+> **Attention — statut alpha de migration.** Cette branche propose un nouveau laboratoire écrit de manière indépendante sous `/observatory/`. La page historique `/` contient des éléments reproduits depuis le site de Dilum Sanjaya ; **leurs droits de redistribution ne sont pas confirmés**. Ne pas publier ou redistribuer ces éléments sans clarification juridique ou remplacement original.
 
-**Protocol Explorer** est une plateforme web interactive conçue pour explorer et maîtriser les protocoles fondamentaux d'Internet. Plutôt que de simples diagrammes statiques ou des résumés abstraits, l'application simule **la circulation réelle des paquets** entre les équipements (client, passerelle, DNS, routeurs et serveurs distants) avec une décomposition octet par octet des en-têtes et des payloads.
+## Nouvelle expérience — Network Observatory
 
-Elle intègre un **double moteur de rendu** (Vue Topologie Réseau & Vue Séquence RFC), un **inspecteur de paquets temps réel** et une bascule vers un nouveau design immersif **Cyber-Glass**.
+Un outil dédié à la compréhension du réseau : un événement sélectionné pilote **simultanément** la topologie, la séquence des messages, la progression et l'inspecteur.
 
----
+- **Découverte** : événement expliqué et premier champ contextualisé, sans octets inutiles.
+- **Expert** : champs modélisés par couche et, lorsque disponible, exemple de texte encodé en UTF-8/hexadécimal.
+- **Contrôles** : lecture/pause, précédent/suivant, vitesse 0,5×–2×, reset et sélection directe.
+- **Progression locale** : dernier protocole et dernier événement mémorisés dans le navigateur, si le stockage est disponible.
+- **Interface** : thèmes clair/sombre, adaptation responsive, contrôles natifs au clavier, direction RTL pour arabe et hébreu.
 
-## ✨ Fonctionnalités clés
+Les **14 protocoles** représentés sont : IP, TCP, UDP, ICMP, DNS, DHCP, HTTP, HTTPS, SMTP, POP3, IMAP, FTP, SSH et TLS 1.3. Chaque scénario est **une abstraction pédagogique construite**, non une capture pcap ni du trafic réseau.
 
-| | Fonctionnalité | Description |
-| :---: | :--- | :--- |
-| 📦 | **Inspection octet par octet** | Chaque trame réseau est décortiquée champ par champ (adresses IP, ports, flags TCP, TTL, checksums, payload applicatif). |
-| 🔀 | **Double vue d'observation** | Basculez instantanément entre la **Topologie Réseau** (animation des flux physiques/logiques) et le **Diagramme de Séquence** (Ladder diagram chronologique). |
-| ⏯️ | **Contrôle dynamique du temps** | Lecture automatique, pause, avancement pas à pas (*Step Next / Prev*), réinitialisation et réglage de la vitesse (`0.5x` à `2.0x`). |
-| 🎨 | **Mode Cyber-Glass** | Switch interactif entre le thème d'origine et le thème modernisé *Cyber-Glass* (effets de flou d'arrière-plan, bordures subtiles et accents néon). |
-| 🌍 | **Internationalisation native (15 langues)** | Traduction intégrale des scénarios et de l'interface en français, anglais, espagnol, allemand, chinois, japonais, arabe, hébreu (avec support RTL complet), etc. |
-| ⚡ | **100% Client-Side & Offline** | Aucune dépendance externe ni télémétrie. Fonctionne intégralement hors ligne une fois chargé. |
+> La nouvelle interface propose un sélecteur de 15 langues pour ses libellés (avec traductions partielles et repli anglais). Les **descriptions des scénarios restent en français** à ce stade : la parité multilingue intégrale n'est pas acquise. La version historique reste conservée pour comparaison.
 
----
+## Installation
 
-## 🛰️ 14 Protocoles détaillés
-
-L'application couvre **14 protocoles incontournables** organisés en 3 grandes familles :
-
-```
-Protocol Explorer
-├── 📡 Réseau & Transport (Core 4 + Infra)
-│   ├── IP      (v4 / v6, routage, TTL, fragmentation)
-│   ├── TCP     (3-way handshake SYN/ACK, fenêtrage, acquittements, FIN)
-│   ├── UDP     (datagrammes non connectés, streaming temps réel)
-│   ├── ICMP    (Echo Request/Reply, Traceroute, Unreachable)
-│   ├── DNS     (résolution récursive UDP/53, enregistrements A/AAAA/CNAME)
-│   └── DHCP    (cycle DORA : Discover, Offer, Request, Ack UDP/67-68)
-├── 🌐 Web & Applications
-│   ├── HTTP    (requêtes GET/POST, headers RFC, statuts 200/301/404)
-│   ├── HTTPS   (chiffrement applicatif sur canal sécurisé TLS)
-│   ├── SMTP    (acheminement d'emails : EHLO, MAIL FROM, RCPT TO, DATA)
-│   ├── POP3    (relève de boîte : USER, PASS, STAT, LIST, RETR, DELE)
-│   ├── IMAP    (synchronisation bidirectionnelle, dossiers, flags TCP/143)
-│   └── FTP     (séparation canal de commande TCP/21 et flux données actif/passif)
-└── 🔐 Sécurité & Chiffrement
-    ├── SSH     (échange post-quantique sntrup761 + X25519, known_hosts)
-    └── TLS/SSL (TLS 1.3 Handshake, Client/Server Hello, échange ECDHE, Finish)
-```
-
-<details>
-<summary><strong>🔍 Cliquez pour voir le détail des scénarios simulés</strong></summary>
-
-<br>
-
-### 1. Réseau et Transport
-- **IP (Internet Protocol)** : Analyse de la construction des paquets IPv4 et IPv6, routage par bond (*hop-by-hop*), décrémentation du TTL et gestion de la fragmentation.
-- **TCP (Transmission Control Protocol)** : Établissement de connexion en 3 étapes (*SYN -> SYN-ACK -> ACK*), suivi rigoureux des numéros de séquence (`Seq`) et d'acquittement (`Ack`), contrôle de flux par fenêtre glissante, et terminaison propre (`FIN/ACK` ou `RST`).
-- **UDP (User Datagram Protocol)** : Envoi direct de paquets sans négociation préalable, idéal pour comprendre les compromis entre rapidité et fiabilité.
-- **ICMP (Internet Control Message Protocol)** : Diagnostic réseau avec Ping (Echo 8 / Reply 0) et simulation de découverte de route (*traceroute*) via expiration du TTL.
-- **DNS (Domain Name System)** : Cycle complet d'interrogation du résolveur local jusqu'aux serveurs faisant autorité, dissection des paquets de questions/réponses.
-- **DHCP (Dynamic Host Configuration Protocol)** : Attribution dynamique d'adresse IP au démarrage d'une machine via le protocole DORA (*Discover, Offer, Request, Acknowledge*).
-
-### 2. Web et Messagerie
-- **HTTP / HTTPS** : Dialogue client-serveur standardisé, headers de cache, négociation de contenu, cookies et bascule vers l'encapsulation TLS sécurisée.
-- **SMTP** : Dialogue textuel RFC 5321 pour l'envoi de courriels entre le client de messagerie (MUA) et le serveur de transfert (MTA).
-- **POP3 & IMAP** : Comparatif visuel direct entre le téléchargement destructif/simple (POP3) et le modèle de synchronisation d'état persistant (IMAP).
-- **FTP** : Mise en évidence de l'architecture historique à double port (port 21 de commande et port dynamique pour le transfert des fichiers).
-
-### 3. Cryptographie et Sécurité
-- **SSH (Secure Shell)** : Négociation d'algorithmes hybrides modernes, calcul de secret partagé et ouverture de canaux virtuels interactifs multiplexés.
-- **TLS 1.3** : Simplification du handshake en 1 seul aller-retour (*1-RTT*), dérivation des clés de session symétriques (AES-GCM / ChaCha20) et chiffrement de la charge utile.
-
-</details>
-
----
-
-## 🕹️ Moteur de simulation
-
-Le moteur de simulation reproduit fidèlement la topologie d'un réseau informatique :
-
-```
-[ Laptop Client ] <---> [ Routeur Local ] <---> [ Nuage Internet ] <---> [ Serveur Distant / DNS ]
-```
-
-### Modes de visualisation
-1. **Vue Réseau (Network View)** : Visualisation spatiale des paquets se déplaçant le long des liens physiques et logiques avec signalétique couleur par protocole.
-2. **Vue Séquence (Ladder Diagram)** : Représentation chronologique temporelle de haut en bas, idéale pour l'apprentissage académique et le débogage réseau.
-
-### Inspecteur de paquets
-En cliquant sur n'importe quel événement ou paquet dans la timeline :
-- Décodage brut hexadécimal / ASCII.
-- Découpage structuré : Couche Liaison (Ethernet), Couche Réseau (IP), Couche Transport (TCP/UDP), Couche Applicative.
-- Explication contextuelle du rôle de chaque bit et fanion (*flags* SYN, ACK, PSH, FIN...).
-
----
-
-## 🌍 Support multilingue
-
-L'application intègre nativement 15 langues avec détection automatique et bascule manuelle :
-
-| Code | Langue | Direction | Code | Langue | Direction |
-| :---: | :--- | :---: | :---: | :--- | :---: |
-| `fr` | Français | LTR | `en` | English | LTR |
-| `es` | Español | LTR | `de` | Deutsch | LTR |
-| `pt` | Português | LTR | `tr` | Türkçe | LTR |
-| `uk` | Українська | LTR | `id` | Bahasa Indonesia | LTR |
-| `ja` | 日本語 | LTR | `ko` | 한국어 | LTR |
-| `zh-CN`| 简体中文 | LTR | `zh-TW`| 繁體中文 | LTR |
-| `hi` | हिन्दी | LTR | `ar` | العربية | **RTL** |
-| `he` | עברית | **RTL** | | | |
-
----
-
-## 🚀 Démarrage rapide
-
-### Prérequis
-- [Node.js](https://nodejs.org/) (version 18 ou supérieure recommandée)
-- `npm` ou `pnpm`
-
-### Installation & Lancement
+Node.js **22+** conseillé. Depuis la racine du dépôt :
 
 ```bash
-# 1. Cloner le dépôt
-git clone https://github.com/neosoda/Protocol.git
-cd Protocol
-
-# 2. Installer les dépendances
 npm --prefix app install
-# ou directement : cd app && npm install
-
-# 3. Démarrer le serveur de développement local
 npm run dev
-# ou : cd app && npm run dev
 ```
 
-L'application sera accessible immédiatement sur `http://localhost:5173`.
+- `http://localhost:5173/observatory/` : laboratoire nouveau, en TypeScript.
+- `http://localhost:5173/` : version historique conservée à titre de référence interne.
 
-### Commandes disponibles
-
-| Commande | Action |
-| :--- | :--- |
-| `npm run dev` | Lance le serveur de développement Vite avec rechargement à chaud (HMR). |
-| `npm run build` | Compile l'application pour la production dans le dossier `app/dist/`. |
-| `npm run preview` | Prévisualise localement le build de production. |
-
----
-
-## 🌐 Déploiement
-
-### Déploiement Vercel
-Le fichier [`vercel.json`](vercel.json) inclus à la racine configure automatiquement le build :
 ```bash
-npx vercel
+npm --prefix app run typecheck
+npm --prefix app run test
+npm --prefix app run test:e2e
+npm run build
+npm run preview
 ```
 
-### Déploiement Netlify / Static Hosting
-Spécifiez simplement :
-- **Base directory** : `app`
-- **Build command** : `npm run build`
-- **Publish directory** : `app/dist`
+**État de validation :** ces commandes sont fournies pour reproduire les vérifications, mais **aucune réussite de compilation, test moteur ou Playwright n'est revendiquée ici. Les tests Playwright sont écrits mais n'ont pas été exécutés ; installer Chromium avec `npx --prefix app playwright install chromium`**. Le fichier `app/package-lock.json` précède le nouveau socle : le régénérer avec `npm --prefix app install`, puis le versionner et vérifier `npm ci` avant fusion.
 
-### Déploiement Docker (Nginx)
-Un conteneur léger Nginx peut servir directement le dossier `app/dist/` :
-```dockerfile
-FROM nginx:alpine
-COPY app/dist /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+## Structure
+
+```text
+app/
+├── index.html                 # application historique (bundles compilés)
+├── observatory/index.html     # nouvelle entrée Vite
+├── src/
+│   ├── protocols/             # catalogue original, données et types
+│   ├── engine/                # machine à états sans dépendance DOM
+│   ├── i18n/                  # UI et direction RTL
+│   ├── ui/                    # tokens et styles responsive
+│   └── main.ts                # contrôles et vues synchronisées
+├── tests/                     # tests de données, navigation et localisation
+└── vite.config.ts             # build multi-pages
+docs/
+├── AUDIT_2026-11-04.md
+├── DESIGN_SYSTEM_NETWORK_OBSERVATORY.md
+└── RIGHTS_AND_ATTRIBUTIONS.md
+PROJECT_HANDOFF.md             # décisions et suite
 ```
 
----
+## Limites et droits
 
-## 🏗️ Architecture
+La version historique est explicitement une « reproduction fidèle » de [Protocol Explorer par Dilum Sanjaya](https://protocol-explorer-alpha.vercel.app/) et contient son attribution. La licence MIT marquée © 2026 Neosoda **ne couvre pas nécessairement ces éléments tiers**. Voir [droits et attributions](docs/RIGHTS_AND_ATTRIBUTIONS.md).
 
-```
-Protocol/
-├── app/                      # Application web Vite
-│   ├── index.html            # Entrée principale de l'application
-│   ├── package.json          # Configuration et dépendances de l'app
-│   ├── public/               # Ressources statiques
-│   │   ├── assets/           # Bundles compilés, traductions i18n & polices Iosevka
-│   │   │   ├── alternate-style.css   # Thème moderne Cyber-Glass
-│   │   │   ├── style-switcher.js     # Script de bascule dynamique de thème
-│   │   │   └── [lang].js             # Modules de traduction (fr, en, es, ar, etc.)
-│   │   ├── favicon.ico
-│   │   ├── og.png
-│   │   └── site.webmanifest
-│   └── dist/                 # Build de production (généré)
-├── docs/                     # Documentation et captures d'écran
-│   ├── preview-desktop.png   # Capture d'écran HD desktop
-│   └── preview-mobile.png    # Capture d'écran HD mobile
-├── package.json              # Runner racine pour scripts npm
-├── vercel.json               # Configuration de déploiement Vercel
-├── .gitignore                # Exclusion des artefacts temporaires et logs
-└── README.md                 # Documentation principale
-```
+Le manifest historique n'établit pas l'offline, aucune preuve de service worker n'est fournie, et certaines anciennes métadonnées renvoient à l'application d'origine. **Pas de promesse « PWA/offline »**, de fidélité d'octets capturés, ni de conformité WCAG AA ou de tests « 100 % » avant campagne dédiée.
+
+L'implémentation nouvelle est originale au niveau du code ajouté dans cette branche. Son existence n'autorise pas à redistribuer les ressources historiques.
+
+## Suite
+
+L'[audit priorisé](docs/AUDIT_2026-11-04.md), le [design system](docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md) et le [handoff](PROJECT_HANDOFF.md) suivent la migration sans masquer les risques.
+
+**Licence :** [MIT](LICENSE) pour les contributions originales dont Neosoda possède les droits ; toute œuvre tierce reste soumise à ses propres droits.
 
 ---
-
-## 🤝 Contribution
-
-Les contributions, signalements de coquilles ou suggestions d'améliorations sont les bienvenus !
-
-1. Forkez le projet (`https://github.com/neosoda/Protocol/fork`).
-2. Créez votre branche thématique (`git checkout -b feature/nouveau-protocole`).
-3. Committez vos modifications (`git commit -m 'feat: ajout protocole QUIC/HTTP3'`).
-4. Poussez votre branche (`git push origin feature/nouveau-protocole`).
-5. Ouvrez une **Pull Request**.
-
----
-
-## 📄 Licence
-
-Ce projet est distribué sous licence **MIT**. Consultez le fichier [LICENSE](LICENSE) pour plus de détails.
-
----
-
-<div align="center">
-  Développé et maintenu avec soin par <a href="https://github.com/neosoda"><strong>Neosoda</strong></a>.
-</div>
+<small>Network Observatory · Neosoda · référence historique et attribution conservées : Dilum Sanjaya.</small>
