@@ -3,7 +3,7 @@
 Ce répertoire contient **deux expériences distinctes** :
 
 - `/` : **nouvelle application moderne originale V4 Workbench**, qui remplace le HTML historique dans le projet courant. L'ancienne version reste dans l'historique Git, et des ressources héritées peuvent encore exister sous `app/public/` en développement (non distribuées).
-- `/observatory/` : chemin de compatibilité en dev et rewrite Vercel du laboratoire original en Vite + TypeScript ; catalogue de 14 scénarios modélisés, diagramme ladder, topologie logique, inspecteur à champs sélectionnables, moteur DOM-indépendant et thèmes clair/sombre.
+- `/observatory/` : chemin de compatibilité en dev et redirection Nginx sous Coolify vers la racine du laboratoire original en Vite + TypeScript ; catalogue de 14 scénarios modélisés, diagramme ladder, topologie logique, inspecteur à champs sélectionnables, moteur DOM-indépendant et thèmes clair/sombre.
 
 ## Démarrage
 
@@ -40,6 +40,10 @@ Branche `feat/observatory-v3-signal-structure` : feuilles de style refactorisée
 
 La V4 introduit une barre latérale de navigation, un grand moniteur de TCP en SVG original, un catalogue indexé et un laboratoire en **diagramme de séquence principal + topologie et inspecteur latéraux**. Nouveau monogramme N/O, palette ivoire/corail/encre, menu mobile. Voir `../docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md`.
 
-**Statut :** sources poussées, pas de build local complet ; `package-lock.json` doit être régénéré. Les previews Vercel sont désormais autorisées avec gates TypeScript + Node + Vite, mais la production reste bloquée. N'interprétez pas une fusion Git comme un déploiement du site.
+**Statut :** sources poussées, pas de build local complet ; `package-lock.json` doit être régénéré. La V4 se construit via un Dockerfile multi-stage compatible Coolify ; le déploiement réel et les validations restent à effectuer. N'interprétez pas une fusion Git comme un déploiement du site.
 
 **Preuve partielle V4 :** 5/5 tests autonomes du nouveau `verify-build` ont réussi sous Node, avec correspondance stricte des SHA de blobs GitHub. Il ne s'agit pas d'un build Vite ni de tests Playwright. PR [#5](https://github.com/neosoda/Protocol/pull/5) ouverte en brouillon.
+
+## Déploiement sur Coolify
+
+Créer une application Git avec la stratégie **Dockerfile**, le contexte `/`, le fichier `Dockerfile` à la racine et le port interne **80**. L'image finale Nginx n'embarque que `app/dist`. Pendant le build : tests TypeScript, tests Node et garde-fou anti-legacy. [Guide complet](../docs/DEPLOY_COOLIFY.md). Le lockfile est encore à régénérer, puis remplacer `npm install` par `npm ci`.
