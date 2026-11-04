@@ -5,7 +5,7 @@
 - Dépôt : `neosoda/Protocol`
 - `main` au départ : `cebc6049d34d7856ddfe5eec967b6c7ba5816de3` (PR #1 fusionnée).
 - Branche de continuation : `feat/network-observatory-v2-consolidation`
-- PR : à créer/consulter depuis cette branche ; **ne pas fusionner automatiquement**.
+- PR : [#2](https://github.com/neosoda/Protocol/pull/2), **en brouillon, ne pas fusionner automatiquement**.
 - Nouvelle application : `/observatory/`. Historique : `/`.
 
 ## Acquis confirmés par inspection des sources et commits (pas par navigateur)
@@ -22,7 +22,7 @@
 | Contrôle | Statut |
 |---|---|
 | Commit `main` et PR #1 | Vérifiés par GitHub |
-| Branche V2 et commits de code | Poussés sur GitHub |
+| Branche V2 et commits de code | Poussés sur GitHub ; imports TypeScript relatifs vérifiés statiquement (aucun fichier manquant), 14 IDs uniques |
 | Lecture du catalogue, fichiers sources, droit et handoff | Effectuée |
 | Revue RFC TCP/DHCP/TLS/HTTP | Ciblée ; non exhaustive |
 | Installation `npm install` et génération `package-lock.json` | **BLOQUÉES** : accès DNS/registry indisponible dans l'environnement d'exécution ; lock actuel obsolète |
