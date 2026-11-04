@@ -41,3 +41,5 @@ Branche `feat/observatory-v3-signal-structure` : feuilles de style refactorisée
 La V4 introduit une barre latérale de navigation, un grand moniteur de TCP en SVG original, un catalogue indexé et un laboratoire en **diagramme de séquence principal + topologie et inspecteur latéraux**. Nouveau monogramme N/O, palette ivoire/corail/encre, menu mobile. Voir `../docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md`.
 
 **Statut :** sources poussées, pas de build local complet ; `package-lock.json` doit être régénéré. Les previews Vercel sont désormais autorisées avec gates TypeScript + Node + Vite, mais la production reste bloquée. N'interprétez pas une fusion Git comme un déploiement du site.
+
+**Preuve partielle V4 :** 5/5 tests autonomes du nouveau `verify-build` ont réussi sous Node, avec correspondance stricte des SHA de blobs GitHub. Il ne s'agit pas d'un build Vite ni de tests Playwright. PR [#5](https://github.com/neosoda/Protocol/pull/5) ouverte en brouillon.
