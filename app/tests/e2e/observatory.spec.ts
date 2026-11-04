@@ -1,54 +1,115 @@
 import { expect, test } from '@playwright/test';
 
+const storagePrefix = 'network-observatory:v1:';
+const open = async (page: import('@playwright/test').Page, id: string): Promise<void> => {
+  await page.goto('/observatory/');
+  await page.locator(`button.protocol-card[data-id="${id}"]`).click();
+};
+
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
-    localStorage.setItem('network-observatory:v1:language', 'fr');
-    localStorage.setItem('network-observatory:v1:theme', 'dark');
-  });
+  await page.addInitScript(prefix => {
+    localStorage.setItem(prefix + 'language', 'fr');
+    localStorage.setItem(prefix + 'theme', 'dark');
+  }, storagePrefix);
 });
 
-test('catalog lists all 14 protocol entries', async ({ page }) => {
+test('shows 14 unique protocol cards on the catalogue', async ({ page }) => {
   await page.goto('/observatory/');
   await expect(page.locator('button.protocol-card')).toHaveCount(14);
   await expect(page.getByRole('heading', { name: 'Catalogue des protocoles' })).toBeVisible();
+  await expect(page.locator('button.protocol-card[data-id="tcp"]')).toHaveCount(1);
 });
 
-test('timeline selection synchronizes topology, sequence, inspector and progress', async ({ page }) => {
-  await page.goto('/observatory/');
-  await page.getByRole('button', { name: /Explorer TCP/ }).first().click();
+test('one selected event drives ladder, topology, inspector and progress', async ({ page }) => {
+  await open(page, 'tcp');
   await expect(page.locator('#progress-text')).toContainText('1 / 5');
   await expect(page.locator('#flow-readout')).toContainText('SYN');
+  await expect(page.locator('.ladder-head .ladder-participant')).toHaveCount(2);
+  await expect(page.locator('.ladder-step')).toHaveCount(5);
   await expect(page.locator('#event-list button[aria-current="step"]')).toHaveCount(1);
+  await expect(page.locator('.actor.is-sender')).toHaveCount(1);
+  await expect(page.locator('.actor.is-receiver')).toHaveCount(1);
+
   await page.getByRole('button', { name: 'Suivant' }).click();
   await expect(page.locator('#progress-text')).toContainText('2 / 5');
   await expect(page.locator('#flow-readout')).toContainText('SYN, ACK');
   await expect(page.locator('#inspector-body')).toContainText('1001');
   await expect(page.locator('#event-list button[aria-current="step"]')).toHaveCount(1);
+  await page.locator('button[data-action="select"][data-index="4"]').click();
+  await expect(page.locator('#progress-text')).toContainText('5 / 5');
   await page.getByRole('button', { name: 'Réinitialiser' }).click();
   await expect(page.locator('#progress-text')).toContainText('1 / 5');
 });
 
-test('two modes, theme and rtl language', async ({ page }) => {
-  await page.goto('/observatory/');
-  await page.getByRole('button', { name: /Explorer TCP/ }).first().click();
+test('transport playback, speed and pause stay synchronized', async ({ page }) => {
+  await open(page, 'tcp');
+  await page.locator('#speed-select').selectOption('2');
+  await expect(page.locator('#speed-select')).toHaveValue('2');
+  await page.locator('#play-control').click();
+  await expect(page.locator('#play-control')).toHaveAttribute('aria-pressed', 'true');
+  await page.locator('#play-control').click();
+  await expect(page.locator('#play-control')).toHaveAttribute('aria-pressed', 'false');
+  await page.getByRole('button', { name: 'Suivant' }).click();
+  await expect(page.locator('#progress-text')).toContainText('2 / 5');
+  await page.getByRole('button', { name: 'Précédent' }).click();
+  await expect(page.locator('#progress-text')).toContainText('1 / 5');
+});
+
+test('resume remembers protocol and step after reload', async ({ page }) => {
+  await open(page, 'tcp');
+  await page.getByRole('button', { name: 'Suivant' }).click();
+  await page.reload();
+  await page.locator('.intro-actions button[data-id="tcp"]').last().click();
+  await expect(page.locator('#progress-text')).toContainText('2 / 5');
+});
+
+test('discovery and expert reveal different field depth, only sourced sample bytes', async ({ page }) => {
+  await open(page, 'http');
   await expect(page.locator('.raw-panel')).toContainText('Passez en mode Expert');
   await page.getByRole('button', { name: 'Expert' }).click();
-  await expect(page.locator('.field-group')).toHaveCount(1);
+  await expect(page.locator('.hex-view')).toBeVisible();
+  await expect(page.locator('.byte-selected')).toHaveCount(6); // "GET": 3 HEX + 3 ASCII
+  await page.locator('button[data-action="inspect-field"][data-field-index="1"]').click();
+  await expect(page.locator('.field-explanation')).toContainText('Hôte HTTP demandé');
+  await expect(page.locator('.byte-selected')).toHaveCount(0);
+  await expect(page.locator('.raw-caption')).toContainText('Pas une trame réseau capturée');
+  await page.getByRole('button', { name: 'Découverte' }).click();
+  await expect(page.locator('button[data-action="inspect-field"]')).toHaveCount(1);
+});
+
+test('TLS 1.3 distinguishes server and client Finished', async ({ page }) => {
+  await open(page, 'tls');
+  await expect(page.locator('.ladder-step')).toHaveCount(7);
+  await expect(page.locator('#event-list')).toContainText('Finished serveur');
+  await expect(page.locator('#event-list')).toContainText('Finished client');
+  await page.locator('button[data-action="select"][data-index="5"]').click();
+  await expect(page.locator('#inspector-body')).toContainText('Finished client');
+});
+
+test('theme and RTL orientation preserve technical chart direction', async ({ page }) => {
+  await open(page, 'tcp');
   await page.getByRole('button', { name: 'Thème' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   await page.locator('#language-select').selectOption('ar');
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+  await expect(page.locator('#event-list')).toBeVisible();
+  await expect(page.locator('.ladder-list')).toHaveCSS('direction', 'ltr');
 });
 
 for (const width of [390, 768, 1440]) {
   for (const theme of ['dark', 'light']) {
-    test('capture ' + width + 'px ' + theme, async ({ page }) => {
-      await page.setViewportSize({ width, height: 900 });
-      await page.addInitScript(value => localStorage.setItem('network-observatory:v1:theme', value), theme);
-      await page.goto('/observatory/');
-      await page.getByRole('button', { name: /Explorer TCP/ }).first().click();
-      await expect(page.locator('#inspector-title')).toBeVisible();
-      await page.screenshot({ path: `test-results/observatory-${width}-${theme}.png`, fullPage: true });
-    });
+    for (const language of ['fr', 'en', 'ar']) {
+      test(`visual baseline ${width}px / ${theme} / ${language}`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await page.addInitScript(({ prefix, theme, language }) => {
+          localStorage.setItem(prefix + 'theme', theme);
+          localStorage.setItem(prefix + 'language', language);
+        }, { prefix: storagePrefix, theme, language });
+        await open(page, 'tcp');
+        await expect(page.locator('#inspector-title')).toBeVisible();
+        await expect(page.locator('.ladder-step')).toHaveCount(5);
+        await page.screenshot({ path: `test-results/observatory-${width}-${theme}-${language}.png`, fullPage: true });
+      });
+    }
   }
 }
