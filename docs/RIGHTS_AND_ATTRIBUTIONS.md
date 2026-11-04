@@ -6,6 +6,12 @@ La base historique qui figurait **avant V4** dans `app/index.html` était prése
 
 La seule licence MIT présente dans ce dépôt mentionne « Copyright (c) 2026 Neosoda ». **Elle ne prouve pas une licence couvrant le code, les textes, scénarios, traductions, images, polices ou ressources de l'auteur original.**
 
+## Mise à jour du 04/11/2026 — habillage Studio v5
+
+- **Déclaration du propriétaire du dépôt** : il a l'accord de Dilum Sanjaya pour modifier et redistribuer Protocol Explorer. **À compléter** par une preuve écrite et datée (lien ou copie), avec les conditions d'attribution demandées. Ce statut ne repose pour l'instant que sur cette déclaration.
+- L'habillage `studio.css` et `skin.js` sont des contributions du projet. Ils modifient la présentation mais ni le moteur ni les contenus pédagogiques.
+- **Police Inter** (`app/public/assets/inter-*-var.woff2`) : SIL Open Font License 1.1, © The Inter Project Authors. Texte complet dans `app/public/assets/inter-OFL.txt`.
+
 ## Règles de travail
 
 - Préserver l'attribution existante tant que les éléments historiques demeurent dans l'arbre.

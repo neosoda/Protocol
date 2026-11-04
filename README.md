@@ -2,6 +2,13 @@
 
 > **Retour au rendu et aux animations d'origine.** La refonte Workbench V4 a été annulée : l'accueil, le moteur d'animation, les styles et les interactions proviennent de la version historique sauvegardée avant la PR #5. **Coolify est conservé**, sans Vercel et sans GitHub Actions.
 
+## Habillage « Studio » (v5)
+
+L'interface est redessinée par une couche CSS, `app/public/assets/studio.css`, posée au-dessus du bundle d'origine. Le **canevas animé (vues réseau et séquence) n'est pas modifié** : moteur, palette, typographie et timing restent ceux de la version historique. Autour, l'interface est entièrement revue : typographie Inter et Iosevka pour les données, panneaux et contrôles, thèmes clair et sombre, et mise en scène des transitions.
+
+- Comparer avec l'original : `/?skin=classic`. Revenir au nouveau : `/?skin=studio`.
+- En local : `cd app && npm ci && npx vite`, puis ouvrir `http://localhost:5173/`.
+
 ## État actuel
 
 Le site servi à `/` reprend **exactement** l'ancien `app/index.html` et les fichiers statiques correspondants (`app/public/assets/` : JS animé, CSS, traductions et typographies). Les paquets animés, les cartes protocoles et les vues ont donc leur comportement de référence ; ils ne sont plus remplacés par le laboratoire simplifié de la V4.
