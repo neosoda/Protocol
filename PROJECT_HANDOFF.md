@@ -1,5 +1,22 @@
 # PROJECT HANDOFF — Network Observatory (2026-11-04)
 
+## RETOUR ARRIÈRE DESIGN V4 — état en cours le 04/11/2026
+
+**Demande utilisateur : retrouver les animations d'origine, nettement plus qualitatives que la V4.** Revenir à la version originale exacte, pas à un CSS approximatif. La V4 a remplacé `app/index.html` par une application pédagogique réécrite dont la chronologie et le rendu des paquets sont moins aboutis.
+
+**Branche de restauration :** `revert/v4-restore-original-animations` depuis `main` post-PR #5. La restauration du design est terminée en code, **fusion et redéploiement Coolify à confirmer**.
+
+- `app/index.html` revenu exactement au blob historique `043fb1c6b2ecd3d607cea3ecbfffe617da89903b` présent avant PR #5 (commit base `de499a7e8896027641ddfd153a86f490f1bfe6f1`).
+- 10 autres fichiers V4 d'interface/test/Vite remis à leur contenu V3. L'ancien laboratoire Vite sous `/observatory/` reste en code source, mais **n'est plus utilisé par le runtime Coolify**.
+- Les **vrais bundles d'animation et styles** `app/public/assets/index-l76eMM6E.js`, `app/public/assets/index-C1vckX_Q.css`, `app/public/assets/style-switcher.js`, `app/public/assets/alternate-style.css` sont **bit à bit identiques** à ceux du commit d'avant PR #5.
+- **Dockerfile Coolify conservé mais simplifié** : Nginx sert directement l'ancien `app/index.html` et **tous les assets sous `app/public/`** ; aucune compilation Vite/Node ne doit modifier les animations. L'exclusion de `app/public/` a été retirée de `.dockerignore`. Port **80**, `/healthz`, routes inchangées.
+- Contrôle statique effectué : **8/8 références absolues HTML vers les ressources locales résolues**, 5 SHA identiques, Dockerfile copie bien les ressources. **Aucun build Docker ni rendu navigateur exécuté** dans l'environnement actuel.
+- Attention : la page historique et ses bundles portent une attribution à **Dilum Sanjaya**, avec des droits de redistribution **non confirmés**. Garder cette attribution ; ne pas prétendre que la restauration a levé les réserves juridiques. Voir `docs/RIGHTS_AND_ATTRIBUTIONS.md`.
+- Suite : fusionner ce rollback, vérifier l'auto-déploiement de `main` dans Coolify puis faire un rechargement complet du navigateur. Contrôler les animations TCP/DNS/HTTPS sur mobile et desktop avant toute autre refonte ; conserver cet état comme référence visuelle.
+- **Ne pas relancer une refonte qui remplace la mécanique d'animation d'origine.** Prioriser à l'avenir de petites améliorations autour de ce socle, avec comparaison visuelle avant/après.
+
+Les anciennes sections V4 qui suivent retracent l'historique et ne décrivent plus l'état à appliquer.
+
 ## État courant après fusion PR #5 — 04/11/2026
 
 - **PR [#5](https://github.com/neosoda/Protocol/pull/5) fusionnée dans `main`**, merge commit `0b7b737a699ed0f4a6f28f391f4dbdf8d0b54e98`. Les sections de travail antérieures marquées « PR en brouillon » sont historiques.
