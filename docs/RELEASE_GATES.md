@@ -21,9 +21,9 @@
 
 ## Réalisé vs non vérifié
 
-**Vérifié statiquement :** 85 clés de traduction FR/EN complètes, nouvelle structure rail/moniteur/workbench, HTML root moderne, CSS avec accolades équilibrées, tests de build et E2E ajoutés.
+**5/5 tests Node autonomes du garde-fou de sortie exécutés et réussis** sur des copies aux SHA de blobs GitHub identiques. Cela ne valide pas le build Vite réel. **Vérifié statiquement :** 85 clés de traduction FR/EN complètes, nouvelle structure rail/moniteur/workbench, HTML root moderne, CSS avec accolades équilibrées, tests de build et E2E ajoutés.
 
-**Non exécuté :** npm ci, typecheck, tests Node du catalogue, Vite, Playwright, visual QA et audits WCAG. Le registre npm reste inaccessible depuis le runtime local. Ces validations ne doivent jamais être annoncées comme réussies par anticipation.
+**Non exécuté :** npm ci, typecheck, tests Node métier du catalogue, Vite, Playwright, visual QA et audits WCAG. Le registre npm reste inaccessible depuis le runtime local. Ces validations ne doivent jamais être annoncées comme réussies par anticipation.
 
 ## Statut juridique
 
