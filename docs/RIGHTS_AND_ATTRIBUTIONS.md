@@ -1,5 +1,7 @@
 # Droits, provenance et attribution — verrou de publication
 
+> **État du rollback (04/11/2026) :** `app/index.html` a été remis à sa version classique et `app/public/` est à nouveau servi par le Dockerfile Coolify pour rétablir les animations. Le contenu comporte toujours l'attribution à Dilum Sanjaya. **Ses droits de redistribution ne sont pas établis par les licences du dépôt.** Cette restauration technique n'autorise pas sa publication auprès de tiers ; vérifier les permissions nécessaires. Les paragraphes ci-dessous décrivant le remplacement V4 sont des étapes historiques, désormais annulées.
+
 La base historique qui figurait **avant V4** dans `app/index.html` était présentée dans `app/README.md` comme une reproduction du [Protocol Explorer de Dilum Sanjaya](https://protocol-explorer-alpha.vercel.app/). Le HTML présente aussi son nom et des liens vers son compte public.
 
 La seule licence MIT présente dans ce dépôt mentionne « Copyright (c) 2026 Neosoda ». **Elle ne prouve pas une licence couvrant le code, les textes, scénarios, traductions, images, polices ou ressources de l'auteur original.**
