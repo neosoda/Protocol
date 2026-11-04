@@ -123,6 +123,8 @@ test('switching to English translates the navigation, diagram and inspector labe
   await expect(page.getByRole('group', { name: 'Exploration mode' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Next' })).toBeVisible();
   await expect(page.locator('#flow-readout')).toContainText('LOGICAL FLOW');
+  await expect(page.locator('.actor.is-sender .actor-state')).toHaveText('SENDER');
+  await expect(page.locator('.actor.is-receiver .actor-state')).toHaveText('RECEIVER');
   await page.getByRole('button', { name: 'Expert' }).click();
   await expect(page.locator('.raw-panel')).toContainText('AUTHORED SAMPLE');
   await expect(page.locator('.raw-caption')).toContainText('Not a captured network frame');

@@ -15,7 +15,7 @@ export function renderActors(scenario: ProtocolScenario): string {
     `<div class="actor" data-actor="${escapeHtml(person.id)}">
       <span class="actor-glyph" aria-hidden="true">${pictogram(person.id)}</span>
       <strong>${escapeHtml(person.name)}</strong><span class="actor-role">${escapeHtml(person.role)}</span>
-      <span class="actor-state" aria-hidden="true"></span>
+      <span class="actor-state"></span>
     </div>`
   ).join('');
 }

@@ -69,7 +69,7 @@ function header(): string {
     <button class="brand" data-action="catalog" aria-label="${escapeHtml(t('catalog'))}">${brand()}<span><strong>NETWORK<span class="brand-divider"> / </span>OBSERVATORY</strong><small>Protocol Explorer · research lab</small></span></button>
     <div class="masthead-actions">
       <label class="select-wrap"><span>${escapeHtml(t('language'))}</span><select id="language-select" aria-label="${escapeHtml(t('language'))}">${selectOptions()}</select></label>
-      <button class="plain-button" data-action="theme" title="${escapeHtml(t('theme'))}" aria-label="${escapeHtml(t('theme'))}">${theme === 'dark' ? '☀︎' : '☾'} <span class="theme-name">${theme === 'dark' ? 'Light' : 'Dark'}</span></button>
+      <button class="plain-button" data-action="theme" title="${escapeHtml(t('theme'))}" aria-label="${escapeHtml(t('theme'))}">${theme === 'dark' ? '☀︎' : '☾'} <span class="theme-name">${escapeHtml(t(theme === 'dark' ? 'themeLight' : 'themeDark'))}</span></button>
     </div>
   </header>`;
 }
@@ -92,7 +92,7 @@ function catalogue(): string {
         <div class="mini-network"><span class="instrument-node">CLIENT</span><span class="mini-link">SYN <b>→</b></span><span class="instrument-node">SERVER</span></div>
         <div class="mini-network reverse"><span class="instrument-node">CLIENT</span><span class="mini-link"><b>←</b> SYN · ACK</span><span class="instrument-node">SERVER</span></div>
         <div class="mini-network"><span class="instrument-node">CLIENT</span><span class="mini-link">ACK <b>→</b></span><span class="instrument-node">SERVER</span></div>
-        <div class="instrument-footer"><span>TCP HANDSHAKE</span><span>03 EVENTS</span></div>
+        <div class="instrument-footer"><span>${escapeHtml(t('handshake'))}</span><span>03 ${escapeHtml(t('events'))}</span></div>
       </div>
     </section>
     <section class="catalogue" aria-labelledby="catalogue-title"><div class="section-heading">
@@ -131,15 +131,15 @@ function simulation(): string {
       <div class="progress-wrap"><span id="progress-text" class="mono"></span><div class="progress-track" role="progressbar" id="progress-bar" aria-label="${escapeHtml(t('status'))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}"><span id="progress-fill"></span></div></div>
     </section>
     <section class="workspace" aria-label="${escapeHtml(t('groupWorkspace'))}">
-      <div class="panel topology-panel"><div class="panel-heading"><div><span class="eyebrow">01 / NETWORK</span><h2>${escapeHtml(t('topology'))}</h2></div><span class="legend-key">↔ TWO-WAY FLOW</span></div>
+      <div class="panel topology-panel"><div class="panel-heading"><div><span class="eyebrow">01 / ${escapeHtml(t('panelNetwork'))}</span><h2>${escapeHtml(t('topology'))}</h2></div><span class="legend-key">${escapeHtml(t('flowLegend'))}</span></div>
         <div class="topology-actors" id="topology-actors" aria-label="${escapeHtml(t('groupParticipants'))}">${renderActors(active)}</div>
         <div class="flow-readout" id="flow-readout" aria-live="polite"></div>
       </div>
-      <div class="panel sequence-panel"><div class="panel-heading"><div><span class="eyebrow">02 / TIMELINE</span><h2>${escapeHtml(t('sequence'))}</h2></div><span class="legend-key">${active.events.length} ${escapeHtml(t('events'))}</span></div>
+      <div class="panel sequence-panel"><div class="panel-heading"><div><span class="eyebrow">02 / ${escapeHtml(t('panelTimeline'))}</span><h2>${escapeHtml(t('sequence'))}</h2></div><span class="legend-key">${active.events.length} ${escapeHtml(t('events'))}</span></div>
         <ol class="event-list ladder-list" id="event-list">${renderSequence(active, t)}</ol>
       </div>
     </section>
-    <section class="panel inspector-panel" aria-labelledby="inspector-title"><div class="panel-heading"><div><span class="eyebrow">03 / ANALYSIS</span><h2 id="inspector-title">${escapeHtml(t('inspector'))}</h2></div><span class="legend-key">MODEL / UTF-8 SAMPLES</span></div>
+    <section class="panel inspector-panel" aria-labelledby="inspector-title"><div class="panel-heading"><div><span class="eyebrow">03 / ${escapeHtml(t('panelAnalysis'))}</span><h2 id="inspector-title">${escapeHtml(t('inspector'))}</h2></div><span class="legend-key">${escapeHtml(t('sampleLegend'))}</span></div>
       <div id="inspector-body"></div>
     </section>
   </main>`;
@@ -193,8 +193,12 @@ function update(): void {
     }
   }
   $('topology-actors')?.querySelectorAll<HTMLElement>('[data-actor]').forEach(element => {
-    element.classList.toggle('is-sender', element.dataset.actor === current.from);
-    element.classList.toggle('is-receiver', element.dataset.actor === current.to);
+    const sender = element.dataset.actor === current.from;
+    const receiver = element.dataset.actor === current.to;
+    element.classList.toggle('is-sender', sender);
+    element.classList.toggle('is-receiver', receiver);
+    const status = element.querySelector<HTMLElement>('.actor-state');
+    if (status) status.textContent = sender ? t('sender') : receiver ? t('receiver') : '';
   });
   const flow = $('flow-readout');
   if (flow) flow.innerHTML = renderFlow(active, current, t);

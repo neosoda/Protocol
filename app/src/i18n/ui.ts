@@ -13,7 +13,7 @@ export type Label = 'catalog' | 'experiment' | 'discovery' | 'expert' | 'topolog
   'inspector' | 'play' | 'pause' | 'previous' | 'next' | 'reset' | 'speed' | 'theme' |
   'language' | 'objective' | 'minutes' | 'modelled' | 'start' | 'back' | 'step' |
   'network' | 'web' | 'security' | 'noBytes' | 'layers' | 'resume' | 'learn' | 'status' |
-  'heroLead' | 'heroAccent' | 'heroDescription' | 'labEyebrow' | 'exploreEyebrow' | 'events' | 'levelInitial' | 'levelIntermediate' | 'levelAdvanced' | 'groupMode' | 'groupControls' | 'groupWorkspace' | 'groupParticipants' | 'skipLink' | 'logicalFlow' | 'sender' | 'receiver' | 'inspectStep' | 'inspectTo' | 'selectedEvent' | 'selectedField' | 'sampleLabel' | 'sampleBytes' | 'sampleMeaning' | 'sampleValidRange' | 'sampleNoRange' | 'discoveryHint' | 'noFields' | 'footerAlpha' | 'footerAttribution' | 'footerRights' | 'diagramTcp';
+  'heroLead' | 'heroAccent' | 'heroDescription' | 'labEyebrow' | 'exploreEyebrow' | 'events' | 'levelInitial' | 'levelIntermediate' | 'levelAdvanced' | 'groupMode' | 'groupControls' | 'groupWorkspace' | 'groupParticipants' | 'skipLink' | 'logicalFlow' | 'sender' | 'receiver' | 'inspectStep' | 'inspectTo' | 'selectedEvent' | 'selectedField' | 'sampleLabel' | 'sampleBytes' | 'sampleMeaning' | 'sampleValidRange' | 'sampleNoRange' | 'discoveryHint' | 'noFields' | 'footerAlpha' | 'footerAttribution' | 'footerRights' | 'diagramTcp' | 'themeLight' | 'themeDark' | 'panelNetwork' | 'panelTimeline' | 'panelAnalysis' | 'flowLegend' | 'sampleLegend' | 'handshake';
 type Messages = Partial<Record<Label, string>>;
 const en: Record<Label, string> = {
   catalog: 'Protocol catalogue', experiment: 'Laboratory', discovery: 'Discovery', expert: 'Expert',
@@ -55,7 +55,15 @@ const en: Record<Label, string> = {
   footerAlpha: "migration alpha · modelled educational data",
   footerAttribution: "Reference work:",
   footerRights: "historical reproduction rights unconfirmed",
-  diagramTcp: "Illustrative TCP exchange diagram"
+  diagramTcp: "Illustrative TCP exchange diagram",
+  themeLight: "Light",
+  themeDark: "Dark",
+  panelNetwork: "NETWORK",
+  panelTimeline: "TIMELINE",
+  panelAnalysis: "ANALYSIS",
+  flowLegend: "LOGICAL EXCHANGE",
+  sampleLegend: "MODEL / UTF-8 SAMPLES",
+  handshake: "TCP HANDSHAKE"
 };
 const fr: Record<Label, string> = {
   catalog: 'Catalogue des protocoles', experiment: 'Laboratoire', discovery: 'Découverte', expert: 'Expert',
@@ -97,7 +105,15 @@ const fr: Record<Label, string> = {
   footerAlpha: "alpha de migration · données pédagogiques modélisées",
   footerAttribution: "Œuvre de référence :",
   footerRights: "droits de reproduction historiques non confirmés",
-  diagramTcp: "Schéma illustratif des échanges TCP"
+  diagramTcp: "Schéma illustratif des échanges TCP",
+  themeLight: "Clair",
+  themeDark: "Sombre",
+  panelNetwork: "RÉSEAU",
+  panelTimeline: "CHRONOLOGIE",
+  panelAnalysis: "ANALYSE",
+  flowLegend: "ÉCHANGE LOGIQUE",
+  sampleLegend: "MODÈLE / EXEMPLES UTF-8",
+  handshake: "ÉTABLISSEMENT TCP"
 };
 /** UI localization only. Narrative content remains French pending professional translations. */
 const extras: Record<Exclude<Language, 'fr' | 'en'>, Messages> = {
