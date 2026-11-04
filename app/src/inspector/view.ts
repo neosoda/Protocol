@@ -13,7 +13,7 @@ function validRange(sample: string, range?: Range): Range | undefined {
 }
 
 /** Only UTF-8 bytes of an explicitly authored sample. Never a synthetic packet capture. */
-function renderSample(sample: string, range?: Range): string {
+function renderSample(sample: string, t: (key: Label) => string, range?: Range): string {
   const bytes = new TextEncoder().encode(sample);
   const selected = validRange(sample, range);
   const rows: string[] = [];
@@ -30,9 +30,9 @@ function renderSample(sample: string, range?: Range): string {
       : escapeHtml(chunk.map(value => value >= 32 && value < 127 ? String.fromCharCode(value) : '.').join(''));
     rows.push(`<span class="hex-line"><span class="hex-offset">${offset}</span><span class="hex-columns">${hex}</span><span class="ascii-columns">${ascii}</span></span>`);
   }
-  return `<div class="hex-view" tabindex="0" role="region" aria-label="Octets UTF-8 de l'exemple textuel" dir="ltr">${rows.join('')}</div>
-  <p class="raw-caption">Octets du texte d'exemple encodé localement en UTF-8. Pas une trame réseau capturée, ni un en-tête binaire complet.
-    ${selected ? 'La sélection indique une plage effectivement définie dans cet exemple.' : 'Aucune correspondance champ/octet vérifiée pour cette sélection.'}</p>`;
+  return `<div class="hex-view" tabindex="0" role="region" aria-label="${escapeHtml(t('sampleBytes'))}" dir="ltr">${rows.join('')}</div>
+  <p class="raw-caption">${escapeHtml(t('sampleMeaning'))}
+    ${selected ? escapeHtml(t('sampleValidRange')) : escapeHtml(t('sampleNoRange'))}</p>`;
 }
 
 export function renderInspector(event: NetworkEvent, mode: InspectorMode, t: (key: Label) => string, selectedField = 0): string {
@@ -45,18 +45,18 @@ export function renderInspector(event: NetworkEvent, mode: InspectorMode, t: (ke
       `<button class="field-option ${current === f ? 'is-selected' : ''}" data-action="inspect-field"
         data-field-index="${i}" aria-pressed="${current === f}">
         <span>${escapeHtml(f.name)}</span><code dir="ltr"><bdi>${escapeHtml(f.value)}</bdi></code></button>`).join('')}</div></section>`).join('')
-    : '<p class="empty-fields">Aucun champ technique détaillé défini pour cette étape.</p>';
+    : '<p class="empty-fields">${escapeHtml(t('noFields'))}</p>';
   const raw = mode === 'discovery'
-    ? '<p class="empty-fields">Passez en mode Expert pour examiner les octets des exemples.</p>'
+    ? '<p class="empty-fields">${escapeHtml(t('discoveryHint'))}</p>'
     : event.sample === undefined
       ? `<p class="empty-fields">${escapeHtml(t('noBytes'))}</p>`
-      : renderSample(event.sample, current?.sampleRange);
+      : renderSample(event.sample, t, current?.sampleRange);
   return `<div class="inspector-grid"><div>
-    <div class="selected-event"><span class="eyebrow">SELECTED EVENT / ${escapeHtml(event.id.toUpperCase())}</span>
+    <div class="selected-event"><span class="eyebrow">${escapeHtml(t('selectedEvent'))} / ${escapeHtml(event.id.toUpperCase())}</span>
       <h3>${escapeHtml(event.title)}</h3><p>${escapeHtml(event.description)}</p></div>
     <h4 class="section-subtitle">${escapeHtml(t('layers'))}</h4><div class="field-list">${grouped}</div>
-    ${current ? `<div class="field-explanation" aria-live="polite"><span class="eyebrow">CHAMP SÉLECTIONNÉ</span>
+    ${current ? `<div class="field-explanation" aria-live="polite"><span class="eyebrow">${escapeHtml(t('selectedField'))}</span>
       <strong>${escapeHtml(current.name)}</strong><p>${escapeHtml(current.explanation)}</p></div>` : ''}
     </div>
-    <div class="raw-panel"><h4>HEX / ASCII <span>· EXEMPLE CONSTRUIT</span></h4>${raw}</div></div>`;
+    <div class="raw-panel"><h4>HEX / ASCII <span>· ${escapeHtml(t('sampleLabel'))}</span></h4>${raw}</div></div>`;
 }

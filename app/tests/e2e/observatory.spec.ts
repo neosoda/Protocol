@@ -115,6 +115,19 @@ test('theme and RTL orientation preserve technical chart direction', async ({ pa
 });
 
 
+test('switching to English translates the navigation, diagram and inspector labels', async ({ page }) => {
+  await page.goto('/observatory/');
+  await page.locator('#language-select').selectOption('en');
+  await expect(page.getByRole('heading', { name: /Internet, event by event/ })).toBeVisible();
+  await page.locator('button.protocol-card[data-id="http"]').click();
+  await expect(page.getByRole('group', { name: 'Exploration mode' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Next' })).toBeVisible();
+  await expect(page.locator('#flow-readout')).toContainText('LOGICAL FLOW');
+  await page.getByRole('button', { name: 'Expert' }).click();
+  await expect(page.locator('.raw-panel')).toContainText('AUTHORED SAMPLE');
+  await expect(page.locator('.raw-caption')).toContainText('Not a captured network frame');
+});
+
 test('keyboard focus survives mode/theme/language rerenders and navigation', async ({ page }) => {
   await open(page, 'tcp');
   await expect(page.locator('#lab-title')).toBeFocused();

@@ -70,19 +70,19 @@ function header(): string {
 }
 
 function formatLevel(level: ProtocolScenario['level']): string {
-  return level === 'initial' ? '01 · Fondamentaux' : level === 'intermediate' ? '02 · Intermédiaire' : '03 · Avancé';
+  return level === 'initial' ? '01 · ' + t('levelInitial') : level === 'intermediate' ? '02 · ' + t('levelIntermediate') : '03 · ' + t('levelAdvanced');
 }
 const categoryName = (category: Category): string => t(category);
 function catalogue(): string {
   const last = findScenario(read('last-protocol') ?? 'tcp');
   return `<main id="main-content" class="page home">
     <section class="intro" aria-labelledby="home-title">
-      <div><span class="eyebrow"><span class="pulse" aria-hidden="true"></span> AN INTERACTIVE NETWORK LAB</span>
-      <h1 id="home-title" tabindex="-1">L’Internet, <em>événement par événement.</em></h1>
-      <p>Observez les échanges entre machines, reliez la chronologie aux protocoles et comprenez chaque étape sans vous perdre dans les paquets.</p>
+      <div><span class="eyebrow"><span class="pulse" aria-hidden="true"></span> ${escapeHtml(t('labEyebrow'))}</span>
+      <h1 id="home-title" tabindex="-1">${escapeHtml(t('heroLead'))} <em>${escapeHtml(t('heroAccent'))}</em></h1>
+      <p>${escapeHtml(t('heroDescription'))}</p>
       <div class="intro-actions"><button class="primary-button" data-action="open" data-id="tcp">${escapeHtml(t('start'))} TCP <span aria-hidden="true">→</span></button>
       <button class="secondary-button" data-action="open" data-id="${escapeHtml(last.id)}">${escapeHtml(t('resume'))} ${escapeHtml(last.name)}</button></div></div>
-      <div class="intro-instrument" aria-label="Schéma illustratif des échanges TCP">
+      <div class="intro-instrument" aria-label="${escapeHtml(t('diagramTcp'))}">
         <span class="instrument-caption">OBSERVATION / 001</span>
         <div class="mini-network"><span class="instrument-node">CLIENT</span><span class="mini-link">SYN <b>→</b></span><span class="instrument-node">SERVER</span></div>
         <div class="mini-network reverse"><span class="instrument-node">CLIENT</span><span class="mini-link"><b>←</b> SYN · ACK</span><span class="instrument-node">SERVER</span></div>
@@ -91,7 +91,7 @@ function catalogue(): string {
       </div>
     </section>
     <section class="catalogue" aria-labelledby="catalogue-title"><div class="section-heading">
-      <div><p class="eyebrow">EXPLORE / 14 PROTOCOLS</p><h2 id="catalogue-title">${escapeHtml(t('catalog'))}</h2></div>
+      <div><p class="eyebrow">${escapeHtml(t('exploreEyebrow'))}</p><h2 id="catalogue-title">${escapeHtml(t('catalog'))}</h2></div>
       <span class="note-tag">${escapeHtml(t('modelled'))}</span></div>
       ${categories.map(category => `<section class="category" aria-labelledby="group-${category}"><h3 id="group-${category}">${escapeHtml(categoryName(category))}</h3>
       <div class="protocol-grid">${catalog.filter(p => p.category === category).map(p => `<button class="protocol-card" data-action="open" data-id="${p.id}">
@@ -110,13 +110,13 @@ function simulation(): string {
       <div class="eyebrow">LAB / ${escapeHtml(active.category.toUpperCase())} / ${escapeHtml(active.id.toUpperCase())}</div>
       <h1 id="lab-title" tabindex="-1">${escapeHtml(active.name)} <span class="muted">/ ${escapeHtml(t('experiment'))}</span></h1>
       <p>${escapeHtml(active.summary)}</p>
-      </div><div class="mode-switch" role="group" aria-label="Mode d'exploration">
+      </div><div class="mode-switch" role="group" aria-label="${escapeHtml(t('groupMode'))}">
       <button data-action="mode" data-mode="discovery" aria-pressed="${mode === 'discovery'}" class="${mode === 'discovery' ? 'chosen' : ''}">${escapeHtml(t('discovery'))}</button>
       <button data-action="mode" data-mode="expert" aria-pressed="${mode === 'expert'}" class="${mode === 'expert' ? 'chosen' : ''}">${escapeHtml(t('expert'))}</button>
       </div>
     </div>
     <section class="goalbar"><span class="eyebrow">${escapeHtml(t('objective'))}</span><strong>${escapeHtml(active.objective)}</strong><span class="note-tag">${escapeHtml(t('modelled'))}</span></section>
-    <section class="toolbar" aria-label="Commandes de simulation">
+    <section class="toolbar" aria-label="${escapeHtml(t('groupControls'))}">
       <div class="transport-controls"><button data-action="reset" aria-label="${escapeHtml(t('reset'))}">↺</button>
       <button data-action="prev" id="prev-control" aria-label="${escapeHtml(t('previous'))}">←</button>
       <button class="play-button" data-action="toggle" id="play-control">${escapeHtml(t('play'))}</button>
@@ -125,13 +125,13 @@ function simulation(): string {
       ${([0.5, 1, 1.5, 2] as Speed[]).map(s => `<option value="${s}" ${state.speed === s ? 'selected' : ''}>${s}×</option>`).join('')}</select></label>
       <div class="progress-wrap"><span id="progress-text" class="mono"></span><div class="progress-track" role="progressbar" id="progress-bar" aria-label="${escapeHtml(t('status'))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}"><span id="progress-fill"></span></div></div>
     </section>
-    <section class="workspace" aria-label="Vues synchronisées, événements modélisés">
+    <section class="workspace" aria-label="${escapeHtml(t('groupWorkspace'))}">
       <div class="panel topology-panel"><div class="panel-heading"><div><span class="eyebrow">01 / NETWORK</span><h2>${escapeHtml(t('topology'))}</h2></div><span class="legend-key">↔ TWO-WAY FLOW</span></div>
-        <div class="topology-actors" id="topology-actors" aria-label="Participants du scénario">${renderActors(active)}</div>
+        <div class="topology-actors" id="topology-actors" aria-label="${escapeHtml(t('groupParticipants'))}">${renderActors(active)}</div>
         <div class="flow-readout" id="flow-readout" aria-live="polite"></div>
       </div>
-      <div class="panel sequence-panel"><div class="panel-heading"><div><span class="eyebrow">02 / TIMELINE</span><h2>${escapeHtml(t('sequence'))}</h2></div><span class="legend-key">${active.events.length} EVENTS</span></div>
-        <ol class="event-list ladder-list" id="event-list">${renderSequence(active)}</ol>
+      <div class="panel sequence-panel"><div class="panel-heading"><div><span class="eyebrow">02 / TIMELINE</span><h2>${escapeHtml(t('sequence'))}</h2></div><span class="legend-key">${active.events.length} ${escapeHtml(t('events'))}</span></div>
+        <ol class="event-list ladder-list" id="event-list">${renderSequence(active, t)}</ol>
       </div>
     </section>
     <section class="panel inspector-panel" aria-labelledby="inspector-title"><div class="panel-heading"><div><span class="eyebrow">03 / ANALYSIS</span><h2 id="inspector-title">${escapeHtml(t('inspector'))}</h2></div><span class="legend-key">MODEL / UTF-8 SAMPLES</span></div>
@@ -142,9 +142,9 @@ function simulation(): string {
 
 function render(focusSelector?: string): void {
   applyPreferences();
-  app!.innerHTML = `<a class="skip-link" href="#main-content">Aller au contenu principal</a><div class="shell">${header()}${onCatalog ? catalogue() : simulation()}
-    <footer class="footer"><span>Network Observatory · alpha de migration · données pédagogiques modélisées</span>
-    <span>Œuvre de référence : <a href="https://protocol-explorer-alpha.vercel.app/" target="_blank" rel="noopener noreferrer">Protocol Explorer — Dilum Sanjaya</a> · droits de reproduction historiques non confirmés</span></footer></div>`;
+  app!.innerHTML = `<a class="skip-link" href="#main-content">${escapeHtml(t('skipLink'))}</a><div class="shell">${header()}${onCatalog ? catalogue() : simulation()}
+    <footer class="footer"><span>Network Observatory · ${escapeHtml(t('footerAlpha'))}</span>
+    <span>${escapeHtml(t('footerAttribution'))} <a href="https://protocol-explorer-alpha.vercel.app/" target="_blank" rel="noopener noreferrer">Protocol Explorer — Dilum Sanjaya</a> · ${escapeHtml(t('footerRights'))}</span></footer></div>`;
   if (!onCatalog) update();
   // Full view replacements must not silently discard keyboard focus.
   if (focusSelector) app!.querySelector<HTMLElement>(focusSelector)?.focus();
@@ -192,7 +192,7 @@ function update(): void {
     element.classList.toggle('is-receiver', element.dataset.actor === current.to);
   });
   const flow = $('flow-readout');
-  if (flow) flow.innerHTML = renderFlow(active, current);
+  if (flow) flow.innerHTML = renderFlow(active, current, t);
   const body = $('inspector-body');
   if (body) body.innerHTML = renderInspector(current, mode, t, selectedField);
   store('progress:' + active.id, String(state.index));
