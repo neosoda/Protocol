@@ -1,9 +1,13 @@
 import { catalog, categories, findScenario } from './protocols/catalog.ts';
-import type { Category, NetworkEvent, ProtocolScenario } from './protocols/model.ts';
+import type { Category, ProtocolScenario } from './protocols/model.ts';
 import { createTimeline } from './engine/timeline.ts';
 import type { Speed, TimelineState } from './engine/timeline.ts';
 import { isRtl, label, languages, languageSupported } from './i18n/ui.ts';
 import type { Label, Language } from './i18n/ui.ts';
+import { escapeHtml } from './ui/escape.ts';
+import { renderActors, renderFlow } from './visualizations/topology.ts';
+import { renderSequence } from './visualizations/sequence.ts';
+import { renderInspector } from './inspector/view.ts';
 import './ui/styles.css';
 
 type Mode = 'discovery' | 'expert';
@@ -11,8 +15,6 @@ type Theme = 'light' | 'dark';
 const storagePrefix = 'network-observatory:v1:';
 const read = (key: string): string | null => { try { return localStorage.getItem(storagePrefix + key); } catch { return null; } };
 const store = (key: string, value: string): void => { try { localStorage.setItem(storagePrefix + key, value); } catch { /* storage not available: stay usable */ } };
-const escapeHtml = (input: unknown): string => String(input).replace(/[&<>"']/g, c =>
-  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] ?? c);
 const t = (key: Label): string => label(language, key);
 const $ = (id: string): HTMLElement | null => document.getElementById(id);
 const readStep = (scenario: ProtocolScenario): number => {
@@ -123,11 +125,11 @@ function simulation(): string {
     </section>
     <section class="workspace" aria-label="Vues synchronisées">
       <div class="panel topology-panel"><div class="panel-heading"><div><span class="eyebrow">01 / NETWORK</span><h2>${escapeHtml(t('topology'))}</h2></div><span class="legend-key">↔ TWO-WAY FLOW</span></div>
-        <div class="topology-actors" id="topology-actors">${active.participants.map(p => `<div class="actor" data-actor="${escapeHtml(p.id)}"><span class="actor-glyph" aria-hidden="true">▣</span><strong>${escapeHtml(p.name)}</strong><span>${escapeHtml(p.role)}</span></div>`).join('')}</div>
+        <div class="topology-actors" id="topology-actors">${renderActors(active)}</div>`).join('')}</div>
         <div class="flow-readout" id="flow-readout" aria-live="polite"></div>
       </div>
       <div class="panel sequence-panel"><div class="panel-heading"><div><span class="eyebrow">02 / TIMELINE</span><h2>${escapeHtml(t('sequence'))}</h2></div><span class="legend-key">${active.events.length} EVENTS</span></div>
-        <ol class="event-list" id="event-list">${active.events.map((e, i) => `<li><button data-action="select" data-index="${i}" class="event-button" aria-label="${escapeHtml('Étape ' + (i + 1) + ' : ' + e.title)}"><span class="event-index mono">${String(i+1).padStart(2,'0')}</span><span class="event-body"><strong>${escapeHtml(e.title)}</strong><small><bdi>${escapeHtml(active.participants.find(p => p.id === e.from)?.name ?? e.from)}</bdi> <span aria-hidden="true">→</span> <bdi>${escapeHtml(active.participants.find(p => p.id === e.to)?.name ?? e.to)}</bdi></small></span><span class="selected-chevron" aria-hidden="true">›</span></button></li>`).join('')}</ol>
+        <ol class="event-list" id="event-list">${renderSequence(active)}</ol>
       </div>
     </section>
     <section class="panel inspector-panel" aria-labelledby="inspector-title"><div class="panel-heading"><div><span class="eyebrow">03 / ANALYSIS</span><h2 id="inspector-title">${escapeHtml(t('inspector'))}</h2></div><span class="legend-key">MODEL / UTF-8 SAMPLES</span></div>
@@ -142,36 +144,6 @@ function render(): void {
     <footer class="footer"><span>Network Observatory · alpha de migration · données pédagogiques modélisées</span>
     <span>Œuvre de référence : <a href="https://protocol-explorer-alpha.vercel.app/" target="_blank" rel="noopener noreferrer">Protocol Explorer — Dilum Sanjaya</a> · droits de reproduction historiques non confirmés</span></footer></div>`;
   if (!onCatalog) update();
-}
-
-function description(event: NetworkEvent): string {
-  return `<div class="selected-event"><span class="eyebrow">SELECTED EVENT / ${escapeHtml(event.id.toUpperCase())}</span>
-   <h3>${escapeHtml(event.title)}</h3><p>${escapeHtml(event.description)}</p></div>`;
-}
-function inspector(event: NetworkEvent): string {
-  const visibleFields = mode === 'discovery' ? event.fields.slice(0, 1) : event.fields;
-  const grouped = Array.from(new Set(visibleFields.map(f => f.layer)));
-  const fields = grouped.length ? grouped.map(layer => `<section class="field-group"><h4>${escapeHtml(layer.toUpperCase())}</h4>
-    <dl>${visibleFields.filter(f => f.layer === layer).map(f => `<div><dt>${escapeHtml(f.name)}</dt><dd><code>${escapeHtml(f.value)}</code><small>${escapeHtml(f.explanation)}</small></dd></div>`).join('')}</dl></section>`).join('') :
-    `<p class="empty-fields">Pas de champs techniques individuels validés pour cette étape.</p>`;
-  const raw = mode === 'discovery'
-    ? '<p class="empty-fields">Passez en mode Expert pour examiner les octets des exemples.</p>'
-    : event.sample === undefined ? `<p class="empty-fields">${escapeHtml(t('noBytes'))}</p>` : renderSample(event.sample);
-  return `<div class="inspector-grid"><div>${description(event)}<h4 class="section-subtitle">${escapeHtml(t('layers'))}</h4><div class="field-list">${fields}</div></div>
-  <div class="raw-panel"><h4>HEX / ASCII <span>· EXEMPLE CONSTRUIT</span></h4>${raw}</div></div>`;
-}
-function renderSample(sample: string): string {
-  const bytes = new TextEncoder().encode(sample);
-  const lines: string[] = [];
-  for (let i = 0; i < bytes.length; i += 16) {
-    const chunk = [...bytes.slice(i, i + 16)];
-    const offset = i.toString(16).padStart(4, '0');
-    const hex = chunk.map(x => x.toString(16).padStart(2, '0')).join(' ').padEnd(47, ' ');
-    const ascii = chunk.map(x => x >= 32 && x < 127 ? String.fromCharCode(x) : '.').join('');
-    lines.push(`${offset}  ${hex}  ${ascii}`);
-  }
-  return `<pre class="hex-view" tabindex="0" aria-label="Octets UTF-8 de l'exemple textuel">${escapeHtml(lines.join('\n'))}</pre>
-  <p class="raw-caption">Encodage UTF-8 du texte d'exemple, généré localement. Ce n'est pas une trame capturée ni un en-tête binaire complet.</p>`;
 }
 
 function update(): void {
@@ -198,19 +170,14 @@ function update(): void {
       if (selected) button.setAttribute('aria-current', 'step'); else button.removeAttribute('aria-current');
     });
   }
-  const people = new Map(active.participants.map(p => [p.id, p.name]));
-  const from = people.get(current.from) ?? current.from;
-  const to = people.get(current.to) ?? current.to;
   $('topology-actors')?.querySelectorAll<HTMLElement>('[data-actor]').forEach(element => {
     element.classList.toggle('is-sender', element.dataset.actor === current.from);
     element.classList.toggle('is-receiver', element.dataset.actor === current.to);
   });
   const flow = $('flow-readout');
-  if (flow) flow.innerHTML = `<span class="flow-label">ACTIVE FLOW</span>
-    <span><bdi>${escapeHtml(from)}</bdi> <span class="direction-arrow" aria-label="vers">→</span> <bdi>${escapeHtml(to)}</bdi></span>
-    <strong>${escapeHtml(current.title)}</strong>`;
+  if (flow) flow.innerHTML = renderFlow(active, current);
   const body = $('inspector-body');
-  if (body) body.innerHTML = inspector(current);
+  if (body) body.innerHTML = renderInspector(current, mode, t);
   store('progress:' + active.id, String(state.index));
 }
 
