@@ -2,17 +2,19 @@ import { defineConfig } from 'vite';
 import { fileURLToPath } from 'node:url';
 
 /**
- * V4: the original Observatory becomes the production ROOT entry.
- * Never rebuild the historical third-party page or copy historical public/.
- * The /observatory/ compatibility URL redirects to / through the
- * Coolify Nginx configuration in deploy/nginx.conf.
+ * The historical site is retained for local comparison, but is NOT part of
+ * production output. Its licensing is unresolved; see RIGHTS_AND_ATTRIBUTIONS.
+ *
+ * Vite copies all of public/ by default, including historical bundles. Keep
+ * public/ available in development only; the observatory icon is imported
+ * explicitly by the modern HTML entry.
  */
 export default defineConfig(({ command }) => ({
   publicDir: command === 'build' ? false : 'public',
   build: {
     rollupOptions: {
       input: {
-        app: fileURLToPath(new URL('./index.html', import.meta.url))
+        observatory: fileURLToPath(new URL('./observatory/index.html', import.meta.url))
       }
     }
   }

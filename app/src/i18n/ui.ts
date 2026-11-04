@@ -13,7 +13,7 @@ export type Label = 'catalog' | 'experiment' | 'discovery' | 'expert' | 'topolog
   'inspector' | 'play' | 'pause' | 'previous' | 'next' | 'reset' | 'speed' | 'theme' |
   'language' | 'objective' | 'minutes' | 'modelled' | 'start' | 'back' | 'step' |
   'network' | 'web' | 'security' | 'noBytes' | 'layers' | 'resume' | 'learn' | 'status' |
-  'heroLead' | 'heroAccent' | 'heroDescription' | 'labEyebrow' | 'exploreEyebrow' | 'events' | 'levelInitial' | 'levelIntermediate' | 'levelAdvanced' | 'groupMode' | 'groupControls' | 'groupWorkspace' | 'groupParticipants' | 'skipLink' | 'logicalFlow' | 'sender' | 'receiver' | 'inspectStep' | 'inspectTo' | 'selectedEvent' | 'selectedField' | 'sampleLabel' | 'sampleBytes' | 'sampleMeaning' | 'sampleValidRange' | 'sampleNoRange' | 'discoveryHint' | 'noFields' | 'footerAlpha' | 'footerAttribution' | 'footerRights' | 'diagramTcp' | 'themeLight' | 'themeDark' | 'panelNetwork' | 'panelTimeline' | 'panelAnalysis' | 'flowLegend' | 'sampleLegend' | 'handshake' | 'brandSubtitle' | 'diagramLabel' | 'heroFootnote' | 'searchLabel' | 'searchPlaceholder' | 'searchClear' | 'searchEmpty' | 'searchResults' | 'eventListLabel' | 'navLabel' | 'navToggle' | 'navBrowse' | 'simulationLabel' | 'heroIndex' | 'heroMonitor' | 'currentSignal';
+  'heroLead' | 'heroAccent' | 'heroDescription' | 'labEyebrow' | 'exploreEyebrow' | 'events' | 'levelInitial' | 'levelIntermediate' | 'levelAdvanced' | 'groupMode' | 'groupControls' | 'groupWorkspace' | 'groupParticipants' | 'skipLink' | 'logicalFlow' | 'sender' | 'receiver' | 'inspectStep' | 'inspectTo' | 'selectedEvent' | 'selectedField' | 'sampleLabel' | 'sampleBytes' | 'sampleMeaning' | 'sampleValidRange' | 'sampleNoRange' | 'discoveryHint' | 'noFields' | 'footerAlpha' | 'footerAttribution' | 'footerRights' | 'diagramTcp' | 'themeLight' | 'themeDark' | 'panelNetwork' | 'panelTimeline' | 'panelAnalysis' | 'flowLegend' | 'sampleLegend' | 'handshake' | 'brandSubtitle' | 'diagramLabel' | 'heroFootnote' | 'searchLabel' | 'searchPlaceholder' | 'searchClear' | 'searchEmpty' | 'searchResults' | 'eventListLabel';
 type Messages = Partial<Record<Label, string>>;
 const en: Record<Label, string> = {
   catalog: 'Protocol catalogue', experiment: 'Laboratory', discovery: 'Discovery', expert: 'Expert',
@@ -24,9 +24,9 @@ const en: Record<Label, string> = {
   start: 'Explore', back: 'All protocols', step: 'Step', network: 'Network & transport',
   web: 'Web & services', security: 'Security', noBytes: 'No verified raw bytes for this modelled event.',
   layers: 'Modelled fields', resume: 'Resume', learn: 'Follow a packet, understand the exchange', status: 'Progress',
-  heroLead: "The network,",
-  heroAccent: "revealed.",
-  heroDescription: "See what really happens between machines. Follow each exchange, explore every signal, and decode Internet protocols one event at a time.",
+  heroLead: "Internet,",
+  heroAccent: "event by event.",
+  heroDescription: "Follow exchanges between machines, connect the protocol to the timeline, and understand every step without getting lost in packet details.",
   labEyebrow: "AN INTERACTIVE NETWORK LAB",
   exploreEyebrow: "EXPLORE / 14 PROTOCOLS",
   events: "EVENTS",
@@ -72,14 +72,7 @@ const en: Record<Label, string> = {
   searchClear: "Clear",
   searchEmpty: "No protocols found. Try another search.",
   searchResults: "protocols",
-  eventListLabel: "Selectable message timeline",
-  navLabel: "Protocol navigation",
-  navToggle: "Toggle protocol navigation",
-  navBrowse: "Browse protocols",
-  simulationLabel: "LOCAL SIMULATION",
-  heroIndex: "NETWORK FIELD NOTES / V4",
-  heroMonitor: "MODEL / LIVE VIEW",
-  currentSignal: "CURRENT MESSAGE"
+  eventListLabel: "Selectable message timeline"
 };
 const fr: Record<Label, string> = {
   catalog: 'Catalogue des protocoles', experiment: 'Laboratoire', discovery: 'Découverte', expert: 'Expert',
@@ -90,9 +83,9 @@ const fr: Record<Label, string> = {
   start: 'Explorer', back: 'Tous les protocoles', step: 'Étape', network: 'Réseau & transport',
   web: 'Web & services', security: 'Sécurité', noBytes: 'Aucun octet brut vérifié pour cet événement modélisé.',
   layers: 'Champs modélisés', resume: 'Reprendre', learn: 'Suivre un paquet, comprendre les échanges', status: 'Progression',
-  heroLead: "Le réseau,",
-  heroAccent: "à découvert.",
-  heroDescription: "Ce qui circule entre deux machines devient enfin visible. Suivez chaque échange, décodez les messages et comprenez les protocoles Internet pas à pas.",
+  heroLead: "L’Internet,",
+  heroAccent: "événement par événement.",
+  heroDescription: "Observez les échanges entre machines, reliez la chronologie aux protocoles et comprenez chaque étape sans vous perdre dans les paquets.",
   labEyebrow: "UN LABORATOIRE RÉSEAU INTERACTIF",
   exploreEyebrow: "EXPLORER / 14 PROTOCOLES",
   events: "ÉVÉNEMENTS",
@@ -138,14 +131,7 @@ const fr: Record<Label, string> = {
   searchClear: "Effacer",
   searchEmpty: "Aucun protocole trouvé. Essayez un autre terme.",
   searchResults: "protocoles",
-  eventListLabel: "Chronologie des messages sélectionnables",
-  navLabel: "Navigation des protocoles",
-  navToggle: "Afficher ou masquer la navigation",
-  navBrowse: "Explorer les protocoles",
-  simulationLabel: "SIMULATION LOCALE",
-  heroIndex: "CARNET DE RÉSEAU / V4",
-  heroMonitor: "MODÈLE / VUE ACTIVE",
-  currentSignal: "MESSAGE EN COURS"
+  eventListLabel: "Chronologie des messages sélectionnables"
 };
 /** UI localization only. Narrative content remains French pending professional translations. */
 const extras: Record<Exclude<Language, 'fr' | 'en'>, Messages> = {

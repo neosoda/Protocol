@@ -118,7 +118,7 @@ test('theme and RTL orientation preserve technical chart direction', async ({ pa
 test('switching to English translates the navigation, diagram and inspector labels', async ({ page }) => {
   await page.goto('/observatory/');
   await page.locator('#language-select').selectOption('en');
-  await expect(page.getByRole('heading', { name: /The network, revealed/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Internet, event by event/ })).toBeVisible();
   await page.locator('button.protocol-card[data-id="http"]').click();
   await expect(page.getByRole('group', { name: 'Exploration mode' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Next' })).toBeVisible();
@@ -227,31 +227,4 @@ test('V3 search and lab controls stay accessible at narrow mobile width', async 
   await expect.poll(() => page.evaluate(() =>
     document.documentElement.scrollWidth <= window.innerWidth
   )).toBe(true);
-});
-
-// V4: the modern code is the main route, not merely a nested experiment.
-test('root route is the Observatory, and its workbench has a visible protocol rail', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.getByRole('heading', { name: /Le réseau, à découvert/ })).toBeVisible();
-  await expect(page.locator('.app-rail')).toBeVisible();
-  await expect(page.locator('.trace-monitor')).toBeVisible();
-  await expect(page.locator('button.protocol-card')).toHaveCount(14);
-  await expect(page.locator('[data-view="catalogue"]')).toHaveCount(1);
-  await page.locator('.rail-protocol[data-id="dns"]').click();
-  await expect(page.locator('#lab-title')).toContainText('DNS');
-  await expect(page.locator('.sequence-panel')).toBeVisible();
-  await expect(page.locator('.workbench-side .inspector-panel')).toBeVisible();
-  await expect(page.locator('#trace-title')).not.toBeEmpty();
-});
-
-test('mobile drawer exposes navigation and closes after protocol selection', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
-  const toggle = page.locator('[data-action="toggle-nav"]');
-  await expect(toggle).toBeVisible();
-  await toggle.click();
-  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-  await page.locator('.rail-protocol[data-id="http"]').click();
-  await expect(page.locator('[data-view="laboratory"]')).toHaveCount(1);
-  await expect(page.locator('.shell')).toHaveAttribute('data-nav-open', 'false');
 });
