@@ -58,8 +58,12 @@ function applyPreferences(): void {
 
 function brand(): string {
   return `<span class="brand-mark" aria-hidden="true">
-    <svg viewBox="0 0 64 64" focusable="false"><path d="M12 18h15l13 14H52" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/><path d="M12 46h15l13-14H52" fill="none" stroke="var(--teal)" stroke-width="4.5" stroke-linecap="round"/><circle cx="12" cy="18" r="5" fill="currentColor"/><circle cx="12" cy="46" r="5" fill="var(--teal)"/><circle cx="52" cy="32" r="5.5" fill="var(--surface)" stroke="currentColor" stroke-width="3"/></svg>
-    </span>`;
+    <svg viewBox="0 0 64 64" focusable="false">
+      <path d="M12 46V18l18 28V18" fill="none" stroke="#f5f0e8" stroke-width="5.1" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="47" cy="32" r="11.5" fill="none" stroke="#ff977b" stroke-width="5"/>
+      <circle cx="47" cy="32" r="3" fill="#ff977b"/>
+    </svg>
+  </span>`;
 }
 
 function selectOptions(): string {
