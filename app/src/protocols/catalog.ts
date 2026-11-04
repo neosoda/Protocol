@@ -87,7 +87,7 @@ export const catalog: readonly ProtocolScenario[] = [
   scenario('http', 'HTTP', 'web', 'initial', 4, 'Dialogue HTTP/1.1 en clair, pour l’étude.', 'Lire une requête, une réponse et leurs en-têtes.',
     [workstation, server], [
       event('http-1', 'client', 'server', 'GET /', 'Le client demande la ressource racine sur une connexion TCP déjà ouverte.', [
-        field('application', 'Méthode', 'GET', 'Lecture de la ressource.'),
+        { ...field('application', 'Méthode', 'GET', 'Lecture de la ressource.'), sampleRange: { offset: 0, length: 3 } },
         field('application', 'Host', 'example.test', 'Hôte HTTP demandé.')], 'GET / HTTP/1.1\r\nHost: example.test\r\n\r\n'),
       event('http-2', 'server', 'client', '200 OK', 'Le serveur retourne un statut et un petit corps texte fictif.', [
         field('application', 'Statut', '200', 'La requête a été traitée avec succès.'),
@@ -95,11 +95,13 @@ export const catalog: readonly ProtocolScenario[] = [
     ]),
   scenario('https', 'HTTPS', 'web', 'intermediate', 5, 'HTTP protégé par une session TLS.', 'Distinguer HTTP du canal TLS qui le transporte.',
     [workstation, server], [
-      event('https-1', 'client', 'server', 'ClientHello', 'Le client commence la négociation TLS 1.3.', [
-        field('security', 'Protocole', 'TLS 1.3', 'Chiffrement et authentification du serveur.')]),
-      event('https-2', 'server', 'client', 'ServerHello', 'Le serveur choisit les paramètres cryptographiques ; les messages suivants de négociation sont en grande partie chiffrés.'),
-      event('https-3', 'client', 'server', 'Requête HTTP chiffrée', 'Après établissement des clés et fin du handshake, les données HTTP passent dans des enregistrements TLS chiffrés.'),
-      event('https-4', 'server', 'client', 'Réponse chiffrée', 'Le contenu HTTP de la réponse n’est pas lisible sur le réseau sans les clés de session.')
+      event('https-1', 'client', 'server', 'ClientHello', 'Le client propose TLS 1.3 et envoie une part de clé ECDHE.', [
+        field('security', 'supported_versions', 'TLS 1.3', 'Annonce la version prise en charge.')]),
+      event('https-2', 'server', 'client', 'ServerHello', 'Le serveur sélectionne les paramètres ; les clés de handshake permettent de chiffrer les messages suivants.'),
+      event('https-3', 'server', 'client', 'Authentification serveur', 'EncryptedExtensions, Certificate, CertificateVerify et Finished sont transmis dans le flux chiffré du handshake ; regroupement pédagogique.'),
+      event('https-4', 'client', 'server', 'Finished client', 'Après vérification du certificat et du Finished serveur, le client confirme la négociation avec son propre Finished.'),
+      event('https-5', 'client', 'server', 'Requête HTTP chiffrée', 'La requête HTTP circule maintenant sous protection TLS ; les en-têtes HTTP ne sont pas visibles sur le réseau.'),
+      event('https-6', 'server', 'client', 'Réponse HTTP chiffrée', 'La réponse est transportée dans des enregistrements TLS protégés ; le contenu en clair n’est pas simulé ici.')
     ]),
   scenario('smtp', 'SMTP', 'web', 'intermediate', 5, 'Soumettre un courrier à un serveur SMTP.', 'Ordonner EHLO, MAIL FROM, RCPT TO et DATA.',
     [workstation, mail], [
@@ -143,15 +145,17 @@ export const catalog: readonly ProtocolScenario[] = [
       event('ssh-4', 'client', 'auth', 'Authentification utilisateur', 'Après protection du transport, le client prouve son identité via une méthode autorisée.'),
       event('ssh-5', 'client', 'auth', 'Ouverture de canal', 'Un canal de session peut transporter un shell ou une commande, toujours à l’intérieur du transport SSH.')
     ]),
-  scenario('tls', 'TLS 1.3', 'security', 'advanced', 6, 'Négocier une session chiffrée avec TLS 1.3.', 'Distinguer messages visibles, messages protégés et Finished.',
+  scenario('tls', 'TLS 1.3', 'security', 'advanced', 6, 'Négocier une session chiffrée avec TLS 1.3.', 'Distinguer messages visibles, authentification et clés de trafic.',
     [workstation, server], [
-      event('tls-1', 'client', 'server', 'ClientHello', 'Le client envoie notamment les suites supportées et une part de clé ECDHE.', [
-        field('security', 'supported_versions', 'TLS 1.3', 'Annonce la version prise en charge.'),
-        field('security', 'key_share', 'ECDHE (illustratif)', 'Part publique d’un secret éphémère.')]),
-      event('tls-2', 'server', 'client', 'ServerHello', 'Le serveur répond avec sa sélection et sa propre part de clé.'),
-      event('tls-3', 'server', 'client', 'EncryptedExtensions / Certificate / Finished', 'Ces messages de la poignée de main TLS 1.3 sont protégés après ServerHello ; regroupement pédagogique.'),
-      event('tls-4', 'client', 'server', 'Finished', 'Le client vérifie le transcript et confirme les clés de la négociation.'),
-      event('tls-5', 'client', 'server', 'Application Data', 'La couche applicative échange alors des données chiffrées.')
+      event('tls-1', 'client', 'server', 'ClientHello', 'Le client propose TLS 1.3 et une part de clé éphémère.', [
+        field('security', 'supported_versions', 'TLS 1.3', 'Version annoncée par le client.'),
+        field('security', 'key_share', 'ECDHE (modèle)', 'Part publique illustrative, sans octets capturés.')]),
+      event('tls-2', 'server', 'client', 'ServerHello', 'Le serveur sélectionne les paramètres et fournit sa part de clé.'),
+      event('tls-3', 'server', 'client', 'EncryptedExtensions', 'Premier message chiffré avec les clés de handshake du serveur.'),
+      event('tls-4', 'server', 'client', 'Certificate / CertificateVerify', 'Dans ce scénario à certificats, le serveur envoie son certificat et prouve la possession de la clé privée.'),
+      event('tls-5', 'server', 'client', 'Finished serveur', 'Le serveur authentifie le transcript du handshake.'),
+      event('tls-6', 'client', 'server', 'Finished client', 'Après validation du certificat, de la signature et du Finished serveur, le client confirme le transcript.'),
+      event('tls-7', 'client', 'server', 'Application Data', 'Les données applicatives sont transmises sous des clés de trafic et une protection authentifiée.')
     ])
 ];
 

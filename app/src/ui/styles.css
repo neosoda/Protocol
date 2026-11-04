@@ -205,3 +205,65 @@ select { min-height: 42px; min-width: 116px; padding: 7px 12px; }
 @media (prefers-reduced-motion: reduce) {
   *,*::before,*::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+
+/* V2: the sequence diagram is an interactive ladder, not a list of labels. */
+.workspace { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); }
+.sequence-panel { min-width: 0; }
+.event-list.ladder-list { max-height: 550px; overflow: auto; padding: 0 16px 16px; overscroll-behavior: contain; }
+.ladder-head, .ladder-row { display: grid; grid-template-columns: repeat(var(--participant-count), minmax(0, 1fr)); }
+.ladder-head { position: sticky; top: 0; z-index: 3; background: var(--surface); padding: 12px 0 0; border-bottom: 1px solid var(--line); }
+.ladder-participant { text-align: center; min-width: 0; padding: 4px 4px 12px; color: var(--ink); font-size: .76rem; font-weight: 750; overflow-wrap: anywhere; }
+.ladder-participant small { display: block; font-size: .62rem; line-height: 1.3; font-weight: 450; }
+.ladder-button.event-button { min-height: 86px; padding: 0; display: block; border: 1px solid transparent; border-radius: 6px; }
+.ladder-button.event-button.is-active { border-color: var(--brand); }
+.ladder-row { position: relative; height: 84px; width: 100%; }
+.ladder-lifeline { height: 100%; justify-self: center; width: 1px; background: var(--line); }
+.ladder-event-caption { position: absolute; z-index: 1; top: 6px; left: 5px; right: 5px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: .8rem; background: var(--surface); padding: 3px 4px; text-align: center; }
+.ladder-step-number { font: 700 .64rem ui-monospace, monospace; color: var(--muted); }
+.ladder-arrow { position: absolute; z-index: 2; top: 60px; height: 2px; background: var(--brand); }
+.ladder-arrow.forward::after, .ladder-arrow.reverse::before { content: ""; position: absolute; top: -4px; border: 5px solid transparent; }
+.ladder-arrow.forward::after { right: -2px; border-left: 9px solid var(--brand); border-right: 0; }
+.ladder-arrow.reverse::before { left: -2px; border-right: 9px solid var(--brand); border-left: 0; }
+.ladder-arrow.reverse { background: var(--teal); }
+.ladder-arrow.reverse::before { border-right-color: var(--teal); }
+.ladder-packet { display: none; position: absolute; top: -5px; left: 0; width: 12px; height: 12px; background: var(--brand); border: 2px solid var(--surface); border-radius: 50%; }
+.ladder-button.is-active .ladder-packet { display: block; animation: ladder-send 1.5s ease-in-out infinite alternate; }
+.ladder-button.is-active .ladder-arrow.reverse .ladder-packet { background: var(--teal); animation-direction: alternate-reverse; }
+@keyframes ladder-send { from { left: 0; } to { left: calc(100% - 12px); } }
+/* Nodes are differentiated by role and by explicit sender/receiver labels. */
+.actor { position: relative; }
+.actor-state { font-size: .65rem; font-weight: 750; color: var(--brand); min-height: 1em; }
+.actor.is-sender .actor-state::before { content: "ÉMISSION"; }
+.actor.is-receiver .actor-state::before { content: "RÉCEPTION"; color: var(--teal); }
+.flow-readout { text-align: start; }
+.packet-journey { display: grid; grid-template-columns: minmax(0, 1fr) minmax(45px, .7fr) minmax(0, 1fr); align-items: center; gap: 8px; }
+.journey-endpoint { min-width: 0; text-align: center; font-weight: 750; overflow-wrap: anywhere; font-size: .86rem; }
+.journey-endpoint small { display: block; font: 600 .62rem ui-monospace, monospace; letter-spacing: .06em; margin-top: 6px; }
+.journey-link { height: 2px; position: relative; background: var(--brand); }
+.journey-link::after { content: ""; position: absolute; right: -1px; top: -4px; border: 5px solid transparent; border-right: 0; border-left: 8px solid var(--brand); }
+.journey-packet { position: absolute; left: 0; top: -5px; width: 12px; height: 12px; background: var(--teal); border: 2px solid var(--surface); border-radius: 50%; animation: ladder-send 2s ease-in-out infinite alternate; }
+.journey-title { text-align: center; }
+[dir="rtl"] .ladder-list { direction: ltr; }
+[dir="rtl"] .ladder-participant bdi, [dir="rtl"] .journey-endpoint bdi { unicode-bidi: isolate; }
+@media (max-width: 1100px) { .workspace { grid-template-columns: 1fr; } .event-list.ladder-list { max-height: none; } }
+@media (max-width: 580px) { .event-list.ladder-list { padding: 0 8px 12px; } .ladder-participant { font-size: .67rem; } .ladder-participant small { font-size: .55rem; } .ladder-event-caption { font-size: .71rem; } .ladder-button.event-button { min-height: 90px; } }
+@media (prefers-reduced-motion: reduce) { .journey-packet, .ladder-button.is-active .ladder-packet { animation: none; } }
+
+/* Inspector V2: selectable, accessible fields and exact sample-only byte ranges. */
+.field-items { display: grid; }
+.field-option { width: 100%; background: var(--surface); border: 0; border-bottom: 1px solid var(--line); color: var(--ink); display: flex; justify-content: space-between; gap: 12px; align-items: center; text-align: start; min-height: 48px; padding: 10px 13px; }
+.field-option:last-child { border-bottom: 0; }
+.field-option:hover { background: var(--surface-alt); }
+.field-option.is-selected { background: var(--wash); box-shadow: inset 3px 0 var(--brand); }
+.field-option code { color: var(--teal); overflow-wrap: anywhere; text-align: end; }
+.field-explanation { margin-top: 15px; border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: var(--surface-alt); }
+.field-explanation strong { display: block; margin: 7px 0; }
+.field-explanation p { color: var(--muted); font-size: .86rem; margin: 0; }
+.hex-view { font-family: ui-monospace, monospace; font-size: .72rem; line-height: 1.65; }
+.hex-line { display: grid; grid-template-columns: 3.2em minmax(25em, auto) minmax(8em, auto); gap: 12px; white-space: nowrap; }
+.hex-columns, .ascii-columns { white-space: pre; }
+.hex-columns { word-spacing: 0; }
+.hex-offset { color: var(--muted); }
+.byte-selected { background: var(--brand); color: var(--canvas); border-radius: 2px; }
+[dir="rtl"] .field-option code, [dir="rtl"] .hex-view { direction: ltr; text-align: left; }
