@@ -22,7 +22,7 @@ Une fusion Git dans `main` n'est **pas** une autorisation de publication. Conser
 ## Journal réel
 
 - Compilation TypeScript : **non exécutée**.
-- Tests Node : **non exécutés**.
+- Tests Node métier du catalogue : **non exécutés**. Quatre tests autonomes du garde-fou de build ont été exécutés et réussis.
 - Playwright : **non exécuté**.
 - Captures : **non produites**.
 - Vérification du lockfile : **non réalisée**.
@@ -40,3 +40,9 @@ Ne remplacer ces statuts que par des résultats et des logs d'exécution vérifi
 En production, l'URL racine `/` **ne doit plus servir le site historique** ; vérifier cette propriété sur un vrai build avant une éventuelle fusion. Les fichiers historiques demeurent dans le dépôt et restent soumis à leurs droits ; l'absence de ces fichiers dans une distribution à vérifier ne constitue pas une licence pour le reste.
 
 **État de décision :** `npm ci`, `typecheck`, tests métier, build, Playwright, captures et conformité restent **NON VÉRIFIÉS**. Lockfile **NON synchronisé**. PR #3 **ouverte en brouillon**, sans fusion ni publication. Les captures doivent être examinées et conservées comme preuves avant toute déclaration de qualité.
+
+## Lot suivant du 4 novembre — données et accessibilité
+
+Les libellés de panneaux, les rôles de topologie et les messages de l'inspecteur disposent d'une version FR/EN complète pour 69 clés UI, avec repli des autres langues. Des contrôles **statiques** ont vérifié les clés, la longueur HTTP et 14 identifiants SSH ; nouveaux tests d'invariants et E2E ajoutés **mais non exécutés**. L'absence de données capturées et les simplifications RFC restent explicites.
+
+**Aucune évolution des critères de fusion :** lockfile et validations npm/Vite/Playwright/production encore bloqués ; droits historiques non résolus. PR #3 ouverte en brouillon, aucune fusion ni publication.

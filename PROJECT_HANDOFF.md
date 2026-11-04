@@ -1,8 +1,35 @@
 # PROJECT HANDOFF — Network Observatory (2026-11-04)
 
+## Suite du 4 novembre 2026 — lot de consolidation après `8ef3caf`
+
+**Dernière branche :** `fix/observatory-v2-hardening`. **Dernier commit du lot de code :** `e81fbb53a50f774aad0552e0bb85c10abbe65cf5`. PR [#3](https://github.com/neosoda/Protocol/pull/3) **ouverte, brouillon, non fusionnée**. `main` reste `9dbeea4877ec78ed40eb54d94350b346072db848`.
+
+### Modifications effectivement poussées
+
+1. `edddff73a01c2ff654cbf2eb391ced105f762da2` : 32 chaînes de navigation/inspector/diagrammes FR/EN ajoutées avec repli anglais sur les 13 autres locales ; test d'unicité/traduction des chaînes et test navigateur en anglais ajoutés.
+2. `8caec1d5139ba79e1d1cc6b937334f9113fedd40` : correction immédiate de deux templates d'inspecteur pour évaluer correctement les libellés localisés.
+3. `f78501c2f7d18a8921778a80820914127d95bf70` : HTTP/1.1 utilise désormais `Content-Length: 7` pour son corps texte de 7 octets ; SSH enrichi à **14 événements** (KEXINIT des deux pairs, deux NEWKEYS, SERVICE_REQUEST/ACCEPT, USERAUTH_SUCCESS, confirmation de canal) ; 2 tests d'invariants RFC ajoutés ; progression persistée par **ID d'événement** plutôt qu'index avec compatibilité des anciens entiers.
+4. `e81fbb53a50f774aad0552e0bb85c10abbe65cf5` : labels de topologie émetteur/récepteur rendus dans le DOM (plus de texte français en pseudo-éléments CSS), accessibles et traduisibles, ainsi que les légendes, titres de panneaux et thème FR/EN ; E2E et tests de dictionnaire ajustés.
+
+### Vérifications réellement effectuées, sans extrapolation
+
+- **4/4 tests Node autonomes** du contrôle `verify-build` réexécutés localement sur les scripts identiques aux blobs GitHub — réussite.
+- **Inspection programmatique des sources GitHub à ce commit** : **69 clés UI présentes dans `en` et `fr`**, aucun doublon ni clé manquante ; réponse HTTP `Content-Length: 7` = corps `Bonjour` (7 octets ASCII/UTF-8) ; **14 événements SSH consécutifs** ; vérification de l'absence d'étiquettes d'état statiques en CSS. **Ces contrôles sont statiques**, ils ne remplacent pas TypeScript ni les tests Node du catalogue.
+- **Retest réseau** : `git ls-remote` échoue sur `github.com` ; `npm view vite` échoue sur `EAI_AGAIN registry.npmjs.org`. Dépendances npm non installables ici.
+- **Toujours absents :** lockfile mis à jour, `npm ci`, typecheck du dépôt complet, tests d'invariants exécutés, build Vite, tests Playwright, captures, preview de production et audit WCAG 2.2 AA. Aucune CI GitHub Actions ni livraison n'a été déclenchée.
+- **Verrou juridique inchangé** : droits de l'historique non établis, malgré l'exclusion désormais programmée du build moderne ; vérifier `dist` réellement avant une fusion.
+
+### Ordre de reprise
+
+1. Sur une machine avec accès Git + npm, installer, régénérer/versionner `app/package-lock.json`, faire `npm ci` puis `typecheck`, `test`, `build`, `test:e2e`.
+2. Corriger **toute** compilation / assertion cassée ; inspecter `app/dist/` et vérifier que `/` ne redistribue aucun élément historique, puis valider `/observatory/` en preview.
+3. Vérifier captures FR/EN/AR × 390/768/1440 × thèmes, navigation clavier, focus, contraste, lecteurs d'écran, reduced motion, compatibilité RTL et contrôle de reprise SSH après changement de scénario.
+4. Conclure le verrou de redistribution et vérifier qu'un `main` fusionné ne déclenchera pas de publication non autorisée.
+5. **Fusionner PR #3 seulement après ces critères**, puis ouvrir `feat/network-observatory-v3` avec une PR non fusionnée : focus précision SMTP/IMAP/FTP/DNS, traduction des récits, revue détaillée des 14 protocoles, enrichissement des tests et améliorations de visualisation.
+
 ## Reprise de stabilisation — 4 novembre 2026 (PR #3 en cours)
 
-**État réel GitHub :** la PR #3 est toujours ouverte en brouillon. Deux commits de correction ont été poussés :
+**État réel GitHub :** la PR #3 est toujours ouverte en brouillon. Les deux premiers commits de correction du lot initial ont été poussés :
 
 - `997a90978c1205b3c7f268abf8984d59a219f005` : build Vite moderne seul (entrée `/observatory/`), `publicDir: false` en production pour exclure les bundles historiques, favicon moderne importé comme ressource, vérificateur des artefacts, navigation du ladder au clavier (flèches, Home, End), défilement interne du ladder et pause en onglet masqué ; test Playwright dédié ajouté.
 - `693aa26310c927690067e0728c45c556c4563a00` : 4 tests Node du garde-fou de sortie, intégrés à `npm test`, contrôle du nombre de bundles JS pour rejeter un ajout accidentel de l'historique.
