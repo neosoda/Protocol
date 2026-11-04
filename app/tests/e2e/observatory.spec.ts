@@ -24,6 +24,19 @@ test('shows 14 unique protocol cards on the catalogue', async ({ page }) => {
   await expect(page.locator('button.protocol-card[data-id="tcp"]')).toHaveCount(1);
 });
 
+test('observatory loads without page errors or console exceptions', async ({ page }) => {
+  const failures: string[] = [];
+  page.on('pageerror', error => failures.push('page: ' + error.message));
+  page.on('console', message => {
+    if (message.type() === 'error') failures.push('console: ' + message.text());
+  });
+  await open(page, 'dns');
+  await page.getByRole('button', { name: 'Suivant' }).click();
+  await page.getByRole('button', { name: 'Expert' }).click();
+  await page.getByRole('button', { name: 'Tous les protocoles' }).click();
+  expect(failures).toEqual([]);
+});
+
 test('one selected event drives ladder, topology, inspector and progress', async ({ page }) => {
   await open(page, 'tcp');
   await expect(page.locator('#progress-text')).toContainText('1 / 5');
