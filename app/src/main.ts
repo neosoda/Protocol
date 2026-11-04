@@ -125,7 +125,7 @@ function simulation(): string {
     </section>
     <section class="workspace" aria-label="Vues synchronisées">
       <div class="panel topology-panel"><div class="panel-heading"><div><span class="eyebrow">01 / NETWORK</span><h2>${escapeHtml(t('topology'))}</h2></div><span class="legend-key">↔ TWO-WAY FLOW</span></div>
-        <div class="topology-actors" id="topology-actors">${renderActors(active)}</div>`).join('')}</div>
+        <div class="topology-actors" id="topology-actors">${renderActors(active)}</div>
         <div class="flow-readout" id="flow-readout" aria-live="polite"></div>
       </div>
       <div class="panel sequence-panel"><div class="panel-heading"><div><span class="eyebrow">02 / TIMELINE</span><h2>${escapeHtml(t('sequence'))}</h2></div><span class="legend-key">${active.events.length} EVENTS</span></div>
