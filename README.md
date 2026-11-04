@@ -1,4 +1,4 @@
-> **V4 Workbench — changement complet d'interface ([PR #5](https://github.com/neosoda/Protocol/pull/5), branche `feat/observatory-v4-workbench`).** L'ancienne page racine de 163 Ko est remplacée par l'application moderne : rail latéral, moniteur TCP, catalogue numéroté, chronologie dominante, topologie et inspecteur latéraux, nouveau monogramme N/O et palette ivoire/corail. **Le site Vercel en production reste inchangé tant que sa barrière de publication est active.** La branche permet uniquement une preview conditionnée au typecheck, aux tests et au build sécurisé. [Identité V4](docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md) · [Handoff](PROJECT_HANDOFF.md).
+> **Network Observatory V4 — déploiement Coolify.** La [PR #5](https://github.com/neosoda/Protocol/pull/5) porte la refonte complète (navigation latérale, moniteur TCP, laboratoire et inspecteur, identité ivoire/corail) et la nouvelle entrée à `/`. Le déploiement est préparé en **Dockerfile + Nginx, port 80**, sans Vercel ni GitHub Actions. **Aucun déploiement réel ni build complet n'a été validé.** [Guide Coolify](docs/DEPLOY_COOLIFY.md) · [Handoff](PROJECT_HANDOFF.md).
 
 <div align="center">
 
@@ -9,7 +9,7 @@
 
 Laboratoire interactif des protocoles réseau : topologie logique, diagramme de séquence à lignes de vie, contrôle pas à pas et inspection pédagogique.
 
-**14 protocoles modélisés** · **Design system Signal & Structure** · **Vite + TypeScript** · **Sans backend**
+**14 protocoles modélisés** · **V4 Workbench** · **Vite + TypeScript** · **Docker / Coolify**
 
 [Découvrir le laboratoire](#nouvelle-expérience--network-observatory) · [Installation](#installation) · [Limites-et-droits](#limites-et-droits)
 
@@ -17,7 +17,7 @@ Laboratoire interactif des protocoles réseau : topologie logique, diagramme de 
 
 ---
 
-> **Attention — statut alpha de migration.** Cette branche propose un nouveau laboratoire écrit de manière indépendante sous `/observatory/`. La page historique `/` contient des éléments reproduits depuis le site de Dilum Sanjaya ; **leurs droits de redistribution ne sont pas confirmés**. Ne pas publier ou redistribuer ces éléments sans clarification juridique ou remplacement original.
+> **Attention — droits historiques.** L'entrée moderne originale est désormais à `/`. Des éléments de l'ancienne reproduction peuvent rester dans l'historique Git et `app/public/`, exclus de l'image Docker. Leurs droits de redistribution ne sont pas confirmés.
 
 ## Identité visuelle V3 — Signal & Structure
 
