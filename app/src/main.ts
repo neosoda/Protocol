@@ -80,7 +80,7 @@ function catalogue(): string {
       <p>Observez les échanges entre machines, reliez la chronologie aux protocoles et comprenez chaque étape sans vous perdre dans les paquets.</p>
       <div class="intro-actions"><button class="primary-button" data-action="open" data-id="tcp">${escapeHtml(t('start'))} TCP <span aria-hidden="true">→</span></button>
       <button class="secondary-button" data-action="open" data-id="${escapeHtml(last.id)}">${escapeHtml(t('resume'))} ${escapeHtml(last.name)}</button></div></div>
-      <div class="intro-instrument" aria-label="Schéma illustratif des échanges">
+      <div class="intro-instrument" aria-label="Schéma illustratif des échanges TCP">
         <span class="instrument-caption">OBSERVATION / 001</span>
         <div class="mini-network"><span class="instrument-node">CLIENT</span><span class="mini-link">SYN <b>→</b></span><span class="instrument-node">SERVER</span></div>
         <div class="mini-network reverse"><span class="instrument-node">CLIENT</span><span class="mini-link"><b>←</b> SYN · ACK</span><span class="instrument-node">SERVER</span></div>
@@ -123,13 +123,13 @@ function simulation(): string {
       ${([0.5, 1, 1.5, 2] as Speed[]).map(s => `<option value="${s}" ${state.speed === s ? 'selected' : ''}>${s}×</option>`).join('')}</select></label>
       <div class="progress-wrap"><span id="progress-text" class="mono"></span><div class="progress-track" role="progressbar" id="progress-bar" aria-label="${escapeHtml(t('status'))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}"><span id="progress-fill"></span></div></div>
     </section>
-    <section class="workspace" aria-label="Vues synchronisées">
+    <section class="workspace" aria-label="Vues synchronisées, événements modélisés">
       <div class="panel topology-panel"><div class="panel-heading"><div><span class="eyebrow">01 / NETWORK</span><h2>${escapeHtml(t('topology'))}</h2></div><span class="legend-key">↔ TWO-WAY FLOW</span></div>
-        <div class="topology-actors" id="topology-actors">${renderActors(active)}</div>
+        <div class="topology-actors" id="topology-actors" aria-label="Participants du scénario">${renderActors(active)}</div>
         <div class="flow-readout" id="flow-readout" aria-live="polite"></div>
       </div>
       <div class="panel sequence-panel"><div class="panel-heading"><div><span class="eyebrow">02 / TIMELINE</span><h2>${escapeHtml(t('sequence'))}</h2></div><span class="legend-key">${active.events.length} EVENTS</span></div>
-        <ol class="event-list" id="event-list">${renderSequence(active)}</ol>
+        <ol class="event-list ladder-list" id="event-list">${renderSequence(active)}</ol>
       </div>
     </section>
     <section class="panel inspector-panel" aria-labelledby="inspector-title"><div class="panel-heading"><div><span class="eyebrow">03 / ANALYSIS</span><h2 id="inspector-title">${escapeHtml(t('inspector'))}</h2></div><span class="legend-key">MODEL / UTF-8 SAMPLES</span></div>
