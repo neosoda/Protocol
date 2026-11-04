@@ -16,6 +16,10 @@
 - `vercel.json` laisse **la production bloquée** (`VERCEL_ENV=production` → code 0) mais autorise les seules **previews** (`VERCEL_ENV=preview` → code 1), avec installation, typecheck, tests Node et build anti-legacy. Une preview réelle dépend de la connexion Vercel et de la réussite des tests.
 - La route `/observatory/` reste accessible en dev et par rewrite Vercel vers `/`.
 
+### Preuve nouvelle du garde-fou
+
+**5/5 tests Node réussis** sur une copie locale dont les deux blobs correspondent exactement aux fichiers GitHub : `f15df0c124ac76df3917a3050e54c23af2d2fcc2` (verifier), `e6c4af565d89bcfdaf7309edd19d3d6fc53fadd6` (tests). Les tests app complets et le build Vite restent non exécutés.
+
 ### Validation et risques
 
 **Non exécutés en local sur cette branche :** `npm ci` (lockfile obsolète), TypeScript complet, Node métier, Vite, Playwright, screenshots, WCAG 2.2 AA. DNS vers le registre npm indisponible. Les vérifications du DOM et des dictionnaires sont **statiques** ; elles ne prouvent pas le rendu.
