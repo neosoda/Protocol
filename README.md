@@ -46,11 +46,12 @@ npm run dev
 ```bash
 npm --prefix app run typecheck
 npm --prefix app run test
+npm --prefix app run test:e2e
 npm run build
 npm run preview
 ```
 
-**État de validation :** ces commandes sont fournies pour reproduire les vérifications, mais **aucune réussite de compilation, test moteur ou Playwright n'est revendiquée ici**. Le fichier `app/package-lock.json` précède le nouveau socle : le régénérer avec `npm --prefix app install`, puis le versionner et vérifier `npm ci` avant fusion.
+**État de validation :** ces commandes sont fournies pour reproduire les vérifications, mais **aucune réussite de compilation, test moteur ou Playwright n'est revendiquée ici. Les tests Playwright sont écrits mais n'ont pas été exécutés ; installer Chromium avec `npx --prefix app playwright install chromium`**. Le fichier `app/package-lock.json` précède le nouveau socle : le régénérer avec `npm --prefix app install`, puis le versionner et vérifier `npm ci` avant fusion.
 
 ## Structure
 
