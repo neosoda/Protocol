@@ -33,7 +33,7 @@ test('observatory loads without page errors or console exceptions', async ({ pag
   await open(page, 'dns');
   await page.getByRole('button', { name: 'Suivant' }).click();
   await page.getByRole('button', { name: 'Expert' }).click();
-  await page.getByRole('button', { name: 'Tous les protocoles' }).click();
+  await page.locator('button[data-action="catalog"].back-link').click();
   expect(failures).toEqual([]);
 });
 
