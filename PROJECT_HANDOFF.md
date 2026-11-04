@@ -1,5 +1,18 @@
 # PROJECT HANDOFF — Network Observatory (2026-11-04)
 
+## Habillage « Studio » v5 — 04/11/2026
+
+**Demande utilisateur :** refaire toute l'interface, l'animation devant rester l'objectif prioritaire. Les animations d'origine sont jugées parfaites.
+
+- **Nouvelle couche** : `app/public/assets/studio.css`, active via `<html data-skin="studio">`. Le moteur `index-l76eMM6E.js` et le CSS `index-C1vckX_Q.css` sont **inchangés** ; la refonte se fait uniquement par CSS au-dessus du bundle.
+- **Canevas animé non modifié** : `.simulation` (vues réseau et séquence) garde sa palette `--k-*`, sa police Iosevka et son mouvement. Seuls le cadre et le sélecteur de vue changent.
+- **Interface modifiée** : typographie Inter pour l'interface et Iosevka pour les données (IP, hex, tableau), panneaux arrondis et surélevés, contrôles segmentés à pastille glissante, rang actif bleu à la place du rouge, thème clair et sombre retravaillés. Mise en scène : entrée échelonnée des panneaux, arrivée animée des lignes de paquets, retours au survol et à l'appui avec ressort, apparition de l'inspecteur et du menu de langue. `prefers-reduced-motion` reste géré par le CSS de base.
+- **Comparaison** : `?skin=classic` réaffiche le design d'origine et `?skin=studio` revient au nouveau, par `app/public/assets/skin.js`, avec mémorisation locale.
+- **Supprimés** : `alternate-style.css` et `style-switcher.js` (ancien bouton « Cyber-Glass »).
+- **Polices ajoutées** : `inter-{latin,latin-ext,cyrillic}-var.woff2` (Inter 4, OFL 1.1, licence dans `inter-OFL.txt`).
+- **Vérifié dans le navigateur (Vite dev)** : 1440×900 en clair et en sombre, lecture HTTP, inspecteur, mobile 375×812 avec tiroir, sans défilement horizontal. **Non vérifiés** : build Docker et Coolify, autres protocoles en détail, RTL (arabe et hébreu), tablette.
+- **Droits** : le propriétaire du dépôt déclare le 04/11/2026 avoir l'accord de Dilum Sanjaya pour modifier et redistribuer. Joindre une preuve écrite dans `docs/RIGHTS_AND_ATTRIBUTIONS.md`. L'attribution « Designed by » est conservée.
+
 ## RETOUR ARRIÈRE DESIGN V4 — état en cours le 04/11/2026
 
 **Demande utilisateur : retrouver les animations d'origine, nettement plus qualitatives que la V4.** Revenir à la version originale exacte, pas à un CSS approximatif. La V4 a remplacé `app/index.html` par une application pédagogique réécrite dont la chronologie et le rendu des paquets sont moins aboutis.
@@ -8,7 +21,7 @@
 
 - `app/index.html` revenu exactement au blob historique `043fb1c6b2ecd3d607cea3ecbfffe617da89903b` présent avant PR #5 (commit base `de499a7e8896027641ddfd153a86f490f1bfe6f1`).
 - 10 autres fichiers V4 d'interface/test/Vite remis à leur contenu V3. L'ancien laboratoire Vite sous `/observatory/` reste en code source, mais **n'est plus utilisé par le runtime Coolify**.
-- Les **vrais bundles d'animation et styles** `app/public/assets/index-l76eMM6E.js`, `app/public/assets/index-C1vckX_Q.css`, `app/public/assets/style-switcher.js`, `app/public/assets/alternate-style.css` sont **bit à bit identiques** à ceux du commit d'avant PR #5.
+- Les **vrais bundles d'animation et styles** `app/public/assets/index-l76eMM6E.js`, `app/public/assets/index-C1vckX_Q.css`, `app/public/assets/style-switcher.js`, `app/public/assets/alternate-style.css` (ces deux derniers retirés depuis par l'habillage Studio v5) étaient **bit à bit identiques** à ceux du commit d'avant PR #5.
 - **Dockerfile Coolify conservé mais simplifié** : Nginx sert directement l'ancien `app/index.html` et **tous les assets sous `app/public/`** ; aucune compilation Vite/Node ne doit modifier les animations. L'exclusion de `app/public/` a été retirée de `.dockerignore`. Port **80**, `/healthz`, routes inchangées.
 - Contrôle statique effectué : **8/8 références absolues HTML vers les ressources locales résolues**, 5 SHA identiques, Dockerfile copie bien les ressources. **Aucun build Docker ni rendu navigateur exécuté** dans l'environnement actuel.
 - Attention : la page historique et ses bundles portent une attribution à **Dilum Sanjaya**, avec des droits de redistribution **non confirmés**. Garder cette attribution ; ne pas prétendre que la restauration a levé les réserves juridiques. Voir `docs/RIGHTS_AND_ATTRIBUTIONS.md`.
