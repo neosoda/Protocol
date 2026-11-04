@@ -20,6 +20,10 @@ const PAD = { x: 140, top: 135, bottom: 130 };
 /** Devices and packets are drawn larger than the plan's units so they read well once zoomed out. */
 const DEVICE_SCALE = 1.25;
 const PACKET_SCALE = 1.35;
+/** Below this width (px) the camera follows the packet in close-up instead of framing everything. */
+const FOLLOW_BELOW = 620;
+/** Width of the scene, in plan units, shown by the close-up camera. */
+const FOLLOW_WIDTH = 470;
 
 interface Box { x: number; y: number; w: number; h: number }
 interface Flight { pts: Point[]; length: number; trail: SVGPathElement; packet: SVGGElement }
@@ -44,17 +48,20 @@ export class TopologyView {
   private target: Box = this.camera;
   private raf = 0;
   private last = 0;
+  private gliding = false;
+  private focus: Point = { x: 0, y: 0 };
   private revealed = new Set<string>();
   private readonly instant: () => boolean;
 
   constructor(svg: SVGSVGElement, instant: () => boolean) {
     this.svg = svg;
     this.instant = instant;
-    new ResizeObserver(() => { this.target = this.frame(this.revealed); this.snap(); }).observe(svg);
+    new ResizeObserver(() => { this.target = this.following() ? this.close(this.focus) : this.frame(this.revealed); this.snap(); }).observe(svg);
   }
 
   render(scenario: Scenario, summaries: Summary[]): void {
     this.scenario = scenario;
+    this.focus = { x: 0, y: 0 };
     this.summaries = summaries;
     this.shown = -1;
     this.revealed = new Set();
@@ -118,6 +125,7 @@ export class TopologyView {
       flight.trail.style.strokeDashoffset = String(flight.length * (1 - f));
     });
     this.trailLayer.classList.toggle('is-idle', progress <= 0);
+    if (this.following()) this.track(event, progress, eased);
     this.nodes.get(event.from)?.classList.toggle('is-sending', progress > 0 && progress < 1);
     if (arrived && !this.wasArrived && !event.drop) for (const id of [event.to, ...(event.also ?? [])]) this.pulse(id);
     this.wasArrived = arrived;
@@ -162,8 +170,36 @@ export class TopologyView {
     this.revealed = seen;
     for (const [id, g] of this.nodes) g.classList.toggle('is-hidden', !seen.has(id));
     for (const [a, b] of scenario.topology.links) this.links.get(`${a}|${b}`)!.classList.toggle('is-hidden', !(seen.has(a) && seen.has(b)));
+    if (this.following()) return;
     this.target = this.frame(seen);
     if (first || this.instant()) this.snap(); else this.glide();
+  }
+
+  private following(): boolean {
+    const width = this.svg.getBoundingClientRect().width;
+    return width > 0 && width < FOLLOW_BELOW;
+  }
+
+  /** Close-up camera: on the sender before departure, on the packet in flight, on the receiver after. */
+  private track(event: NetEvent, progress: number, eased: number): void {
+    const nodes = this.scenario!.topology.nodes;
+    const at = (id: string): Point => { const n = nodes.find(x => x.id === id)!; return { x: n.x, y: n.y }; };
+    const main = this.flights[0];
+    let focus: Point;
+    if (progress <= 0 || !main) focus = at(event.from);
+    else if (progress >= 1 && !event.drop) focus = at(event.to);
+    else focus = along(main.pts, Math.min(eased, event.drop ? DROP_AT : 1));
+    const first = this.focus.x === 0 && this.focus.y === 0;
+    this.focus = focus;
+    this.target = this.close(focus);
+    if (first || this.instant()) this.snap(); else this.glide();
+  }
+
+  private close(p: Point): Box {
+    const box = this.svg.getBoundingClientRect();
+    const aspect = box.width && box.height ? box.width / box.height : 4 / 3;
+    const w = FOLLOW_WIDTH, h = w / aspect;
+    return { x: p.x - w / 2, y: p.y + 6 - h / 2, w, h };
   }
 
   /** The smallest box around the given nodes, widened to the canvas aspect ratio. */
@@ -183,15 +219,19 @@ export class TopologyView {
 
   private snap(): void {
     cancelAnimationFrame(this.raf);
+    this.gliding = false;
     this.camera = this.target;
     this.apply();
   }
 
+  /** Eases the camera toward its target; retargeting while moving keeps the same motion going. */
   private glide(): void {
-    cancelAnimationFrame(this.raf);
+    if (this.gliding) return;
+    this.gliding = true;
     this.last = performance.now();
     const step = (now: number) => {
-      const k = 1 - Math.exp(-(now - this.last) / 380);
+      // Tighter when following a moving packet, so it never leaves the frame.
+      const k = 1 - Math.exp(-(now - this.last) / (this.following() ? 110 : 380));
       this.last = now;
       const c = this.camera, t = this.target;
       this.camera = { x: c.x + (t.x - c.x) * k, y: c.y + (t.y - c.y) * k, w: c.w + (t.w - c.w) * k, h: c.h + (t.h - c.h) * k };

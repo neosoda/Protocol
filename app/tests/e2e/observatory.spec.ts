@@ -55,7 +55,8 @@ test('every lesson renders without errors or horizontal scroll', async ({ page }
   for (const id of ids) {
     await page.goto(`/#/${id}`);
     await page.locator('.tick').last().click();
-    await expect(page.locator('.step-card')).toBeVisible();
+    // The step text sits in the inspector on wide screens, under the scene on phones.
+    await expect(page.locator('.step-card h2, .story h2').filter({ visible: true })).toHaveCount(1);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
   expect(failures).toEqual([]);

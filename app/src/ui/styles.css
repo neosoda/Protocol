@@ -326,6 +326,9 @@ a{color:inherit}
 .counter{font-size:13px;font-weight:600;color:var(--text-2);font-variant-numeric:tabular-nums;white-space:nowrap}
 .hint{display:none}
 
+/* step story, shown under the scene on small screens */
+.story{display:none}
+
 /* packet log */
 .log{flex:none;border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-2);overflow:hidden;animation:rise .55s var(--snap) .16s both}
 .log-head{display:flex;align-items:baseline;justify-content:space-between;padding:10px 14px 6px}
@@ -415,7 +418,15 @@ a{color:inherit}
   .stage{padding:16px}
   .viz{flex:none;min-height:0}
   .viz-body,.viz[data-view] .viz-body{flex:none;grid-template-rows:auto}
-  .pane-network{aspect-ratio:16/9}
+  .pane-network{aspect-ratio:4/3;max-height:62vh}
+  .story{display:block;padding:14px 16px;border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--tone);box-shadow:var(--shadow-2)}
+  .story .step-badge{font-size:12.5px}
+  .story-route{margin-left:8px;font-size:12.5px;color:var(--text-3)}
+  .story h2{margin:8px 0 4px;font-size:17px;line-height:1.3}
+  .story p{margin:0;color:var(--text-2);font-size:14.5px}
+  .inspector .step-card{display:none}
+  .log th:nth-child(2),.log td:nth-child(2),.log th:nth-child(3),.log td:nth-child(3),.log th:nth-child(4),.log td:nth-child(4),.log th:nth-child(7),.log td:nth-child(7){display:none}
+  .log td.log-info{white-space:nowrap}
   .pane-sequence{max-height:52vh}
   .top-progress .tp-label,.brand small{display:none}
   .tp-bar{width:72px}

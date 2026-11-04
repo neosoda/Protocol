@@ -76,6 +76,7 @@ app.innerHTML = `
         <span class="counter"></span>
         <div class="seg speed" role="group">${SPEEDS.map(s => `<button type="button" data-speed="${s}">${s}×</button>`).join('')}</div>
       </section>
+      <section class="story" aria-live="polite"></section>
       <section class="log"></section>
       <p class="hint"></p>
     </main>
@@ -115,6 +116,11 @@ function draw(frame: Frame): void {
     shownIndex = frame.index;
     $('.counter').textContent = `${t('step')} ${frame.index + 1} ${t('of')} ${scenario.events.length}`;
     $('.viz-caption').textContent = tx(event.title);
+    const route = (id: string) => tx(scenario.topology.nodes.find(n => n.id === id)?.label ?? id);
+    $('.story').className = `story tone-${event.tone}`;
+    $('.story').innerHTML = `<span class="step-badge">${t('step')} ${frame.index + 1}</span>
+      <span class="story-route">${esc(route(event.from))} → ${esc(route(event.to))}</span>
+      <h2>${esc(tx(event.title))}</h2><p>${esc(tx(event.text))}</p>`;
     app.querySelectorAll<HTMLElement>('.tick').forEach((tick, i) => {
       tick.classList.toggle('is-done', i < frame.index);
       tick.classList.toggle('is-current', i === frame.index);

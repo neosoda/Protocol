@@ -43,7 +43,7 @@ export class SequenceView {
   }
 
   private width(scenario: Scenario): number {
-    const least = scenario.actors.length * 136 + 70;
+    const least = scenario.actors.length * 156 + 110;
     return Math.round(Math.max(least, Math.min(1100, this.scroller.clientWidth || 1000)));
   }
 
@@ -137,8 +137,17 @@ export class SequenceView {
     const top = (row.y1 - 40) * scale;
     const bottom = (row.y2 + 40) * scale;
     const box = this.scroller;
-    if (top < box.scrollTop || bottom > box.scrollTop + box.clientHeight) {
-      box.scrollTo({ top: Math.max(0, top - box.clientHeight / 3), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    const left = Math.min(row.x1, row.x2) * scale - 70, right = Math.max(row.x1, row.x2) * scale + 70;
+    const outY = top < box.scrollTop || bottom > box.scrollTop + box.clientHeight;
+    // On narrow screens wide ladders scroll sideways too: keep both ends of the arrow in view when possible.
+    const outX = left < box.scrollLeft || right > box.scrollLeft + box.clientWidth;
+    if (outY || outX) {
+      box.scrollTo({
+        top: outY ? Math.max(0, top - box.clientHeight / 3) : box.scrollTop,
+        left: outX ? Math.max(0, (left + right) / 2 - box.clientWidth / 2) : box.scrollLeft,
+        behavior
+      });
     }
   }
 }
