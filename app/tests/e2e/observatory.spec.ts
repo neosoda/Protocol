@@ -101,11 +101,13 @@ for (const width of [390, 768, 1440]) {
     for (const language of ['fr', 'en', 'ar']) {
       test(`visual baseline ${width}px / ${theme} / ${language}`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 });
-        await page.addInitScript(({ prefix, theme, language }) => {
+        await page.goto('/observatory/');
+        await page.evaluate(({ prefix, theme, language }) => {
           localStorage.setItem(prefix + 'theme', theme);
           localStorage.setItem(prefix + 'language', language);
         }, { prefix: storagePrefix, theme, language });
-        await open(page, 'tcp');
+        await page.reload();
+        await page.locator('button.protocol-card[data-id="tcp"]').click();
         await expect(page.locator('#inspector-title')).toBeVisible();
         await expect(page.locator('.ladder-step')).toHaveCount(5);
         await page.screenshot({ path: `test-results/observatory-${width}-${theme}-${language}.png`, fullPage: true });

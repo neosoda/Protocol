@@ -5,7 +5,7 @@
 # Network Observatory
 ### Comprendre les échanges Internet, événement par événement.
 
-Laboratoire interactif des protocoles réseau, avec deux vues synchronisées, contrôle pas à pas et inspection pédagogique.
+Laboratoire interactif des protocoles réseau : topologie logique, diagramme de séquence à lignes de vie, contrôle pas à pas et inspection pédagogique.
 
 **14 protocoles modélisés** · **Vite + TypeScript** · **UI claire/sombre** · **Sans backend**
 
@@ -22,10 +22,12 @@ Laboratoire interactif des protocoles réseau, avec deux vues synchronisées, co
 Un outil dédié à la compréhension du réseau : un événement sélectionné pilote **simultanément** la topologie, la séquence des messages, la progression et l'inspecteur.
 
 - **Découverte** : événement expliqué et premier champ contextualisé, sans octets inutiles.
-- **Expert** : champs modélisés par couche et, lorsque disponible, exemple de texte encodé en UTF-8/hexadécimal.
+- **Expert** : champs par couche sélectionnables, explications ciblées, exemples HEX/ASCII UTF-8 lorsque disponibles, et surlignage de plages uniquement si la correspondance est vérifiable.
 - **Contrôles** : lecture/pause, précédent/suivant, vitesse 0,5×–2×, reset et sélection directe.
 - **Progression locale** : dernier protocole et dernier événement mémorisés dans le navigateur, si le stockage est disponible.
 - **Interface** : thèmes clair/sombre, adaptation responsive, contrôles natifs au clavier, direction RTL pour arabe et hébreu.
+
+Les diagrammes sont des **vues d'un scénario logique modélisé** : ils n'affichent ni capture réelle ni topologie physique déduite. Les données de simulation sont communes aux deux modes.
 
 Les **14 protocoles** représentés sont : IP, TCP, UDP, ICMP, DNS, DHCP, HTTP, HTTPS, SMTP, POP3, IMAP, FTP, SSH et TLS 1.3. Chaque scénario est **une abstraction pédagogique construite**, non une capture pcap ni du trafic réseau.
 
@@ -51,8 +53,7 @@ npm run build
 npm run preview
 ```
 
-**État de validation :** ces commandes sont fournies pour reproduire les vérifications, mais **aucune réussite de compilation, test moteur ou Playwright n'est revendiquée ici. Les tests Playwright sont écrits mais n'ont pas été exécutés ; installer Chromium avec `npx --prefix app playwright install chromium`**. Le fichier `app/package-lock.json` précède le nouveau socle : le régénérer avec `npm --prefix app install`, puis le versionner et vérifier `npm ci` avant fusion.
-
+**État de validation (04/11/2026) :** les nouveaux tests unitaires et Playwright sont **rédigés mais non exécutés** ; aucun résultat de build, typecheck ou capture navigateur n'est revendiqué. Le verrou npm est toujours ouvert : le `app/package-lock.json` historique n'est **pas synchronisé** avec les dépendances du socle TypeScript. Exécuter `npm --prefix app install`, versionner le lock puis vérifier `npm --prefix app ci` dans un environnement disposant de npm et du réseau. Aucun workflow GitHub Actions n'est requis.\n
 ## Structure
 
 ```text
@@ -62,6 +63,8 @@ app/
 ├── src/
 │   ├── protocols/             # catalogue original, données et types
 │   ├── engine/                # machine à états sans dépendance DOM
+│   ├── inspector/             # champs sélectionnables, HEX des exemples
+│   ├── visualizations/        # ladder / topologie logique
 │   ├── i18n/                  # UI et direction RTL
 │   ├── ui/                    # tokens et styles responsive
 │   └── main.ts                # contrôles et vues synchronisées
@@ -70,7 +73,8 @@ app/
 docs/
 ├── AUDIT_2026-11-04.md
 ├── DESIGN_SYSTEM_NETWORK_OBSERVATORY.md
-└── RIGHTS_AND_ATTRIBUTIONS.md
+├── RIGHTS_AND_ATTRIBUTIONS.md
+└── PROTOCOL_REFERENCES.md
 PROJECT_HANDOFF.md             # décisions et suite
 ```
 
@@ -84,7 +88,7 @@ L'implémentation nouvelle est originale au niveau du code ajouté dans cette br
 
 ## Suite
 
-L'[audit priorisé](docs/AUDIT_2026-11-04.md), le [design system](docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md) et le [handoff](PROJECT_HANDOFF.md) suivent la migration sans masquer les risques.
+L'[audit priorisé](docs/AUDIT_2026-11-04.md), le [design system](docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md), les [références RFC](docs/PROTOCOL_REFERENCES.md) et le [handoff](PROJECT_HANDOFF.md) documentent les acquis et les vérifications restant à faire sans masquer les risques.
 
 **Licence :** [MIT](LICENSE) pour les contributions originales dont Neosoda possède les droits ; toute œuvre tierce reste soumise à ses propres droits.
 

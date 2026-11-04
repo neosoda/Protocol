@@ -1,54 +1,64 @@
-# PROJECT HANDOFF — Protocol Explorer / Network Observatory
+# PROJECT HANDOFF — Network Observatory (2026-11-04)
 
-**Base vérifiée :** `main` @ `4daf177d22bd1c5c83a9a3d342e7e98a8bbb275d` (04/11/2026).
-**Branche :** `feat/network-observatory-foundation`.
-**Ne pas fusionner automatiquement.**
+## Références Git
 
-## Objectif
+- Dépôt : `neosoda/Protocol`
+- `main` au départ : `cebc6049d34d7856ddfe5eec967b6c7ba5816de3` (PR #1 fusionnée).
+- Branche de continuation : `feat/network-observatory-v2-consolidation`
+- PR : à créer/consulter depuis cette branche ; **ne pas fusionner automatiquement**.
+- Nouvelle application : `/observatory/`. Historique : `/`.
 
-Remplacer progressivement la reproduction historique, sous réserve de droits, par une application originale Vite + TypeScript (« Network Observatory »), pédagogique et maintenable.
+## Acquis confirmés par inspection des sources et commits (pas par navigateur)
 
-## Documents de référence
+1. L'architecture Vite/TypeScript, le catalogue original à 14 protocoles et le moteur indépendant du DOM de la PR #1 restent en place.
+2. Le diagramme de séquence est désormais un **ladder** : participants, lignes de vie, flèches chronologiques, boutons de sélection et événement actif. Code : `app/src/visualizations/sequence.ts`.
+3. La topologie distingue graphiquement les rôles, émission/réception et trajet de l'événement. Il s'agit **d'un chemin logique modélisé**, pas de liens réseau réellement détectés. Code : `app/src/visualizations/topology.ts`.
+4. Inspecteur : sélection de champs par couche, explication contextuelle et surlignage d'octets **seulement lorsqu'une plage dans l'exemple textuel UTF-8 est explicitement définie et dans ses limites**. Première correspondance : « GET » dans l'exemple HTTP/1.1. Pas d'en-têtes binaires inventés.
+5. TLS 1.3 : séparation des étapes EncryptedExtensions, Certificate/CertificateVerify, Finished serveur et client. HTTPS : attente du Finished client avant la requête. Sources : `docs/PROTOCOL_REFERENCES.md`.
+6. Tests `app/tests/protocol-invariants.test.ts` ajoutés ; E2E actualisés, avec parcours des contrôles, reprise, RTL et matrice de **18 captures prévues** (3 tailles × 2 thèmes × 3 langues).
 
-- `docs/AUDIT_2026-11-04.md` : risques, preuves, priorités, validations attendues.
-- `docs/RIGHTS_AND_ATTRIBUTIONS.md` : **verrou P0 de redistribution**.
-- `docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md` : direction UX et tokens.
+## Validations / statuts rigoureux
 
-## Décisions
+| Contrôle | Statut |
+|---|---|
+| Commit `main` et PR #1 | Vérifiés par GitHub |
+| Branche V2 et commits de code | Poussés sur GitHub |
+| Lecture du catalogue, fichiers sources, droit et handoff | Effectuée |
+| Revue RFC TCP/DHCP/TLS/HTTP | Ciblée ; non exhaustive |
+| Installation `npm install` et génération `package-lock.json` | **BLOQUÉES** : accès DNS/registry indisponible dans l'environnement d'exécution ; lock actuel obsolète |
+| Typecheck, tests unitaires, build, Playwright | **NON exécutés** : aucune copie exécutable du dépôt ni dépendances installables localement |
+| Captures 390/768/1440 FR/EN/AR et thèmes | **Non produites** ; scripts écrits seulement |
+| Contrastes, clavier, lecteur d'écran, responsive, performance | Non vérifiés en navigateur |
+| Traductions des récits (15 langues) | À faire ; interface partiellement localisée seulement |
+| Rights & redistributabilité de l'historique | **P0 bloquant**, documentation inchangée, autorisation non confirmée |
 
-1. Pas de modification des bundles tiers historiques ni suppression de leur attribution.
-2. Nouveau parcours parallèle `/observatory/` ; root historique conservé tant qu'aucune parité n'est prouvée.
-3. Une unique machine à états pour les événements ; vues topologie, séquence et inspection dérivées du même index.
-4. Scénarios **modélisés**, pas trafic réel ; hex uniquement sur des octets d'exemple réellement fournis.
-5. Pas de revendication offline/PWA ou WCAG AA avant vérification.
+## Étapes de reprise prioritaires
 
-## Statuts et suites
+1. Dans un clone local, Node 22+ et npm opérationnels : `npm --prefix app install`, **committer le package-lock régénéré**, puis `npm --prefix app ci`.
+2. Exécuter `npm --prefix app run typecheck`, `test`, `build`, puis installer Chromium et lancer `test:e2e`. Corriger **tout** échec ; ne pas utiliser GitHub Actions.
+3. Valider `/observatory/` en dev et après `vite preview`. Vérifier console, URL de base, sans scroll horizontal ; FR/EN/AR, 390/768/1440 px, modes et thèmes.
+4. Tester l'accessibilité clavier et lecteurs d'écran, focus des champs re-rendus, réductions de mouvement, contrastes AA. Vérifier en particulier les libellés encore en français dans les 15 locales.
+5. Compléter les réponses et causations DNS/SMTP/IMAP/FTP/SSH ; revue RFC exhaustive et tests d'invariants.
+6. Traiter le **P0 juridique** : obtenir une permission explicite pour les ressources historiques ou les retirer de tout livrable distribué ; ne jamais supprimer silencieusement leur attribution.
 
-- [x] Inspection de l'arbre et documentation ; risques juridiques et techniques documentés.
-- [x] Direction et tokens du design system définis.
-- [ ] Confirmation des droits avec Dilum Sanjaya ou retrait complet des éléments non autorisés avant diffusion.
-- [ ] Comparaison navigateur du produit historique par protocole, langue et action.
-- [x] Premier catalogue éditable de 14 protocoles modélisés et tests d'invariants **écrits (non exécutés)**.
-- [ ] Vérification RFC exhaustive des 14 protocoles (références et tests de chaque champ).
-- [x] Libellés UI partiels dans 15 langues, ar/he avec direction RTL ; repli anglais explicite.
-- [ ] Traductions pédagogiques intégrales dans les 15 langues, RTL compris, avec relecture.
-- [ ] Captures avant/après à 390, 768, 1440 px, FR/EN/AR, clair/sombre.
-- [x] Tests unitaires et scénarios Playwright de base **rédigés**, dont captures 390/768/1440 clair/sombre (non exécutés).
-- [ ] Exécuter `tsc`, tests unitaires, build et Playwright en local ; auditer accessibilité clavier/contrastes, console et CSP.
-- [ ] Vérifier manifest/icônes, URLs OG, PWA/offline avant tout changement de revendication.
-- [ ] Revue des dépendances et licences avant une PR non draft ou un déploiement.
-
-## Procédure reproductible (à exécuter)
+## Reproduction locale attendue
 
 ```bash
 npm --prefix app install
+npm --prefix app ci
 npm --prefix app run typecheck
 npm --prefix app run test
 npm --prefix app run build
+npx --prefix app playwright install chromium
 npm --prefix app run test:e2e
 npm --prefix app run dev
 ```
 
-Inspecter ensuite `/observatory/` sur `http://localhost:5173` et comparer avec `/`.
+Ne déclarer aucun succès sans logs réels. Conserver la PR V2 en **draft** jusqu'à preuves de qualité et clarification des droits. Les modules TypeScript ajoutés ne suffisent pas à garantir la parité avec le site historique.
 
-**Remarque :** la branche contient du code et des scripts de test, mais **aucune exécution locale probante ni capture générée n'a été obtenue**. `app/package-lock.json` doit être régénéré et vérifié. Les tests et captures ne peuvent être considérés « OK » qu'après un journal réel de leur exécution. Ce document doit être mis à jour à chaque lot.
+## Références
+
+- `docs/AUDIT_2026-11-04.md`
+- `docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md`
+- `docs/PROTOCOL_REFERENCES.md`
+- `docs/RIGHTS_AND_ATTRIBUTIONS.md`
