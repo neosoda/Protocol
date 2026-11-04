@@ -7,7 +7,7 @@
 
 Laboratoire interactif des protocoles réseau : topologie logique, diagramme de séquence à lignes de vie, contrôle pas à pas et inspection pédagogique.
 
-**14 protocoles modélisés** · **Vite + TypeScript** · **UI claire/sombre** · **Sans backend**
+**14 protocoles modélisés** · **Design system Signal & Structure** · **Vite + TypeScript** · **Sans backend**
 
 [Découvrir le laboratoire](#nouvelle-expérience--network-observatory) · [Installation](#installation) · [Limites-et-droits](#limites-et-droits)
 
@@ -16,6 +16,14 @@ Laboratoire interactif des protocoles réseau : topologie logique, diagramme de 
 ---
 
 > **Attention — statut alpha de migration.** Cette branche propose un nouveau laboratoire écrit de manière indépendante sous `/observatory/`. La page historique `/` contient des éléments reproduits depuis le site de Dilum Sanjaya ; **leurs droits de redistribution ne sont pas confirmés**. Ne pas publier ou redistribuer ces éléments sans clarification juridique ou remplacement original.
+
+## Identité visuelle V3 — Signal & Structure
+
+La branche de travail `feat/observatory-v3-signal-structure` introduit une refonte UX/UI complète des **surfaces visuelles** du laboratoire : monogramme vectoriel original, palette scientifique claire/sombre, design system unifié, catalogue avec recherche et état vide, topologie et ladder plus lisibles, inspecteur technique repensé et adaptation mobile. Le moteur de simulation et les 14 scénarios restent la source de vérité.
+
+[Voir la spécification de l'identité](docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md) · [Consulter le handoff V3](PROJECT_HANDOFF.md)
+
+**Statut : implémenté en code, non validé en navigateur.** `npm ci`, build et tests Playwright sont encore bloqués par l'accès npm/DNS et le lockfile. Aucune promesse WCAG 2.2 AA avant validation instrumentée.
 
 ## Nouvelle expérience — Network Observatory
 

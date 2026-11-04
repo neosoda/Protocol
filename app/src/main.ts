@@ -108,7 +108,7 @@ function catalogue(): string {
       </div>
       <p id="search-empty" class="search-empty" hidden>${escapeHtml(t('searchEmpty'))}</p>
       ${categories.map(category => `<section class="category" data-category="${category}" aria-labelledby="group-${category}"><h3 id="group-${category}">${escapeHtml(categoryName(category))}</h3>
-      <div class="protocol-grid">${catalog.filter(p => p.category === category).map(p => `<button class="protocol-card" data-action="open" data-id="${p.id}" data-search="${escapeHtml([p.name, p.summary, p.category, p.id].join(' ').toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))}">
+      <div class="protocol-grid">${catalog.filter(p => p.category === category).map(p => `<button class="protocol-card" data-action="open" data-id="${p.id}" data-search="${escapeHtml([p.name, p.summary, categoryName(p.category), p.category, p.id].join(' ').toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))}">
         <span class="protocol-top"><strong>${escapeHtml(p.name)}</strong><span class="protocol-arrow" aria-hidden="true">↗</span></span>
         <span class="protocol-summary">${escapeHtml(p.summary)}</span><span class="protocol-meta">${escapeHtml(formatLevel(p.level))} <span aria-hidden="true">·</span> ~${p.minutes} ${escapeHtml(t('minutes'))}</span>
       </button>`).join('')}</div></section>`).join('')}
