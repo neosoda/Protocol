@@ -1,5 +1,15 @@
 {
   "buildCommand": "cd app && npm run build",
   "outputDirectory": "app/dist",
-  "ignoreCommand": "echo 'Build ignored: rights and release gates not cleared'; exit 0"
+  "ignoreCommand": "echo 'Build ignored: rights and release gates not cleared'; exit 0",
+  "rewrites": [
+    {
+      "source": "/observatory",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/observatory/:path*",
+      "destination": "/index.html"
+    }
+  ]
 }
