@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 /**
  * V4: the original Observatory becomes the production ROOT entry.
  * Never rebuild the historical third-party page or copy historical public/.
- * The /observatory/ path stays available in dev and is rewritten to the root
- * single-page entry by Vercel in production.
+ * The /observatory/ compatibility URL redirects to / through the
+ * Coolify Nginx configuration in deploy/nginx.conf.
  */
 export default defineConfig(({ command }) => ({
   publicDir: command === 'build' ? false : 'public',
