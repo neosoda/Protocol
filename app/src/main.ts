@@ -141,7 +141,7 @@ function simulation(): string {
   const progress = Math.round(((state.index + 1) / active.events.length) * 100);
   return `<main id="main-content" class="page lab">
     <div class="lab-overview">
-      <div><button data-action="catalog" class="back-link">← ${escapeHtml(t('back'))}</button>
+      <div class="lab-heading"><button data-action="catalog" class="back-link">← ${escapeHtml(t('back'))}</button>
       <div class="eyebrow">LAB / ${escapeHtml(active.category.toUpperCase())} / ${escapeHtml(active.id.toUpperCase())}</div>
       <h1 id="lab-title" tabindex="-1">${escapeHtml(active.name)} <span class="muted">/ ${escapeHtml(t('experiment'))}</span></h1>
       <p>${escapeHtml(active.summary)}</p>

@@ -19,7 +19,7 @@ Laboratoire interactif des protocoles réseau : topologie logique, diagramme de 
 
 ## Identité visuelle V3 — Signal & Structure
 
-La branche de travail `feat/observatory-v3-signal-structure` introduit une refonte UX/UI complète des **surfaces visuelles** du laboratoire : monogramme vectoriel original, palette scientifique claire/sombre, design system unifié, catalogue avec recherche et état vide, topologie et ladder plus lisibles, inspecteur technique repensé et adaptation mobile. Le moteur de simulation et les 14 scénarios restent la source de vérité.
+La [PR #4 — Signal & Structure](https://github.com/neosoda/Protocol/pull/4) sur la branche `feat/observatory-v3-signal-structure` introduit une refonte UX/UI complète des **surfaces visuelles** du laboratoire : monogramme vectoriel original, palette scientifique claire/sombre, design system unifié, catalogue avec recherche et état vide, topologie et ladder plus lisibles, inspecteur technique repensé et adaptation mobile. Le moteur de simulation et les 14 scénarios restent la source de vérité.
 
 [Voir la spécification de l'identité](docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md) · [Consulter le handoff V3](PROJECT_HANDOFF.md)
 

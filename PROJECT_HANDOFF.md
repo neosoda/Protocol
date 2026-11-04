@@ -6,7 +6,7 @@
 
 **Protection** : `vercel.json` contient `ignoreCommand` qui retourne 0 et demande à Vercel de sauter les nouveaux builds. Cela ne désactive pas les déploiements déjà existants ni les autres hébergeurs. Le statut juridique concernant les ressources historiques reste P0.
 
-**Branche actuelle :** `feat/observatory-v3-signal-structure`, issue du merge `80dac1d`. **Ne pas fusionner la PR V3 automatiquement.**
+**Branche actuelle :** `feat/observatory-v3-signal-structure`, issue du merge `80dac1d`. **PR [#4](https://github.com/neosoda/Protocol/pull/4) ouverte en brouillon : ne pas fusionner automatiquement.**
 
 ### Travaux V3 poussés
 
