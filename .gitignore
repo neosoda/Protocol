@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Production builds
+dist/
+**/dist/
+
+# Logs & temp
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+usage.json
+
+# ArtCraft internal scratch & checks
+app-intact/
+checks/
+capture/
+investigation.cany/
+craft.json
+feed.json
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & editors
+.vscode/
+.idea/
+*.swp
+*.swo

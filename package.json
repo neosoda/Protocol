@@ -1,0 +1,25 @@
+{
+  "name": "protocol-explorer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Visualiseur interactif des protocoles Internet paquet par paquet (TCP/IP, DNS, HTTP, TLS, SSH...) avec décodage des trames au niveau octet.",
+  "scripts": {
+    "dev": "npm --prefix app run dev",
+    "build": "npm --prefix app run build",
+    "preview": "npm --prefix app run preview"
+  },
+  "keywords": [
+    "networking",
+    "protocols",
+    "packet-inspector",
+    "tcp-ip",
+    "dns",
+    "http",
+    "tls",
+    "ssh",
+    "interactive-learning",
+    "vite"
+  ],
+  "author": "Neosoda",
+  "license": "MIT"
+}
