@@ -1,5 +1,36 @@
 # PROJECT HANDOFF — Network Observatory (2026-11-04)
 
+## ÉTAT ACTUEL — V4 Workbench — 4 novembre 2026
+
+**Pourquoi le design restait identique sur le site :** la V3 avait été fusionnée sur GitHub, mais `/` était encore l'ancien `app/index.html` (163 633 caractères), tandis que le laboratoire moderne était uniquement sous `/observatory/`. Le `vercel.json` ignorait tous les builds. La V3 ne modifiait en outre pas assez la structure.
+
+**Nouvelle branche :** `feat/observatory-v4-workbench`, créée depuis le `main` après PR #4. **Ne pas fusionner automatiquement.**
+
+### Changements effectués (sur GitHub)
+
+- `app/index.html` réécrit comme **entrée moderne** ; Vite compile uniquement `dist/index.html`, avec `publicDir: false`. Les anciens bundles historiques ne doivent plus se retrouver dans une sortie de production.
+- `app/scripts/verify-build.mjs` et 5 tests Node réécrits : racine moderne obligatoire, un seul bundle JS et aucun fichier inattendu.
+- Nouvelle interface V4 **structurelle** : rail latéral permanent avec accès aux 14 protocoles, tiroir mobile, accueil éditorial avec moniteur TCP SVG original, catalogue indexé, chronologie principale, topologie et inspecteur empilés à droite, message actif synchronisé.
+- `app/src/ui/styles.css` intégralement refondu en palette ivoire, encre, corail et bleu. Nouvel emblème vectoriel N/O, distinct de la V3.
+- **85 clés FR/EN vérifiées statiquement** (aucun doublon, aucune clé manquante). 2 scénarios E2E ajoutés sur l'entrée racine et le menu mobile.
+- `vercel.json` laisse **la production bloquée** (`VERCEL_ENV=production` → code 0) mais autorise les seules **previews** (`VERCEL_ENV=preview` → code 1), avec installation, typecheck, tests Node et build anti-legacy. Une preview réelle dépend de la connexion Vercel et de la réussite des tests.
+- La route `/observatory/` reste accessible en dev et par rewrite Vercel vers `/`.
+
+### Validation et risques
+
+**Non exécutés en local sur cette branche :** `npm ci` (lockfile obsolète), TypeScript complet, Node métier, Vite, Playwright, screenshots, WCAG 2.2 AA. DNS vers le registre npm indisponible. Les vérifications du DOM et des dictionnaires sont **statiques** ; elles ne prouvent pas le rendu.
+
+L'ancien contenu tiers se trouve encore dans l'historique Git et des ressources historiques peuvent rester dans `app/public`, **non recopié au build**. La licence de ces ressources n'est pas établie. Ne pas réactiver la production ni redistribuer l'historique.
+
+### Priorité suivante
+
+1. Vérifier si Vercel publie une preview ; consulter son build et corriger tout échec réel.
+2. Sur un poste avec npm, régénérer et committer `app/package-lock.json`, puis `npm ci`, typecheck, tests, build et Playwright.
+3. Capturer et examiner visuellement 390/768/1440, FR/EN/AR, clair/sombre, clavier/RTL et contrastes.
+4. Confirmer la sécurité des artefacts et les droits avant fusion et déploiement de production.
+
+**Les sections suivantes relatent les étapes précédentes ; cette section V4 fait foi.**
+
 ## État actuel après fusion PR #4 — 04/11/2026
 
 - **PR #4 « Signal & Structure » fusionnée dans `main`**, commit `5da7512c52ebefec763eb6a5248d1eb2a8db780a`. PR #3 fusionnée auparavant : `80dac1df1327a0c7dc9872806c27aa15824be8ad`.
