@@ -33,6 +33,8 @@ let language: Language = languageFromBrowser();
 let theme: Theme = read('theme') === 'light' ? 'light' : 'dark';
 let mode: Mode = read('mode') === 'expert' ? 'expert' : 'discovery';
 let onCatalog = true;
+let selectedField = 0;
+let inspectedEventId = "";
 let active: ProtocolScenario = findScenario(read('last-protocol') ?? 'tcp');
 const app = $('app');
 if (!app) throw new Error('Missing application mount');
@@ -150,6 +152,7 @@ function update(): void {
   if (onCatalog || !$('event-list')) return;
   const state: TimelineState = timeline.getState();
   const current = active.events[state.index];
+  if (inspectedEventId !== current.id) { selectedField = 0; inspectedEventId = current.id; }
   const progress = Math.round(((state.index + 1) / active.events.length) * 100);
   const progressText = $('progress-text');
   if (progressText) progressText.textContent = `${t('step')} ${state.index + 1} / ${active.events.length}`;
@@ -177,7 +180,7 @@ function update(): void {
   const flow = $('flow-readout');
   if (flow) flow.innerHTML = renderFlow(active, current);
   const body = $('inspector-body');
-  if (body) body.innerHTML = renderInspector(current, mode, t);
+  if (body) body.innerHTML = renderInspector(current, mode, t, selectedField);
   store('progress:' + active.id, String(state.index));
 }
 
@@ -201,6 +204,15 @@ app.addEventListener('click', ev => {
     case 'next': timeline.dispatch({ type: 'NEXT' }); break;
     case 'reset': timeline.dispatch({ type: 'RESET' }); break;
     case 'select': timeline.dispatch({ type: 'SELECT', index: Number(target.dataset.index) }); break;
+    case 'inspect-field': {
+      const index = Number(target.dataset.fieldIndex);
+      if (Number.isInteger(index) && index >= 0 && index < active.events[timeline.getState().index].fields.length) {
+        selectedField = index;
+        update();
+        $('inspector-body')?.querySelectorAll<HTMLButtonElement>('button[data-field-index]')[index]?.focus();
+      }
+      break;
+    }
   }
 });
 app.addEventListener('change', ev => {

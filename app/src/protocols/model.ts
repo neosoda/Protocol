@@ -1,7 +1,7 @@
 export type Category = 'network' | 'web' | 'security';
 export type Layer = 'network' | 'transport' | 'application' | 'security';
 export interface Participant { id: string; name: string; role: string }
-export interface PacketField { layer: Layer; name: string; value: string; explanation: string }
+export interface PacketField { layer: Layer; name: string; value: string; explanation: string; /** Offsets into sample UTF-8 bytes only; omit when not verified. */ sampleRange?: { offset: number; length: number } }
 export interface NetworkEvent {
   id: string;
   from: string;
