@@ -12,6 +12,7 @@ npm install
 npm run dev
 npm run typecheck
 npm run test
+npm run test:e2e
 npm run build
 ```
 
