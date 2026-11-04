@@ -1,11 +1,31 @@
 # PROJECT HANDOFF — Network Observatory (2026-11-04)
 
+## Reprise après fusion PR #2
+
+- `main` : `9dbeea4877ec78ed40eb54d94350b346072db848` — PR #2 **fusionnée sur instruction explicite du propriétaire**, sans exécution des tests ni autorisation de distribution.
+- Nouvelle branche : `fix/observatory-v2-hardening`, issue de ce commit.
+- Nouvelle PR : non fusionnée ; ouvrir en brouillon après vérification statique.
+- Critères de publication : `docs/RELEASE_GATES.md` (P0 droits historiques toujours bloquant).
+
+### Travaux du lot durcissement
+
+- Focus clavier conservé après réaffichage complet du mode, du thème et de la langue ; focus transféré au titre du laboratoire/catalogue lors du changement de page.
+- Focus de l'inspecteur repositionné par **identifiant de champ**, et non par position DOM (les champs sont regroupés par couche).
+- Typecheck élargi au code de test, à la configuration Vite et Playwright ; types Node inclus. Aucun résultat de typecheck revendiqué.
+- Script `npm test` : chemins explicites pour éviter la dépendance à l'expansion des globs sur Windows.
+- Tests Playwright ajoutés : focus, absence de débordement horizontal à 390 px, absence d'erreur console/page.
+- **Bug de la matrice de captures corrigé** : le script d'initialisation ne doit plus réécraser la langue et le thème sélectionnés au rechargement ; des assertions HTML vérifient maintenant chaque couple.
+- Documentation de lancement racine corrigée : commandes `npm --prefix app run ...`.
+
+**Validation : modifications poussées et sources inspectées, mais npm / tsc / navigateur et screenshots toujours non exécutés dans l'environnement actuel faute d'accès npm/Git direct. Ne pas afficher « passé » dans la PR.**
+
+
 ## Références Git
 
 - Dépôt : `neosoda/Protocol`
 - `main` au départ : `cebc6049d34d7856ddfe5eec967b6c7ba5816de3` (PR #1 fusionnée).
 - Branche de continuation : `feat/network-observatory-v2-consolidation`
-- PR : [#2](https://github.com/neosoda/Protocol/pull/2), **en brouillon, ne pas fusionner automatiquement**.
+- PR #2 : [fusionnée](https://github.com/neosoda/Protocol/pull/2) le 04/11/2026 ; la branche de suite est `fix/observatory-v2-hardening`.
 - Nouvelle application : `/observatory/`. Historique : `/`.
 
 ## Acquis confirmés par inspection des sources et commits (pas par navigateur)
@@ -54,7 +74,7 @@ npm --prefix app run test:e2e
 npm --prefix app run dev
 ```
 
-Ne déclarer aucun succès sans logs réels. Conserver la PR V2 en **draft** jusqu'à preuves de qualité et clarification des droits. Les modules TypeScript ajoutés ne suffisent pas à garantir la parité avec le site historique.
+Ne déclarer aucun succès sans logs réels. Ne pas publier/redistribuer l'historique non autorisé. Conserver la **PR de durcissement** en brouillon jusqu'aux tests reproductibles et au traitement des droits. Les modules TypeScript ajoutés ne suffisent pas à garantir la parité avec le site historique.
 
 ## Références
 
@@ -62,3 +82,4 @@ Ne déclarer aucun succès sans logs réels. Conserver la PR V2 en **draft** jus
 - `docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md`
 - `docs/PROTOCOL_REFERENCES.md`
 - `docs/RIGHTS_AND_ATTRIBUTIONS.md`
+- `docs/RELEASE_GATES.md`

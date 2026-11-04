@@ -88,7 +88,7 @@ L'implémentation nouvelle est originale au niveau du code ajouté dans cette br
 
 ## Suite
 
-L'[audit priorisé](docs/AUDIT_2026-11-04.md), le [design system](docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md), les [références RFC](docs/PROTOCOL_REFERENCES.md) et le [handoff](PROJECT_HANDOFF.md) documentent les acquis et les vérifications restant à faire sans masquer les risques.
+L'[audit priorisé](docs/AUDIT_2026-11-04.md), le [design system](docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md), les [références RFC](docs/PROTOCOL_REFERENCES.md), les [conditions de livraison](docs/RELEASE_GATES.md) et le [handoff](PROJECT_HANDOFF.md) documentent les acquis et les vérifications restant à faire sans masquer les risques.
 
 **Licence :** [MIT](LICENSE) pour les contributions originales dont Neosoda possède les droits ; toute œuvre tierce reste soumise à ses propres droits.
 
