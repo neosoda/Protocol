@@ -114,7 +114,7 @@ function catalogue(): string {
     <section class="signal-hero" aria-labelledby="home-title">
       <div class="hero-copy">
         <div class="eyebrow"><span class="tiny-square" aria-hidden="true"></span>${escapeHtml(t('heroIndex'))}</div>
-        <h1 id="home-title" tabindex="-1">${escapeHtml(t('heroLead'))}<em>${escapeHtml(t('heroAccent'))}</em></h1>
+        <h1 id="home-title" tabindex="-1">${escapeHtml(t('heroLead'))} <em>${escapeHtml(t('heroAccent'))}</em></h1>
         <p class="hero-description">${escapeHtml(t('heroDescription'))}</p>
         <div class="intro-actions">
           <button class="primary-button" data-action="open" data-id="tcp">${escapeHtml(t('start'))} TCP <span aria-hidden="true">↗</span></button>
@@ -176,7 +176,7 @@ function catalogue(): string {
         <div class="category-heading"><h3 id="group-${category}"><span>0${catIndex + 1} /</span> ${escapeHtml(categoryName(category))}</h3>
           <span>${String(catalog.filter(p => p.category === category).length).padStart(2, '0')} ${escapeHtml(t('searchResults'))}</span></div>
         <div class="protocol-grid">${catalog.filter(p => p.category === category).map(p => `<button class="protocol-card" data-action="open" data-id="${escapeHtml(p.id)}"
-          data-search="${escapeHtml([p.name, p.summary, categoryName(p.category), p.category, p.id].join(' ').toLocaleLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, ''))}">
+          data-search="${escapeHtml([p.name, p.summary, categoryName(p.category), p.category, p.id].join(' ').toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))}">
           <span class="card-index">${String(catalog.indexOf(p) + 1).padStart(2, '0')}</span>
           <span class="card-main"><span class="protocol-top"><strong>${escapeHtml(p.name)}</strong><span class="protocol-arrow" aria-hidden="true">↗</span></span>
           <span class="protocol-summary">${escapeHtml(p.summary)}</span>
