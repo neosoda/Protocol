@@ -38,6 +38,7 @@ let language: Language = languageFromBrowser();
 let theme: Theme = read('theme') === 'light' ? 'light' : 'dark';
 let mode: Mode = read('mode') === 'expert' ? 'expert' : 'discovery';
 let onCatalog = true;
+let catalogQuery = '';
 let selectedField = 0;
 let inspectedEventId = "";
 let active: ProtocolScenario = findScenario(read('last-protocol') ?? 'tcp');
@@ -56,7 +57,7 @@ function applyPreferences(): void {
 
 function brand(): string {
   return `<span class="brand-mark" aria-hidden="true">
-    <svg viewBox="0 0 48 48" focusable="false"><path d="M7 14h20l10 10-10 10H7" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M39 33H21L11 23l10-10h18" fill="none" stroke="var(--teal)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="14" r="3.2" fill="currentColor"/><circle cx="39" cy="33" r="3.2" fill="var(--teal)"/></svg>
+    <svg viewBox="0 0 64 64" focusable="false"><path d="M12 18h15l13 14H52" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/><path d="M12 46h15l13-14H52" fill="none" stroke="var(--teal)" stroke-width="4.5" stroke-linecap="round"/><circle cx="12" cy="18" r="5" fill="currentColor"/><circle cx="12" cy="46" r="5" fill="var(--teal)"/><circle cx="52" cy="32" r="5.5" fill="var(--surface)" stroke="currentColor" stroke-width="3"/></svg>
     </span>`;
 }
 
@@ -66,7 +67,7 @@ function selectOptions(): string {
 
 function header(): string {
   return `<header class="masthead">
-    <button class="brand" data-action="catalog" aria-label="${escapeHtml(t('catalog'))}">${brand()}<span><strong>NETWORK<span class="brand-divider"> / </span>OBSERVATORY</strong><small>Protocol Explorer · research lab</small></span></button>
+    <button class="brand" data-action="catalog" aria-label="${escapeHtml(t('catalog'))}">${brand()}<span><strong>NETWORK<span class="brand-divider"> / </span>OBSERVATORY</strong><small>${escapeHtml(t('brandSubtitle'))}</small></span></button>
     <div class="masthead-actions">
       <label class="select-wrap"><span>${escapeHtml(t('language'))}</span><select id="language-select" aria-label="${escapeHtml(t('language'))}">${selectOptions()}</select></label>
       <button class="plain-button" data-action="theme" title="${escapeHtml(t('theme'))}" aria-label="${escapeHtml(t('theme'))}">${theme === 'dark' ? '☀︎' : '☾'} <span class="theme-name">${escapeHtml(t(theme === 'dark' ? 'themeLight' : 'themeDark'))}</span></button>
@@ -86,9 +87,9 @@ function catalogue(): string {
       <h1 id="home-title" tabindex="-1">${escapeHtml(t('heroLead'))} <em>${escapeHtml(t('heroAccent'))}</em></h1>
       <p>${escapeHtml(t('heroDescription'))}</p>
       <div class="intro-actions"><button class="primary-button" data-action="open" data-id="tcp">${escapeHtml(t('start'))} TCP <span aria-hidden="true">→</span></button>
-      <button class="secondary-button" data-action="open" data-id="${escapeHtml(last.id)}">${escapeHtml(t('resume'))} ${escapeHtml(last.name)}</button></div></div>
+      <button class="secondary-button" data-action="open" data-id="${escapeHtml(last.id)}">${escapeHtml(t('resume'))} ${escapeHtml(last.name)}</button></div><p class="hero-footnote">${escapeHtml(t('heroFootnote'))}</p></div>
       <div class="intro-instrument" aria-label="${escapeHtml(t('diagramTcp'))}">
-        <span class="instrument-caption">OBSERVATION / 001</span>
+        <span class="instrument-caption"><span class="instrument-live"></span> ${escapeHtml(t('diagramLabel'))} / 001</span>
         <div class="mini-network"><span class="instrument-node">CLIENT</span><span class="mini-link">SYN <b>→</b></span><span class="instrument-node">SERVER</span></div>
         <div class="mini-network reverse"><span class="instrument-node">CLIENT</span><span class="mini-link"><b>←</b> SYN · ACK</span><span class="instrument-node">SERVER</span></div>
         <div class="mini-network"><span class="instrument-node">CLIENT</span><span class="mini-link">ACK <b>→</b></span><span class="instrument-node">SERVER</span></div>
@@ -98,12 +99,41 @@ function catalogue(): string {
     <section class="catalogue" aria-labelledby="catalogue-title"><div class="section-heading">
       <div><p class="eyebrow">${escapeHtml(t('exploreEyebrow'))}</p><h2 id="catalogue-title">${escapeHtml(t('catalog'))}</h2></div>
       <span class="note-tag">${escapeHtml(t('modelled'))}</span></div>
-      ${categories.map(category => `<section class="category" aria-labelledby="group-${category}"><h3 id="group-${category}">${escapeHtml(categoryName(category))}</h3>
-      <div class="protocol-grid">${catalog.filter(p => p.category === category).map(p => `<button class="protocol-card" data-action="open" data-id="${p.id}">
-        <span class="protocol-top"><strong>${escapeHtml(p.name)}</strong><span aria-hidden="true">↗</span></span>
+      <div class="catalogue-tools">
+        <label class="search-control" for="protocol-search"><span class="search-label">${escapeHtml(t('searchLabel'))}</span>
+          <span class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+            <input id="protocol-search" type="search" autocomplete="off" placeholder="${escapeHtml(t('searchPlaceholder'))}" value="${escapeHtml(catalogQuery)}"></span></label>
+        <button type="button" class="search-clear" data-action="clear-search" ${catalogQuery ? '' : 'hidden'}>${escapeHtml(t('searchClear'))}</button>
+        <span id="search-count" class="search-count" role="status" aria-live="polite"></span>
+      </div>
+      <p id="search-empty" class="search-empty" hidden>${escapeHtml(t('searchEmpty'))}</p>
+      ${categories.map(category => `<section class="category" data-category="${category}" aria-labelledby="group-${category}"><h3 id="group-${category}">${escapeHtml(categoryName(category))}</h3>
+      <div class="protocol-grid">${catalog.filter(p => p.category === category).map(p => `<button class="protocol-card" data-action="open" data-id="${p.id}" data-search="${escapeHtml([p.name, p.summary, categoryName(p.category), p.category, p.id].join(' ').toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))}">
+        <span class="protocol-top"><strong>${escapeHtml(p.name)}</strong><span class="protocol-arrow" aria-hidden="true">↗</span></span>
         <span class="protocol-summary">${escapeHtml(p.summary)}</span><span class="protocol-meta">${escapeHtml(formatLevel(p.level))} <span aria-hidden="true">·</span> ~${p.minutes} ${escapeHtml(t('minutes'))}</span>
       </button>`).join('')}</div></section>`).join('')}
     </section></main>`;
+}
+
+function updateCatalogueFilter(): void {
+  if (!onCatalog) return;
+  const query = catalogQuery.trim().toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  let matches = 0;
+  app!.querySelectorAll<HTMLElement>('.category').forEach(section => {
+    let sectionMatches = 0;
+    section.querySelectorAll<HTMLButtonElement>('.protocol-card').forEach(card => {
+      const match = (card.dataset.search ?? '').includes(query);
+      card.hidden = !match;
+      if (match) { sectionMatches++; matches++; }
+    });
+    section.hidden = sectionMatches === 0;
+  });
+  const count = $('search-count');
+  if (count) count.textContent = `${matches} / ${catalog.length} ${t('searchResults')}`;
+  const empty = $('search-empty');
+  if (empty) empty.hidden = matches !== 0;
+  const clear = app!.querySelector<HTMLButtonElement>('.search-clear');
+  if (clear) clear.hidden = !catalogQuery;
 }
 
 function simulation(): string {
@@ -111,7 +141,7 @@ function simulation(): string {
   const progress = Math.round(((state.index + 1) / active.events.length) * 100);
   return `<main id="main-content" class="page lab">
     <div class="lab-overview">
-      <div><button data-action="catalog" class="back-link">← ${escapeHtml(t('back'))}</button>
+      <div class="lab-heading"><button data-action="catalog" class="back-link">← ${escapeHtml(t('back'))}</button>
       <div class="eyebrow">LAB / ${escapeHtml(active.category.toUpperCase())} / ${escapeHtml(active.id.toUpperCase())}</div>
       <h1 id="lab-title" tabindex="-1">${escapeHtml(active.name)} <span class="muted">/ ${escapeHtml(t('experiment'))}</span></h1>
       <p>${escapeHtml(active.summary)}</p>
@@ -136,7 +166,7 @@ function simulation(): string {
         <div class="flow-readout" id="flow-readout" aria-live="polite"></div>
       </div>
       <div class="panel sequence-panel"><div class="panel-heading"><div><span class="eyebrow">02 / ${escapeHtml(t('panelTimeline'))}</span><h2>${escapeHtml(t('sequence'))}</h2></div><span class="legend-key">${active.events.length} ${escapeHtml(t('events'))}</span></div>
-        <ol class="event-list ladder-list" id="event-list">${renderSequence(active, t)}</ol>
+        <ol class="event-list ladder-list" id="event-list" aria-label="${escapeHtml(t('eventListLabel'))}">${renderSequence(active, t)}</ol>
       </div>
     </section>
     <section class="panel inspector-panel" aria-labelledby="inspector-title"><div class="panel-heading"><div><span class="eyebrow">03 / ${escapeHtml(t('panelAnalysis'))}</span><h2 id="inspector-title">${escapeHtml(t('inspector'))}</h2></div><span class="legend-key">${escapeHtml(t('sampleLegend'))}</span></div>
@@ -150,7 +180,7 @@ function render(focusSelector?: string): void {
   app!.innerHTML = `<a class="skip-link" href="#main-content">${escapeHtml(t('skipLink'))}</a><div class="shell">${header()}${onCatalog ? catalogue() : simulation()}
     <footer class="footer"><span>Network Observatory · ${escapeHtml(t('footerAlpha'))}</span>
     <span>${escapeHtml(t('footerAttribution'))} <a href="https://protocol-explorer-alpha.vercel.app/" target="_blank" rel="noopener noreferrer">Protocol Explorer — Dilum Sanjaya</a> · ${escapeHtml(t('footerRights'))}</span></footer></div>`;
-  if (!onCatalog) update();
+  if (onCatalog) updateCatalogueFilter(); else update();
   // Full view replacements must not silently discard keyboard focus.
   if (focusSelector) app!.querySelector<HTMLElement>(focusSelector)?.focus();
 }
@@ -220,6 +250,12 @@ app.addEventListener('click', ev => {
   switch (target.dataset.action) {
     case 'catalog': timeline.dispatch({ type: 'PAUSE' }); onCatalog = true; render('#home-title'); break;
     case 'open': openScenario(target.dataset.id ?? 'tcp'); break;
+    case 'clear-search': {
+      catalogQuery = '';
+      const input = $('protocol-search') as HTMLInputElement | null;
+      if (input) { input.value = ''; updateCatalogueFilter(); input.focus(); }
+      break;
+    }
     case 'theme': theme = theme === 'dark' ? 'light' : 'dark'; store('theme', theme); render('[data-action="theme"]'); break;
     case 'mode': mode = target.dataset.mode === 'expert' ? 'expert' : 'discovery'; store('mode', mode); render('[data-action="mode"][data-mode="' + mode + '"]'); break;
     case 'toggle': timeline.dispatch({ type: 'TOGGLE' }); break;
@@ -236,6 +272,13 @@ app.addEventListener('click', ev => {
       }
       break;
     }
+  }
+});
+app.addEventListener('input', ev => {
+  const target = ev.target;
+  if (target instanceof HTMLInputElement && target.id === 'protocol-search') {
+    catalogQuery = target.value;
+    updateCatalogueFilter();
   }
 });
 app.addEventListener('change', ev => {

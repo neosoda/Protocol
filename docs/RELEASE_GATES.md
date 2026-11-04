@@ -46,3 +46,11 @@ En production, l'URL racine `/` **ne doit plus servir le site historique** ; vé
 Les libellés de panneaux, les rôles de topologie et les messages de l'inspecteur disposent d'une version FR/EN complète pour 69 clés UI, avec repli des autres langues. Des contrôles **statiques** ont vérifié les clés, la longueur HTTP et 14 identifiants SSH ; nouveaux tests d'invariants et E2E ajoutés **mais non exécutés**. L'absence de données capturées et les simplifications RFC restent explicites.
 
 **Aucune évolution des critères de fusion :** lockfile et validations npm/Vite/Playwright/production encore bloqués ; droits historiques non résolus. PR #3 ouverte en brouillon, aucune fusion ni publication.
+
+## V3 Signal & Structure — points supplémentaires à vérifier
+
+- Recherche par protocole/catégorie, état vide, effacement et focus après interaction.
+- 78 libellés FR/EN vérifiés statiquement, mais pas en navigateur ni par lecteur d'écran.
+- Remplacement complet de la feuille CSS : inspecter les régressions éventuelles sur boutons, cartes, émetteur/récepteur, ladder, HEX, modes, thèmes, RTL et largeur 390 px.
+- Logo src/public cohérent ; `vercel.json` garde `ignoreCommand` renvoyant 0 jusqu'à déblocage juridique.
+- **Aucune validation npm/Playwright ou WCAG attestée.** La PR #3 fusionnée reste historiquement non testée ; la PR V3 doit rester non fusionnée.

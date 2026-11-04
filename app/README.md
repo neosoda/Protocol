@@ -31,3 +31,7 @@ Le serveur **de développement** conserve `/` et ses ressources historiques pour
 Les quatre tests autonomes du garde-fou ont été exécutés avec succès sur des copies identiques aux sources poussées. Cela ne valide ni TypeScript, ni les scénarios, ni l'accessibilité, ni les tests navigateur. Consulter `../PROJECT_HANDOFF.md`.
 
 Le scénario SSH comporte maintenant 14 événements modélisés et l'exemple HTTP/1.1 annonce un `Content-Length` cohérent avec son corps. Les contrôles d'exactitude ont été écrits mais ne sont pas encore passés par le runner du dépôt. Les nouvelles progressions sont enregistrées par ID d'événement (reprise des anciens index acceptée).
+
+## V3 / Signal & Structure
+
+Branche `feat/observatory-v3-signal-structure` : feuilles de style refactorisées, nouvelle marque vectorielle, interface de recherche locale dans le catalogue, messages FR/EN avec repli anglais sur les 13 autres langues. Des tests E2E complémentaires existent mais **ne sont pas exécutés** dans l'environnement actuel. Voir `../docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md` et le début du handoff.

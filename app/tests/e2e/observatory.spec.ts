@@ -189,3 +189,42 @@ for (const width of [390, 768, 1440]) {
     }
   }
 }
+
+test('protocol search filters the catalogue without losing focus', async ({ page }) => {
+  await page.goto('/observatory/');
+  const input = page.locator('#protocol-search');
+  await input.fill('tls');
+  await expect(input).toBeFocused();
+  await expect(page.locator('.protocol-card:visible')).toHaveCount(1);
+  await expect(page.locator('#search-count')).toContainText('1 / 14');
+  await page.locator('[data-action="clear-search"]').click();
+  await expect(input).toHaveValue('');
+  await expect(input).toBeFocused();
+  await expect(page.locator('.protocol-card:visible')).toHaveCount(14);
+});
+
+test('empty catalogue search has a meaningful empty state', async ({ page }) => {
+  await page.goto('/observatory/');
+  const input = page.locator('#protocol-search');
+  await input.fill('unavailable-protocol-xyz');
+  await expect(page.locator('#search-empty')).toBeVisible();
+  await input.fill('DNS');
+  await expect(page.locator('#search-empty')).toBeHidden();
+  await expect(page.locator('.protocol-card:visible')).toHaveCount(1);
+});
+
+// Design smoke tests supplement, but do not replace, visual review.
+test('V3 search and lab controls stay accessible at narrow mobile width', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/observatory/');
+  await expect(page.locator('#protocol-search')).toBeVisible();
+  await expect.poll(() => page.evaluate(() =>
+    document.documentElement.scrollWidth <= window.innerWidth
+  )).toBe(true);
+  await page.locator('button.protocol-card[data-id="tcp"]').click();
+  await expect(page.locator('#play-control')).toBeVisible();
+  await expect(page.locator('#event-list button[aria-current="step"]')).toHaveCount(1);
+  await expect.poll(() => page.evaluate(() =>
+    document.documentElement.scrollWidth <= window.innerWidth
+  )).toBe(true);
+});

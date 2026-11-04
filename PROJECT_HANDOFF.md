@@ -1,5 +1,36 @@
 # PROJECT HANDOFF — Network Observatory (2026-11-04)
 
+## V3 — Signal & Structure (reprise courante, 04/11/2026)
+
+**PR #3 fusionnée dans `main`** par demande explicite : commit de fusion `80dac1df1327a0c7dc9872806c27aa15824be8ad`. La fusion a eu lieu malgré la non-validation de `npm ci`, TypeScript, build et E2E (blocage DNS). **Elle ne vaut ni certificat qualité ni autorisation de redistribution.**
+
+**Protection** : `vercel.json` contient `ignoreCommand` qui retourne 0 et demande à Vercel de sauter les nouveaux builds. Cela ne désactive pas les déploiements déjà existants ni les autres hébergeurs. Le statut juridique concernant les ressources historiques reste P0.
+
+**Branche actuelle :** `feat/observatory-v3-signal-structure`, issue du merge `80dac1d`. **PR [#4](https://github.com/neosoda/Protocol/pull/4) ouverte en brouillon : ne pas fusionner automatiquement.**
+
+### Travaux V3 poussés
+
+- Direction artistique originale **Signal & Structure** : logo vectoriel à deux trajets convergents, palette lumière/obscurité revue, typographie et hiérarchie scientifique sobres. Spécification `docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md`.
+- Feuille `app/src/ui/styles.css` **entièrement remplacée**, plutôt qu'un empilement d'overrides : tokens, application chrome, catalogue, recherche, instrument, laboratoire, topologie, ladder, inspection HEX, responsive et reduced motion.
+- Catalogue filtrable par nom, identifiant, catégorie et résumé, avec statut live de résultats, zéro résultat, effacement sans perte de focus. Reprise conservée et simulation inchangée.
+- Localisation FR/EN des nouveaux libellés, repli anglais des 13 autres locales ; nouvelles assertions E2E de recherche et de layout mobile.
+- Métadonnée de thème et icône du développement harmonisées avec l'identité modernisée.
+
+### État des vérifications
+
+- Inspection **statique** : 78 clés i18n présentes en FR/EN, sans doublons ; 14 protocoles existants conservés ; syntaxe CSS équilibrée ; références sélecteurs/étiquettes examinées ; nouvelles suites E2E rédigées.
+- Vérifications **non réalisées** : compilation TypeScript, tests npm métier, bundle Vite, Playwright, captures réelles, audit contrastes/lecteurs d'écran, parcours clavier et droits finaux. DNS `github.com`/`registry.npmjs.org` indisponible dans l'environnement d'exécution. Ne pas présenter une vérification statique comme un test fonctionnel.
+- `app/package-lock.json` **non synchronisé**. Aucun GitHub Actions déclenché, aucun déploiement volontaire.
+- **Attention :** les anciens paragraphes ci-dessous sont un historique de la PR #3 *avant fusion*, ils ne constituent plus le statut courant. Cette section V3 fait foi.
+
+### Reprise prioritaire
+
+1. Cloner la branche V3 sur machine avec npm accessible, `npm --prefix app install`, committer le lockfile, puis `npm --prefix app ci`.
+2. `npm --prefix app run typecheck`, `test`, `build`, installer Chromium, puis `npm --prefix app run test:e2e`. Corriger chaque erreur réelle.
+3. Tester à 390/768/1440, thèmes clair/sombre, FR/EN/AR, recherche et déroulement des 14 scénarios ; préserver les captures comme preuves. Vérifier l'absence de débordement et les contrastes.
+4. Contrôler que les assets tiers ne sont pas inclus dans `app/dist` ; résoudre le point légal, puis autoriser uniquement une distribution effectivement légitime.
+5. Poursuivre V3 par lots : ergonomie du ladder multi-participants, lecture guidée, i18n des récits, revue RFC et tests d'acceptation. Garder la PR V3 non fusionnée jusqu'aux preuves.
+
 ## Suite du 4 novembre 2026 — lot de consolidation après `8ef3caf`
 
 **Dernière branche :** `fix/observatory-v2-hardening`. **Dernier commit du lot de code :** `e81fbb53a50f774aad0552e0bb85c10abbe65cf5`. PR [#3](https://github.com/neosoda/Protocol/pull/3) **ouverte, brouillon, non fusionnée**. `main` reste `9dbeea4877ec78ed40eb54d94350b346072db848`.

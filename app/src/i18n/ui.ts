@@ -13,7 +13,7 @@ export type Label = 'catalog' | 'experiment' | 'discovery' | 'expert' | 'topolog
   'inspector' | 'play' | 'pause' | 'previous' | 'next' | 'reset' | 'speed' | 'theme' |
   'language' | 'objective' | 'minutes' | 'modelled' | 'start' | 'back' | 'step' |
   'network' | 'web' | 'security' | 'noBytes' | 'layers' | 'resume' | 'learn' | 'status' |
-  'heroLead' | 'heroAccent' | 'heroDescription' | 'labEyebrow' | 'exploreEyebrow' | 'events' | 'levelInitial' | 'levelIntermediate' | 'levelAdvanced' | 'groupMode' | 'groupControls' | 'groupWorkspace' | 'groupParticipants' | 'skipLink' | 'logicalFlow' | 'sender' | 'receiver' | 'inspectStep' | 'inspectTo' | 'selectedEvent' | 'selectedField' | 'sampleLabel' | 'sampleBytes' | 'sampleMeaning' | 'sampleValidRange' | 'sampleNoRange' | 'discoveryHint' | 'noFields' | 'footerAlpha' | 'footerAttribution' | 'footerRights' | 'diagramTcp' | 'themeLight' | 'themeDark' | 'panelNetwork' | 'panelTimeline' | 'panelAnalysis' | 'flowLegend' | 'sampleLegend' | 'handshake';
+  'heroLead' | 'heroAccent' | 'heroDescription' | 'labEyebrow' | 'exploreEyebrow' | 'events' | 'levelInitial' | 'levelIntermediate' | 'levelAdvanced' | 'groupMode' | 'groupControls' | 'groupWorkspace' | 'groupParticipants' | 'skipLink' | 'logicalFlow' | 'sender' | 'receiver' | 'inspectStep' | 'inspectTo' | 'selectedEvent' | 'selectedField' | 'sampleLabel' | 'sampleBytes' | 'sampleMeaning' | 'sampleValidRange' | 'sampleNoRange' | 'discoveryHint' | 'noFields' | 'footerAlpha' | 'footerAttribution' | 'footerRights' | 'diagramTcp' | 'themeLight' | 'themeDark' | 'panelNetwork' | 'panelTimeline' | 'panelAnalysis' | 'flowLegend' | 'sampleLegend' | 'handshake' | 'brandSubtitle' | 'diagramLabel' | 'heroFootnote' | 'searchLabel' | 'searchPlaceholder' | 'searchClear' | 'searchEmpty' | 'searchResults' | 'eventListLabel';
 type Messages = Partial<Record<Label, string>>;
 const en: Record<Label, string> = {
   catalog: 'Protocol catalogue', experiment: 'Laboratory', discovery: 'Discovery', expert: 'Expert',
@@ -63,7 +63,16 @@ const en: Record<Label, string> = {
   panelAnalysis: "ANALYSIS",
   flowLegend: "LOGICAL EXCHANGE",
   sampleLegend: "MODEL / UTF-8 SAMPLES",
-  handshake: "TCP HANDSHAKE"
+  handshake: "TCP HANDSHAKE",
+  brandSubtitle: "Network protocol laboratory",
+  diagramLabel: "OBSERVATION",
+  heroFootnote: "14 protocols · Local simulation · No real captures",
+  searchLabel: "Find a protocol",
+  searchPlaceholder: "Name, layer or keyword…",
+  searchClear: "Clear",
+  searchEmpty: "No protocols found. Try another search.",
+  searchResults: "protocols",
+  eventListLabel: "Selectable message timeline"
 };
 const fr: Record<Label, string> = {
   catalog: 'Catalogue des protocoles', experiment: 'Laboratoire', discovery: 'Découverte', expert: 'Expert',
@@ -113,7 +122,16 @@ const fr: Record<Label, string> = {
   panelAnalysis: "ANALYSE",
   flowLegend: "ÉCHANGE LOGIQUE",
   sampleLegend: "MODÈLE / EXEMPLES UTF-8",
-  handshake: "ÉTABLISSEMENT TCP"
+  handshake: "ÉTABLISSEMENT TCP",
+  brandSubtitle: "Laboratoire des protocoles",
+  diagramLabel: "OBSERVATION",
+  heroFootnote: "14 protocoles · Simulation locale · Aucune capture réelle",
+  searchLabel: "Trouver un protocole",
+  searchPlaceholder: "Nom, couche ou mot-clé…",
+  searchClear: "Effacer",
+  searchEmpty: "Aucun protocole trouvé. Essayez un autre terme.",
+  searchResults: "protocoles",
+  eventListLabel: "Chronologie des messages sélectionnables"
 };
 /** UI localization only. Narrative content remains French pending professional translations. */
 const extras: Record<Exclude<Language, 'fr' | 'en'>, Messages> = {
