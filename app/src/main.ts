@@ -154,8 +154,9 @@ function inspector(event: NetworkEvent): string {
   const fields = grouped.length ? grouped.map(layer => `<section class="field-group"><h4>${escapeHtml(layer.toUpperCase())}</h4>
     <dl>${visibleFields.filter(f => f.layer === layer).map(f => `<div><dt>${escapeHtml(f.name)}</dt><dd><code>${escapeHtml(f.value)}</code><small>${escapeHtml(f.explanation)}</small></dd></div>`).join('')}</dl></section>`).join('') :
     `<p class="empty-fields">Pas de champs techniques individuels validés pour cette étape.</p>`;
-  const raw = event.sample === undefined ? `<p class="empty-fields">${escapeHtml(t('noBytes'))}</p>` :
-    renderSample(event.sample);
+  const raw = mode === 'discovery'
+    ? '<p class="empty-fields">Passez en mode Expert pour examiner les octets des exemples.</p>'
+    : event.sample === undefined ? `<p class="empty-fields">${escapeHtml(t('noBytes'))}</p>` : renderSample(event.sample);
   return `<div class="inspector-grid"><div>${description(event)}<h4 class="section-subtitle">${escapeHtml(t('layers'))}</h4><div class="field-list">${fields}</div></div>
   <div class="raw-panel"><h4>HEX / ASCII <span>· EXEMPLE CONSTRUIT</span></h4>${raw}</div></div>`;
 }
