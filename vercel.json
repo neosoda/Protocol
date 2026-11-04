@@ -1,5 +1,0 @@
-{
-  "buildCommand": "cd app && npm run build",
-  "outputDirectory": "app/dist",
-  "ignoreCommand": "echo 'Build ignored: rights and release gates not cleared'; exit 0"
-}

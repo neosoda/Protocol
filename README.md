@@ -1,3 +1,5 @@
+> **Network Observatory V4 — déploiement Coolify.** La [PR #5](https://github.com/neosoda/Protocol/pull/5) porte la refonte complète (navigation latérale, moniteur TCP, laboratoire et inspecteur, identité ivoire/corail) et la nouvelle entrée à `/`. Le déploiement est préparé en **Dockerfile + Nginx, port 80**, sans Vercel ni GitHub Actions. **Aucun déploiement réel ni build complet n'a été validé.** [Guide Coolify](docs/DEPLOY_COOLIFY.md) · [Handoff](PROJECT_HANDOFF.md).
+
 <div align="center">
 
 <img src="app/public/observatory-mark.svg" width="72" height="72" alt="Network Observatory">
@@ -7,7 +9,7 @@
 
 Laboratoire interactif des protocoles réseau : topologie logique, diagramme de séquence à lignes de vie, contrôle pas à pas et inspection pédagogique.
 
-**14 protocoles modélisés** · **Design system Signal & Structure** · **Vite + TypeScript** · **Sans backend**
+**14 protocoles modélisés** · **V4 Workbench** · **Vite + TypeScript** · **Docker / Coolify**
 
 [Découvrir le laboratoire](#nouvelle-expérience--network-observatory) · [Installation](#installation) · [Limites-et-droits](#limites-et-droits)
 
@@ -15,7 +17,7 @@ Laboratoire interactif des protocoles réseau : topologie logique, diagramme de 
 
 ---
 
-> **Attention — statut alpha de migration.** Cette branche propose un nouveau laboratoire écrit de manière indépendante sous `/observatory/`. La page historique `/` contient des éléments reproduits depuis le site de Dilum Sanjaya ; **leurs droits de redistribution ne sont pas confirmés**. Ne pas publier ou redistribuer ces éléments sans clarification juridique ou remplacement original.
+> **Attention — droits historiques.** L'entrée moderne originale est désormais à `/`. Des éléments de l'ancienne reproduction peuvent rester dans l'historique Git et `app/public/`, exclus de l'image Docker. Leurs droits de redistribution ne sont pas confirmés.
 
 ## Identité visuelle V3 — Signal & Structure
 
@@ -50,8 +52,8 @@ npm --prefix app install
 npm --prefix app run dev
 ```
 
-- `http://localhost:5173/observatory/` : laboratoire nouveau, en TypeScript.
-- `http://localhost:5173/` : version historique conservée à titre de référence interne.
+- `http://localhost:5173/observatory/` : chemin de compatibilité du même laboratoire TypeScript.
+- `http://localhost:5173/` : **nouvelle interface originale V4**, accueil principal.
 
 ```bash
 npm --prefix app run typecheck
@@ -65,7 +67,7 @@ npm --prefix app run preview
 
 ### Séparation de la distribution
 
-En développement, la version historique reste accessible localement à la racine pour comparaison. **Le build de production Vite n'embarque intentionnellement que `/observatory/`** : `app/public/` est exclu et un contrôle automatique (`app/scripts/verify-build.mjs`) rejette les artefacts suspects. Ce comportement est **implémenté mais pas encore vérifié par un build réel**, faute d'accès à npm. Il ne régularise pas les droits du contenu historique déjà présent dans le dépôt.
+En développement, la version historique reste accessible localement à la racine pour comparaison. **Le build de production Vite n'embarque intentionnellement que la nouvelle entrée `/`** : `app/public/` est exclu et un contrôle automatique (`app/scripts/verify-build.mjs`) rejette les artefacts suspects. Ce comportement est **implémenté mais pas encore vérifié par un build réel**, faute d'accès à npm. Il ne régularise pas les droits du contenu historique déjà présent dans le dépôt.
 
 **Validation partielle réelle (04/11/2026) :** 4/4 tests autonomes du garde-fou réussis sous Node 22.16.0 sur des copies identiques aux fichiers GitHub ; les tests métier, le build Vite et Playwright ne sont toujours pas exécutés. La PR #3 reste ouverte. Voir `PROJECT_HANDOFF.md` pour les SHA, les blocages réseau et le plan de reprise.
 
@@ -79,7 +81,7 @@ La topologie expose directement les états émetteur/récepteur au lieu de les m
 
 ```text
 app/
-├── index.html                 # application historique (bundles compilés)
+├── index.html                 # entrée moderne originale V4
 ├── observatory/index.html     # nouvelle entrée Vite
 ├── src/
 │   ├── protocols/             # catalogue original, données et types

@@ -1,56 +1,34 @@
-# Network Observatory — critères de validation et livraison
+# Network Observatory — release gates V4 Workbench (2026-11-04)
 
-**État actuel : alpha de migration. Aucun déploiement ni redistribution n'est autorisé tant que les critères suivants ne sont pas clôturés.**
+**État : code V4 développé, tests de compilation et d'acceptation encore à valider. Ne pas confondre fusion Git et publication.**
 
-## Vérifications techniques obligatoires
+## Entrée et distribution
 
-1. Installer les dépendances sur une machine disposant du réseau, avec Node.js >= 22.
-2. Régénérer et committer `app/package-lock.json` après `npm --prefix app install`.
-3. Vérifier `npm --prefix app ci`.
-4. Exécuter `npm --prefix app run typecheck`, `test`, `build`, `test:e2e` (Chromium Playwright préalablement installé).
-5. Exécuter et documenter les vérifications en **dev et build de production** sur `/observatory/`.
-6. Vérifier la navigation clavier, la gestion du focus, la restitution lecteur d'écran, le RTL, le contraste WCAG 2.2 AA et `prefers-reduced-motion`.
-7. Examiner les 18 captures ciblées (390/768/1440 × clair/sombre × FR/EN/AR), absence de scroll horizontal et erreurs console.
-8. Compléter la validation RFC des 14 protocoles, y compris simplifications et représentation des octets.
+- Nouvelle entrée root `app/index.html` (application moderne originale), remplaçant les 163 Ko de HTML historique.
+- `app/vite.config.ts` construit **seulement** `dist/index.html` et refuse de copier `app/public` pour le build.
+- `app/scripts/verify-build.mjs` n'accepte qu'un HTML racine reconnu, les artefacts Vite CSS/JS/SVG, et exactement **un JS moderne**. Il rejette le site historique et les artefacts inattendus.
+- Coolify : `Dockerfile` multi-stage + `deploy/nginx.conf`, port interne **80**, redirection `/observatory/` → `/`. `vercel.json` est supprimé. Aucun déploiement réel déclenché.
 
-## Verrou juridique — bloquant à lui seul
+## Vérifications nécessaires, sans GitHub Actions
 
-Lire `docs/RIGHTS_AND_ATTRIBUTIONS.md`. L'application historique, ses bundles, traductions, styles et autres ressources potentiellement dérivées du Protocol Explorer de Dilum Sanjaya doivent être **explicitement autorisés** ou **totalement exclus de la distribution**. Le code nouvellement écrit ne légitime pas les composants historiques.
+1. Depuis la racine : `npm --prefix app install`, committer `app/package-lock.json` puis `npm --prefix app ci`.
+2. `npm --prefix app run typecheck`, `npm --prefix app run test`, `npm --prefix app run build`. Le Dockerfile lance ces commandes pendant la construction de l'image ; aucune exécution de ce build complet n'est encore attestée.
+3. Tester `/` et `/observatory/` en dev et sur **une instance Coolify de test** ; vérifier `dist` et absence des bundles tiers.
+4. Exécuter `npm --prefix app run test:e2e` avec Chromium ; examiner les 18 captures 390/768/1440 × FR/EN/AR × clair/sombre.
+5. Clavier, focus sur menu mobile, recherche, navigation du ladder, lecteur d'écran, zoom 200 %, RTL, reduced motion, contrastes WCAG 2.2 AA.
+6. Revue des droits : aucune réutilisation non autorisée de la reproduction historique et de ses ressources.
+7. Seulement après preuves, envisager une fusion V4 et configurer l'application Coolify de production.
 
-Une fusion Git dans `main` n'est **pas** une autorisation de publication. Conserver les attributions existantes tant que les ressources restent dans l'arbre. Éviter toute publication automatique depuis `main` avant régularisation du contenu déployé.
+## Réalisé vs non vérifié
 
-## Journal réel
+**5/5 tests Node autonomes du garde-fou de sortie exécutés et réussis** sur des copies aux SHA de blobs GitHub identiques. Cela ne valide pas le build Vite réel. **Vérifié statiquement :** 85 clés de traduction FR/EN complètes, nouvelle structure rail/moniteur/workbench, HTML root moderne, CSS avec accolades équilibrées, tests de build et E2E ajoutés.
 
-- Compilation TypeScript : **non exécutée**.
-- Tests Node métier du catalogue : **non exécutés**. Quatre tests autonomes du garde-fou de build ont été exécutés et réussis.
-- Playwright : **non exécuté**.
-- Captures : **non produites**.
-- Vérification du lockfile : **non réalisée**.
-- Inspection statique des imports et des 14 ID uniques : effectuée pendant la PR #2.
-- Focus : correctifs et scénarios Playwright ajoutés dans la branche de durcissement, **à exécuter**.
+**Non exécuté :** npm ci, typecheck, tests Node métier du catalogue, Vite, Playwright, visual QA et audits WCAG. Le registre npm reste inaccessible depuis le runtime local. Ces validations ne doivent jamais être annoncées comme réussies par anticipation.
 
-Ne remplacer ces statuts que par des résultats et des logs d'exécution vérifiables. Pas de CI GitHub Actions pour cette phase ; utiliser un terminal local.
+## Statut juridique
 
-## Stabilisation PR #3 — contrôle provisoire du 04/11/2026
+L'ancien `app/index.html` a été remplacé, mais des assets historiques peuvent demeurer dans `app/public/` et l'historique Git. Ne pas présumer qu'ils sont libres de droits. Le contrôle Vite exclut `public/` du build, mais une vraie revue de distribution reste nécessaire.
 
-**Correction de livraison poussée, non validée en build :** la configuration Vite exclut maintenant l'entrée historique et désactive la copie de `app/public/` en production. L'icône originale de l'Observatory est importée par `app/observatory/index.html`. Le script `app/scripts/verify-build.mjs` échoue si `dist` contient une entrée racine historique, des fichiers inattendus ou plusieurs bundles JavaScript.
+## Déploiement self-hosted
 
-**Preuve réellement obtenue :** les quatre tests indépendants de `verify-build` passent sur une copie strictement identique aux blobs de la PR #3 (SHA Git vérifiés, Node 22.16.0). Cela **ne prouve pas** que Vite a produit un artefact conforme. `npm view vite version` échoue avec `EAI_AGAIN` sur `registry.npmjs.org`, et `git ls-remote` échoue sur la résolution de `github.com` : impossible de cloner ou d'installer la suite complète dans cet environnement.
-
-En production, l'URL racine `/` **ne doit plus servir le site historique** ; vérifier cette propriété sur un vrai build avant une éventuelle fusion. Les fichiers historiques demeurent dans le dépôt et restent soumis à leurs droits ; l'absence de ces fichiers dans une distribution à vérifier ne constitue pas une licence pour le reste.
-
-**État de décision :** `npm ci`, `typecheck`, tests métier, build, Playwright, captures et conformité restent **NON VÉRIFIÉS**. Lockfile **NON synchronisé**. PR #3 **ouverte en brouillon**, sans fusion ni publication. Les captures doivent être examinées et conservées comme preuves avant toute déclaration de qualité.
-
-## Lot suivant du 4 novembre — données et accessibilité
-
-Les libellés de panneaux, les rôles de topologie et les messages de l'inspecteur disposent d'une version FR/EN complète pour 69 clés UI, avec repli des autres langues. Des contrôles **statiques** ont vérifié les clés, la longueur HTTP et 14 identifiants SSH ; nouveaux tests d'invariants et E2E ajoutés **mais non exécutés**. L'absence de données capturées et les simplifications RFC restent explicites.
-
-**Aucune évolution des critères de fusion :** lockfile et validations npm/Vite/Playwright/production encore bloqués ; droits historiques non résolus. PR #3 ouverte en brouillon, aucune fusion ni publication.
-
-## V3 Signal & Structure — points supplémentaires à vérifier
-
-- Recherche par protocole/catégorie, état vide, effacement et focus après interaction.
-- 78 libellés FR/EN vérifiés statiquement, mais pas en navigateur ni par lecteur d'écran.
-- Remplacement complet de la feuille CSS : inspecter les régressions éventuelles sur boutons, cartes, émetteur/récepteur, ladder, HEX, modes, thèmes, RTL et largeur 390 px.
-- Logo src/public cohérent ; `vercel.json` garde `ignoreCommand` renvoyant 0 jusqu'à déblocage juridique.
-- **Aucune validation npm/Playwright ou WCAG attestée.** La PR #3 fusionnée reste historiquement non testée ; la PR V3 doit rester non fusionnée.
+Configuration exacte et limites : [DEPLOY_COOLIFY.md](DEPLOY_COOLIFY.md). Tant que le lockfile est obsolète, le Dockerfile utilise `npm install` temporairement et doit être durci vers `npm ci` ; **ne pas considérer l'image comme validée avant un build et des tests réels**.
