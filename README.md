@@ -15,6 +15,7 @@ Chaque leçon propose :
 - **une carte réseau animée** : le paquet voyage de saut en saut, les pertes et les diffusions sont représentées ;
 - **un diagramme de séquence** synchronisé, où chaque flèche se trace au rythme du paquet ;
 - **un inspecteur** qui reconstruit le paquet (IPv4, TCP/UDP/ICMP, puis DNS, DHCP, HTTP, TLS, SSH…) : survoler un champ allume ses octets dans le dump hexadécimal, et inversement ;
+- recherche instantanée des leçons en français et anglais, sans sensibilité aux accents ;
 - lecture, pas à pas, vitesse, raccourcis clavier (Espace, ← →, 1 2 3), progression mémorisée, thème clair ou sombre.
 
 Les paquets sont **construits par le code** à partir de leurs champs : sommes de contrôle IP, TCP, UDP et ICMP réelles, numéros de séquence TCP cohérents d’un bout à l’autre, messages DNS et DHCP conformes, enregistrements TLS et paquets SSH aux bonnes longueurs. Les adresses sont des plages de documentation (RFC 5737) ou privées (RFC 1918). Les tests vérifient ces invariants.

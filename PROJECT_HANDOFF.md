@@ -33,3 +33,13 @@ Branche `main`. L’application servie à `/` est **entièrement écrite pour ce
 
 - Tests de bout en bout Playwright (`app/tests/e2e/`, configuration présente).
 - Leçons supplémentaires (ARP, IPv6, QUIC/HTTP3, WebSocket) avec les mêmes encodeurs.
+
+## V7 — Lot 0 (branche `feat/v7-lot0-stabilization`, 2026-11-05)
+
+Base : `main` @ `a0b5524e91bc452812556e890b275820434813b0`.
+
+Implémenté sur cette branche : recherche FR/EN insensible aux accents et filtrage par catégorie pour les 14 leçons ; désélection corrigée dans l'inspecteur HEX ; contrôles E2E couvrant recherche, paquets perdus TCP, correspondance champs/octets et mouvement réel ; script local de capture visuelle en six configurations et cinq protocoles.
+
+**Validations restantes / blocages :** aucun test npm, typecheck, build, Playwright ou Docker ni capture baseline V7 n'a été exécuté dans cet environnement ; l'accès réseau sortant à GitHub depuis le conteneur est indisponible. Ne pas fusionner avant d'exécuter et réussir les contrôles de `docs/RELEASE_GATES.md` et d'inspecter les animations sans réduction du mouvement.
+
+**Reprise :** lancer les commandes documentées, corriger les échecs, comparer captures avant/après TCP, DNS, DHCP, HTTP et TLS sur desktop/tablette/mobile, puis fusionner la PR si tous les critères passent. Ensuite, lot 1 UX/UI puis lot 2 moteur de simulation déterministe avec paquets réellement reconstruits. Déploiement Coolify : non déclenché.
