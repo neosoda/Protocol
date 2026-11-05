@@ -91,6 +91,31 @@ const inspector = new InspectorView($('.inspector'));
 const player = new Player(draw, () => reduced.matches);
 player.speed = speed;
 let shownIndex = -1;
+let railQuery = '';
+
+/** Filter existing lesson links without losing input focus. */
+function filterRail(query: string): void {
+  railQuery = query;
+  const normal = (value: string): string => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  const needle = normal(query);
+  let matches = 0;
+  app.querySelectorAll<HTMLElement>('.rail section').forEach(section => {
+    const categoryMatches = normal(section.querySelector('h3')?.textContent ?? '').includes(needle);
+    let visible = 0;
+    section.querySelectorAll<HTMLAnchorElement>('.lesson-link').forEach(link => {
+      const lesson = findScenario(link.dataset.id);
+      const value = lesson ? normal(`${lesson.name} ${tx(lesson.tagline)}`) : '';
+      const match = !needle || categoryMatches || value.includes(needle);
+      const item = link.closest('li');
+      if (item) item.hidden = !match;
+      if (match) visible++;
+    });
+    section.hidden = visible === 0;
+    matches += visible;
+  });
+  const empty = app.querySelector<HTMLElement>('.rail-empty');
+  if (empty) empty.hidden = matches !== 0;
+}
 
 function draw(frame: Frame): void {
   const event = scenario.events[frame.index];
@@ -131,7 +156,8 @@ function draw(frame: Frame): void {
 function renderRail(): void {
   const levels = ['', t('level1'), t('level2'), t('level3')];
   $('#rail').innerHTML = `<div class="rail-head"><h2>${t('lessons')}</h2>
-    <button class="icon-btn rail-close" type="button" data-action="rail" aria-label="${esc(t('close'))}">${icon(ui.close)}</button></div>` +
+    <button class="icon-btn rail-close" type="button" data-action="rail" aria-label="${esc(t('close'))}">${icon(ui.close)}</button></div>
+    <div class="rail-search"><input type="search" class="lesson-search" value="${esc(railQuery)}" placeholder="${esc(t('searchLessons'))}" aria-label="${esc(t('searchLessons'))}" autocomplete="off"></div>` +
     categories.map(c => `<section><h3>${esc(category(c))}</h3><ul>${scenarios.filter(s => s.category === c).map(s => {
       const done = Math.round(100 * ((progress[s.id] ?? -1) + 1) / s.events.length);
       return `<li><a href="#/${s.id}" class="lesson-link${s.id === scenario.id ? ' is-active' : ''}" data-id="${s.id}"
@@ -139,7 +165,8 @@ function renderRail(): void {
         <span class="ring" aria-hidden="true">${done === 100 ? icon(ui.check) : ''}</span>
         <span class="ll-text"><strong>${esc(s.name)}</strong><small>${esc(tx(s.tagline))}</small></span>
         <span class="ll-level" title="${esc(levels[s.level])}">${'●'.repeat(s.level)}${'○'.repeat(3 - s.level)}</span></a></li>`;
-    }).join('')}</ul></section>`).join('');
+    }).join('')}</ul></section>`).join('') + `<p class="rail-empty" hidden>${esc(t('noLessonsFound'))}</p>`;
+  filterRail(railQuery);
 }
 
 function renderProgress(): void {
@@ -224,6 +251,11 @@ function setRail(openRail: boolean): void {
   document.body.classList.toggle('rail-open', openRail);
   $('.rail-toggle').setAttribute('aria-expanded', String(openRail));
 }
+
+app.addEventListener('input', e => {
+  const target = e.target;
+  if (target instanceof HTMLInputElement && target.classList.contains('lesson-search')) filterRail(target.value);
+});
 
 app.addEventListener('click', e => {
   const target = e.target as Element;
