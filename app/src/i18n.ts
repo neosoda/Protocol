@@ -6,6 +6,8 @@ const fr = {
   brandTag: 'Les protocoles d’Internet, paquet par paquet',
   progress: 'Progression',
   lessons: 'Leçons',
+  searchLessons: 'Rechercher un protocole',
+  noLessonsFound: 'Aucune leçon trouvée.'
   openLessons: 'Toutes les leçons',
   close: 'Fermer',
   theme: 'Changer de thème',
@@ -45,6 +47,8 @@ const en: Record<Key, string> = {
   brandTag: 'Internet protocols, packet by packet',
   progress: 'Progress',
   lessons: 'Lessons',
+  searchLessons: 'Search protocols',
+  noLessonsFound: 'No matching lessons.'
   openLessons: 'All lessons',
   close: 'Close',
   theme: 'Switch theme',
