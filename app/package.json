@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test tests/packets.test.ts tests/scenarios.test.ts tests/player.test.ts scripts/verify-build.test.mjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "baseline:capture": "node scripts/capture-baseline.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
