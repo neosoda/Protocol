@@ -22,7 +22,7 @@ export class InspectorView {
       const located = this.locate(e.target as Element);
       if (!located) return;
       this.pinned = this.pinned && same(this.pinned, located) ? null : located;
-      this.show(located);
+      this.show(this.pinned);
     });
   }
 
