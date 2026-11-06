@@ -33,7 +33,7 @@ const parentOrigin = (() => {
 })();
 if (embedded) document.documentElement.dataset.embed = 'true';
 
-function notifyParent(type: 'ready' | 'progress', details: Record<string, unknown> = {}): void {
+function notifyParent(type: 'ready' | 'progress' | 'error', details: Record<string, unknown> = {}): void {
   if (!embedded || !parentOrigin) return;
   window.parent.postMessage({ source: 'network-observatory', version: 1, type, scenarioId: scenario.id, ...details }, parentOrigin);
 }
@@ -54,7 +54,8 @@ let theme: Theme = embedded && ['light', 'dark'].includes(embedParams.get('theme
 let view: View = (['network', 'sequence', 'both'] as const).find(v => v === store.get('view')) ?? 'network';
 let speed: number = SPEEDS.find(s => String(s) === store.get('speed')) ?? 1;
 let progress = readProgress();
-let scenario: Scenario = embedded ? (findScenario(embedParams.get('scenario')) ?? scenarios[3]) : (findScenario(location.hash.slice(2)) ?? findScenario(store.get('last')) ?? scenarios[3]);
+const requestedEmbeddedScenario = embedded ? embedParams.get('scenario') : null;
+let scenario: Scenario = embedded ? (findScenario(requestedEmbeddedScenario) ?? scenarios[3]) : (findScenario(location.hash.slice(2)) ?? findScenario(store.get('last')) ?? scenarios[3]);
 
 const app = document.getElementById('app')!;
 app.innerHTML = `
@@ -368,3 +369,4 @@ if (embedded) {
 }
 
 open(scenario);
+if (embedded && !findScenario(requestedEmbeddedScenario)) notifyParent('error', { code: 'unknown-scenario' });
