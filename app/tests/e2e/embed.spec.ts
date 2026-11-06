@@ -37,5 +37,5 @@ test('embedded HTTP keeps its engine and reports distinct visited steps', async 
 test('regular standalone navigation still resolves hash scenarios', async ({ page }) => {
   await page.goto('/#/dns');
   await expect(page.locator('h1')).toContainText('DNS');
-  await expect(page.locator('.rail')).toBeVisible({ visible: true });
+  await expect(page.locator('.rail')).toBeVisible();
 });
