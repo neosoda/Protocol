@@ -114,7 +114,7 @@ const player = new Player(draw, () => reduced.matches);
 player.speed = speed;
 let shownIndex = -1;
 let embedStarted = false;
-let lastReportedStep = -1;
+const visitedEmbedSteps = new Set<number>();
 
 function draw(frame: Frame): void {
   const event = scenario.events[frame.index];
@@ -129,9 +129,9 @@ function draw(frame: Frame): void {
     store.set('progress', JSON.stringify(progress));
     renderProgress();
   }
-  if (embedded && embedStarted && arrived && frame.index > lastReportedStep) {
-    lastReportedStep = frame.index;
-    notifyParent('progress', { step: frame.index + 1, totalSteps: scenario.events.length, complete: frame.index === scenario.events.length - 1 });
+  if (embedded && embedStarted && arrived && !visitedEmbedSteps.has(frame.index)) {
+    visitedEmbedSteps.add(frame.index);
+    notifyParent('progress', { step: visitedEmbedSteps.size, currentStep: frame.index + 1, totalSteps: scenario.events.length, complete: visitedEmbedSteps.size === scenario.events.length });
   }
   const play = $<HTMLButtonElement>('.play');
   if (play.dataset.state !== String(frame.playing)) {
@@ -234,7 +234,7 @@ function open(next: Scenario, keepPlace = false): void {
   if (!embedded && location.hash !== `#/${scenario.id}`) history.replaceState(null, '', `#/${scenario.id}`);
   shownIndex = -1;
   embedStarted = false;
-  lastReportedStep = -1;
+  visitedEmbedSteps.clear();
   renderChrome();
   renderRail();
   renderLesson();
