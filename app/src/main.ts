@@ -347,6 +347,13 @@ if (embedded) {
     const msg = e.data;
     if (!msg || typeof msg !== 'object' || msg.source !== 'sentinel-campus' || msg.version !== 1 || msg.scenarioId !== scenario.id) return;
     switch (msg.type) {
+      case 'hello': notifyParent('ready', { totalSteps: scenario.events.length }); break;
+      case 'restore':
+        if (Array.isArray(msg.visited) && msg.visited.length <= scenario.events.length &&
+            msg.visited.every((step: unknown) => Number.isInteger(step) && (step as number) >= 1 && (step as number) <= scenario.events.length)) {
+          for (const step of msg.visited as number[]) visitedEmbedSteps.add(step - 1);
+        }
+        break;
       case 'pause': player.pause(); break;
       case 'play': embedStarted = true; player.play(); break;
       case 'restart': embedStarted = true; player.seek(0); player.play(); break;
