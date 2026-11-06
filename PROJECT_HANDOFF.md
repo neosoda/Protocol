@@ -1,3 +1,12 @@
+## 06/11/2026 — Fusion de l'intégration Network Observatory
+
+- **PR #9 fusionnée dans main** par squash : `9f018a62e67c92c6ad2e586a8de715a1dbc96a4a`.
+- Le code est fusionné mais la recette npm, Playwright, accessibilité et le déploiement Coolify restent **non vérifiés** ; GitHub Actions non réactivées.
+- Prochaine étape : déployer Protocol puis reconstruire Sentinel Campus avec `VITE_PROTOCOL_EMBED_BASE_URL=https://protocol.techsentinel.fr/`, sans fragment `#/`. Vérifier le laboratoire HTTP dans M090 en navigateur.
+- Les mentions « PR brouillon / non fusionnée » ci-dessous décrivent l'état antérieur à cette fusion.
+
+---
+
 ## 06/11/2026 — Intégration embarquée Sentinel Campus (branche non fusionnée)
 
 - **PR #9 (brouillon)** : https://github.com/neosoda/Protocol/pull/9. Ne pas fusionner avant recette.
