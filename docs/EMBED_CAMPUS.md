@@ -15,6 +15,7 @@ Du laboratoire vers son parent (`source: 'network-observatory', version: 1, scen
 - `{type:'progress', step, currentStep, totalSteps, complete}`. `step` = nombre **d'étapes distinctes réellement consultées** ; sauter à la dernière étape ne termine pas la simulation.
 
 Du parent vers le laboratoire (`source: 'sentinel-campus', version: 1, scenarioId`) :
+- `{type:'hello'}` demande à nouveau `ready` après le chargement de l'iframe ; `{type:'restore', visited:[1, 2, ...]}` restaure les étapes consultées sans attribuer de nouvelle progression.
 - `{type:'pause'}`, `{type:'play'}`, `{type:'restart'}`
 - `{type:'theme', value:'light'|'dark'}`
 - `{type:'lang', value:'fr'|'en'}`
