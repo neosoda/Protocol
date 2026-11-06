@@ -10,6 +10,8 @@ test('embedded HTTP keeps its engine and reports distinct visited steps', async 
     });
     const iframe = document.createElement('iframe');
     iframe.title = 'HTTP lab';
+    iframe.style.width = 'min(100%, 960px)';
+    iframe.style.height = '900px';
     iframe.dataset.test = 'campus-embed';
     const url = new URL('/', location.origin);
     url.searchParams.set('embed', '1');
