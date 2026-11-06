@@ -1,3 +1,15 @@
+## 06/11/2026 — Intégration embarquée Sentinel Campus (branche non fusionnée)
+
+- **PR #9 (brouillon)** : https://github.com/neosoda/Protocol/pull/9. Ne pas fusionner avant recette.
+- **Base** : `main` au commit `a0b5524e91bc452812556e890b275820434813b0`. Branche : `feat/campus-embed-bridge-20261106`.
+- **Implémenté en source** : mode `?embed=1&scenario=http`, paramètres langue/thème, disposition iframe sans changement du moteur SVG ni des 14 scénarios, messages `ready/progress`, commandes `hello/restore/pause/play/restart/theme/lang`, filtrage origine + fenêtre + ID/version.
+- **Respect des étapes** : seules les étapes distinctes effectivement arrivées sont comptabilisées ; saut à la dernière étape insuffisant pour achever la simulation. Restauration des étapes déjà consultées fournie par Campus.
+- **Tests ajoutés** : `app/tests/e2e/embed.spec.ts` ; documentation `docs/EMBED_CAMPUS.md`.
+- **Vérification manquante** : `npm ci`, `npm run typecheck`, `npm test`, `npm run build`, Playwright desktop/mobile, revue WCAG, et recette Docker/Coolify **non exécutés** depuis l'environnement GitHub distant.
+- **Suite** : exécuter toute la recette, corriger les éventuelles anomalies avant fusion, déployer le mode embarqué, puis activer Campus avec le domaine réel. GitHub Actions non réactivées.
+
+---
+
 # PROJECT HANDOFF — Network Observatory v6 (2026-11-04)
 
 ## État

@@ -16,6 +16,28 @@ type View = 'network' | 'sequence' | 'both';
 type Theme = 'light' | 'dark';
 const SPEEDS = [0.5, 1, 2] as const;
 
+// Query-driven embed avoids interfering with either application's hash router.
+const embedParams = new URLSearchParams(location.search);
+const embedded = window.parent !== window && embedParams.get('embed') === '1';
+const referrerOrigin = (() => { try { return document.referrer ? new URL(document.referrer).origin : null; } catch { return null; } })();
+const parentOrigin = (() => {
+  if (!embedded) return null;
+  const raw = embedParams.get('parentOrigin');
+  if (!raw) return referrerOrigin;
+  try {
+    const url = new URL(raw);
+    if (!['https:', 'http:'].includes(url.protocol) || url.origin !== raw) return null;
+    if (referrerOrigin && referrerOrigin !== raw) return null;
+    return raw;
+  } catch { return null; }
+})();
+if (embedded) document.documentElement.dataset.embed = 'true';
+
+function notifyParent(type: 'ready' | 'progress' | 'error', details: Record<string, unknown> = {}): void {
+  if (!embedded || !parentOrigin) return;
+  window.parent.postMessage({ source: 'network-observatory', version: 1, type, scenarioId: scenario.id, ...details }, parentOrigin);
+}
+
 const store = {
   get(key: string): string | null { try { return localStorage.getItem('observatory:' + key); } catch { return null; } },
   set(key: string, value: string): void { try { localStorage.setItem('observatory:' + key, value); } catch { /* private mode: stay usable */ } }
@@ -27,12 +49,13 @@ const readProgress = (): Record<string, number> => {
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const prefersDark = matchMedia('(prefers-color-scheme: dark)');
 const savedLang = store.get('lang');
-setLang(savedLang === 'fr' || savedLang === 'en' ? savedLang : navigator.language.toLowerCase().startsWith('fr') ? 'fr' : 'en');
-let theme: Theme = store.get('theme') === 'dark' ? 'dark' : store.get('theme') === 'light' ? 'light' : prefersDark.matches ? 'dark' : 'light';
+setLang(embedded && ['fr', 'en'].includes(embedParams.get('lang') ?? '') ? embedParams.get('lang') as Lang : savedLang === 'fr' || savedLang === 'en' ? savedLang : navigator.language.toLowerCase().startsWith('fr') ? 'fr' : 'en');
+let theme: Theme = embedded && ['light', 'dark'].includes(embedParams.get('theme') ?? '') ? embedParams.get('theme') as Theme : store.get('theme') === 'dark' ? 'dark' : store.get('theme') === 'light' ? 'light' : prefersDark.matches ? 'dark' : 'light';
 let view: View = (['network', 'sequence', 'both'] as const).find(v => v === store.get('view')) ?? 'network';
 let speed: number = SPEEDS.find(s => String(s) === store.get('speed')) ?? 1;
 let progress = readProgress();
-let scenario: Scenario = findScenario(location.hash.slice(2)) ?? findScenario(store.get('last')) ?? scenarios[3];
+const requestedEmbeddedScenario = embedded ? embedParams.get('scenario') : null;
+let scenario: Scenario = embedded ? (findScenario(requestedEmbeddedScenario) ?? scenarios[3]) : (findScenario(location.hash.slice(2)) ?? findScenario(store.get('last')) ?? scenarios[3]);
 
 const app = document.getElementById('app')!;
 app.innerHTML = `
@@ -91,6 +114,8 @@ const inspector = new InspectorView($('.inspector'));
 const player = new Player(draw, () => reduced.matches);
 player.speed = speed;
 let shownIndex = -1;
+let embedStarted = false;
+const visitedEmbedSteps = new Set<number>();
 
 function draw(frame: Frame): void {
   const event = scenario.events[frame.index];
@@ -104,6 +129,10 @@ function draw(frame: Frame): void {
     progress = { ...progress, [scenario.id]: frame.index };
     store.set('progress', JSON.stringify(progress));
     renderProgress();
+  }
+  if (embedded && embedStarted && arrived && !visitedEmbedSteps.has(frame.index)) {
+    visitedEmbedSteps.add(frame.index);
+    notifyParent('progress', { step: visitedEmbedSteps.size, currentStep: frame.index + 1, totalSteps: scenario.events.length, complete: visitedEmbedSteps.size === scenario.events.length });
   }
   const play = $<HTMLButtonElement>('.play');
   if (play.dataset.state !== String(frame.playing)) {
@@ -203,8 +232,10 @@ function renderChrome(): void {
 function open(next: Scenario, keepPlace = false): void {
   scenario = next;
   store.set('last', scenario.id);
-  if (location.hash !== `#/${scenario.id}`) history.replaceState(null, '', `#/${scenario.id}`);
+  if (!embedded && location.hash !== `#/${scenario.id}`) history.replaceState(null, '', `#/${scenario.id}`);
   shownIndex = -1;
+  embedStarted = false;
+  visitedEmbedSteps.clear();
   renderChrome();
   renderRail();
   renderLesson();
@@ -216,7 +247,8 @@ function open(next: Scenario, keepPlace = false): void {
   log.render(scenario, summaries);
   const slots = schedule(scenario.events, e => hops(scenario.topology, e));
   const seen = progress[scenario.id] ?? -1;
-  player.load(slots, keepPlace ? player.frame().index : seen >= scenario.events.length - 1 ? -1 : seen);
+  player.load(slots, embedded ? -1 : keepPlace ? player.frame().index : seen >= scenario.events.length - 1 ? -1 : seen);
+  notifyParent('ready', { totalSteps: scenario.events.length });
 }
 
 
@@ -238,7 +270,7 @@ app.addEventListener('click', e => {
   }
   const button = target.closest<HTMLElement>('[data-action],[data-lang],[data-view],[data-speed],.tick');
   if (!button) return;
-  if (button.classList.contains('tick')) { player.replay(Number(button.dataset.index)); return; }
+  if (button.classList.contains('tick')) { embedStarted = true; player.replay(Number(button.dataset.index)); return; }
   if (button.dataset.lang) { setLang(button.dataset.lang as Lang); store.set('lang', lang()); open(scenario, true); return; }
   if (button.dataset.view && button.closest('.views')) { setView(button.dataset.view as View); return; }
   if (button.dataset.speed) {
@@ -251,10 +283,10 @@ app.addEventListener('click', e => {
   switch (button.dataset.action) {
     case 'theme': theme = theme === 'dark' ? 'light' : 'dark'; store.set('theme', theme); renderChrome(); break;
     case 'rail': setRail(!document.body.classList.contains('rail-open')); break;
-    case 'restart': player.seek(0); player.play(); break;
-    case 'previous': player.previous(); break;
-    case 'next': player.next(); break;
-    case 'play': player.toggle(); break;
+    case 'restart': embedStarted = true; player.seek(0); player.play(); break;
+    case 'previous': embedStarted = true; player.previous(); break;
+    case 'next': embedStarted = true; player.next(); break;
+    case 'play': embedStarted = true; player.toggle(); break;
     case 'more': {
       const open = $('.lesson').classList.toggle('is-open');
       button.setAttribute('aria-expanded', String(open));
@@ -284,6 +316,7 @@ $('.scrub-track').addEventListener('pointerdown', e => {
 });
 
 document.addEventListener('keydown', e => {
+  if (embedded && !e.altKey && !e.ctrlKey && !e.metaKey) embedStarted = true;
   if (e.altKey || e.ctrlKey || e.metaKey) return;
   const target = e.target as HTMLElement;
   if (target.closest('input, textarea, select, [contenteditable]')) return;
@@ -299,14 +332,41 @@ document.addEventListener('keydown', e => {
 });
 
 addEventListener('hashchange', () => {
+  if (embedded) return;
   const next = findScenario(location.hash.slice(2));
   if (next && next !== scenario) open(next);
 });
 prefersDark.addEventListener('change', e => {
-  if (store.get('theme')) return;
+  if (embedded || store.get('theme')) return;
   theme = e.matches ? 'dark' : 'light';
   renderChrome();
 });
 document.addEventListener('visibilitychange', () => { if (document.hidden) player.pause(); });
+if (embedded) {
+  window.addEventListener('message', e => {
+    if (e.source !== window.parent || !parentOrigin || e.origin !== parentOrigin) return;
+    const msg = e.data;
+    if (!msg || typeof msg !== 'object' || msg.source !== 'sentinel-campus' || msg.version !== 1 || msg.scenarioId !== scenario.id) return;
+    switch (msg.type) {
+      case 'hello': notifyParent('ready', { totalSteps: scenario.events.length }); break;
+      case 'restore':
+        if (Array.isArray(msg.visited) && msg.visited.length <= scenario.events.length &&
+            msg.visited.every((step: unknown) => Number.isInteger(step) && (step as number) >= 1 && (step as number) <= scenario.events.length)) {
+          for (const step of msg.visited as number[]) visitedEmbedSteps.add(step - 1);
+        }
+        break;
+      case 'pause': player.pause(); break;
+      case 'play': embedStarted = true; player.play(); break;
+      case 'restart': embedStarted = true; player.seek(0); player.play(); break;
+      case 'theme':
+        if (msg.value === 'light' || msg.value === 'dark') { theme = msg.value; renderChrome(); }
+        break;
+      case 'lang':
+        if (msg.value === 'fr' || msg.value === 'en') { setLang(msg.value); open(scenario, true); }
+        break;
+    }
+  });
+}
 
 open(scenario);
+if (embedded && !findScenario(requestedEmbeddedScenario)) notifyParent('error', { code: 'unknown-scenario' });
