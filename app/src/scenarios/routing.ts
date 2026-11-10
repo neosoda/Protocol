@@ -7,9 +7,9 @@ import { events, node } from './kit.ts';
 /** Links are schematic point-to-point adjacencies; no fictitious core device. */
 const routers: Topology = {
   nodes: [
-    node('r1', 'router', T('Routeur R1', 'Router R1'), 125, 270, '10.0.12.1'),
-    node('r2', 'router', T('Routeur R2', 'Router R2'), 470, 270, '10.0.12.2'),
-    node('r3', 'router', T('Routeur R3', 'Router R3'), 815, 270, '10.0.23.3')
+    node('r1', 'network-router', T('Routeur R1', 'Router R1'), 125, 270, '10.0.12.1'),
+    node('r2', 'network-router', T('Routeur R2', 'Router R2'), 470, 270, '10.0.12.2'),
+    node('r3', 'network-router', T('Routeur R3', 'Router R3'), 815, 270, '10.0.23.3')
   ],
   links: [['r1', 'r2'], ['r2', 'r3']]
 };
@@ -169,9 +169,9 @@ export const bgp: Scenario = {
     'BGP-4 connects autonomous systems (ASes), for example between providers, over TCP port 179. A session exchanges OPEN and KEEPALIVE before announcing prefixes via UPDATE. AS_PATH records crossed ASes, prevents certain loops and informs routing policy: BGP does not simply select the shortest route. Private ASNs 65001, 65002 and 65003 are used in this lab.'),
   topology: {
     nodes: [
-      node('r1', 'router', T('AS 65001 · R1', 'AS 65001 · R1'), 125, 270, R.r1),
-      node('r2', 'router', T('AS 65002 · R2', 'AS 65002 · R2'), 470, 270, R.r2left),
-      node('r3', 'router', T('AS 65003 · R3', 'AS 65003 · R3'), 815, 270, R.r3)
+      node('r1', 'network-router', T('AS 65001 · R1', 'AS 65001 · R1'), 125, 270, R.r1),
+      node('r2', 'network-router', T('AS 65002 · R2', 'AS 65002 · R2'), 470, 270, R.r2left),
+      node('r3', 'network-router', T('AS 65003 · R3', 'AS 65003 · R3'), 815, 270, R.r3)
     ],
     links: routers.links
   },
