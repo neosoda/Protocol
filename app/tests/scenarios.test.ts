@@ -5,8 +5,8 @@ import { route } from '../src/views/geometry.ts';
 import { dictionaries, keys } from '../src/i18n.ts';
 import type { Text } from '../src/model.ts';
 
-test('14 lessons with unique ids, every category used', () => {
-  assert.equal(scenarios.length, 14);
+test('17 lessons with unique ids, every category used', () => {
+  assert.equal(scenarios.length, 17);
   assert.equal(new Set(scenarios.map(s => s.id)).size, 14);
   for (const c of categories) assert.ok(scenarios.some(s => s.category === c), c);
 });
@@ -46,5 +46,30 @@ test('interface strings exist in both languages', () => {
   for (const k of keys) {
     assert.ok(dictionaries.fr[k].length > 0, `fr.${k}`);
     assert.ok(dictionaries.en[k].length > 0, `en.${k}`);
+  }
+});
+
+test('only meaningful equipment is drawn in foundation and routing scenes', () => {
+  for (const id of ['ip', 'icmp', 'ospf', 'rip', 'bgp']) {
+    const s = scenarios.find(x => x.id === id)!;
+    assert.ok(s, id);
+    assert.ok(!s.topology.nodes.some(n => n.id === 'core' || /cœur de réseau|core router/i.test(n.label.fr + n.label.en)), id);
+  }
+  for (const id of ['ospf', 'rip', 'bgp']) {
+    const s = scenarios.find(x => x.id === id)!;
+    assert.equal(s.category, 'routing');
+    assert.equal(s.topology.nodes.filter(n => n.kind === 'router').length, 3);
+    assert.ok(s.events.length >= 5);
+  }
+});
+
+test('link-local OSPF/RIP messages have TTL 1 and routing events target neighbors', () => {
+  for (const id of ['ospf', 'rip']) {
+    const s = scenarios.find(x => x.id === id)!;
+    for (const e of s.events) {
+      if (!e.packet.layers.some(l => l.kind === id)) continue;
+      assert.equal(e.packet.layers[0].bytes[8], 1, e.id);
+      assert.equal(route(s.topology, e.from, e.to).length, 2, e.id);
+    }
   }
 });
