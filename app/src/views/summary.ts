@@ -65,6 +65,25 @@ export function summarize(scenario: Scenario, hops: (e: NetEvent) => number): Su
 
 function describeApp(layer: Layer, event: NetEvent): string | undefined {
   switch (layer.kind) {
+    case 'ospf': {
+      const kinds = ['?', 'Hello', 'DB Description', 'LS Request', 'LS Update', 'LS Ack'];
+      const kind = kinds[Number(fieldText(layer, 'Packet Type'))] ?? 'Unknown';
+      return `OSPF ${kind} · Router ID ${fieldText(layer, 'Router ID') ?? '?'}`;
+    }
+    case 'rip': {
+      const command = Number(fieldText(layer, 'Command')) === 1 ? 'Request' : 'Response';
+      const route = fieldText(layer, 'IP Address');
+      const metric = fieldText(layer, 'Metric');
+      return `RIPv2 ${command}${route && route !== '0.0.0.0' ? ' ' + route : ''}${metric ? ' metric ' + metric : ''}`;
+    }
+    case 'bgp': {
+      const kind = Number(fieldText(layer, 'Type'));
+      if (kind === 1) return `BGP OPEN AS ${fieldText(layer, 'My AS') ?? '?'}`;
+      if (kind === 4) return 'BGP KEEPALIVE';
+      const route = fieldText(layer, 'Withdrawn Route');
+      if (route) return `BGP WITHDRAW ${route}`;
+      return `BGP UPDATE ${fieldText(layer, 'NLRI') ?? ''} AS_PATH ${fieldText(layer, 'AS_PATH') ?? ''}`;
+    }
     case 'dns': {
       const id = fieldText(layer, 'Transaction ID');
       const q = fieldText(layer, 'QNAME');
