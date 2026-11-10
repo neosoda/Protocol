@@ -52,6 +52,18 @@ function router(): string {
     `<path class="vent" d="M${x + w - 34} ${y + 8}v10M${x + w - 27} ${y + 8}v10M${x + w - 20} ${y + 8}v10M${x + w - 13} ${y + 8}v10"/>`;
 }
 
+function networkRouter(): string {
+  const x = -57, y = -8, w = 104, h = 30, d = 22;
+  const ports = Array.from({ length: 6 }, (_, i) => {
+    const px = x + 12 + i * 15;
+    return `<rect class="eth-port" x="${px}" y="${y + 9}" width="11" height="11" rx="1.5"/>
+      <path class="eth-pins" d="M${px + 2} ${y + 12}v4m3-4v4m3-4v4"/>`;
+  }).join('');
+  return shadow(148) + solid(x, y, w, h, d, 'routing-appliance') + ports +
+    leds(x + 17, y + 26, 4, 16) +
+    `<path class="vent" d="M${x + w - 11} ${y + 9}v12"/>`;
+}
+
 function rack(kind: NodeKind): string {
   const x = -44, w = 76, h = 22, d = 20, r = d * K;
   // Bottom unit first, so each unit's top face sits under the one above.
@@ -87,6 +99,7 @@ export function device(kind: NodeKind): string {
     case 'laptop': return laptop();
     case 'phone': return phone();
     case 'router': return router();
+    case 'network-router': return networkRouter();
     case 'cloud': return cloud();
     case 'switch': return accessPoint();
     case 'server': case 'dns': case 'mail': return rack(kind);
