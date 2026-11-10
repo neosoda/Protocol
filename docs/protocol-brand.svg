@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-label="Protocol.techsentinel.fr visual identity">
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#0B1026"/><stop offset=".55" stop-color="#0F1C3B"/><stop offset="1" stop-color="#111A36"/></linearGradient>
+<linearGradient id="c" x2="1" y2="1"><stop stop-color="#00E5FF"/><stop offset="1" stop-color="#247CF4"/></linearGradient>
+<linearGradient id="t" x2="1" y2="1"><stop stop-color="#14C8A6"/><stop offset="1" stop-color="#00E5FF"/></linearGradient>
+<linearGradient id="v" x2="1" y2="1"><stop stop-color="#5274EC"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient></defs>
+<rect width="1200" height="520" rx="24" fill="url(#bg)"/>
+<g transform="translate(99 108) scale(2.45)"><rect width="96" height="96" rx="22" fill="#0B1026" stroke="#00E5FF" stroke-opacity=".34" stroke-width=".6"/>
+<path d="M17 42a31 31 0 0 1 56-19" fill="none" stroke="url(#c)" stroke-width="4.5" stroke-linecap="round"/>
+<path d="M48 7v6M29 14l3 5M19 29l6 3" fill="none" stroke="#00E5FF" stroke-width="2.6" stroke-linecap="round"/>
+<path d="M72 17l11 3-9 10z" fill="#8B5CF6"/>
+<path d="M16 65l31-16 33 14-31 17z" fill="url(#v)" stroke="#A89BFF" stroke-width="1.2"/>
+<path d="M16 49l31-16 33 14-31 17z" fill="url(#t)" stroke="#56F5EC" stroke-width="1.2"/>
+<path d="M30 49l18 9 18-10" fill="none" stroke="#F8FAFF" stroke-width="3.5" stroke-linecap="round"/>
+<g fill="#F8FAFF"><circle cx="30" cy="49" r="4.8"/><circle cx="48" cy="58" r="4.8"/><circle cx="66" cy="48" r="4.8"/></g></g>
+<text x="389" y="220" fill="#F8FAFF" font-family="Inter,Arial,sans-serif" font-size="98" font-weight="750" letter-spacing="-5">Protocol</text>
+<text x="397" y="275" fill="#C0D0E9" font-family="Inter,Arial,sans-serif" font-size="43" font-weight="400">.techsentinel.fr</text>
+<rect x="395" y="309" width="54" height="5" rx="2" fill="#00E5FF"/>
+<text x="467" y="314" fill="#C0D0E9" font-family="Inter,Arial,sans-serif" font-size="17" letter-spacing="2.8">LES PROTOCOLES, PAQUET PAR PAQUET</text>
+<path d="M50 405C260 365 445 480 660 429S1010 340 1155 386" stroke="#00E5FF" stroke-opacity=".6" stroke-width="2" stroke-dasharray="5 13" fill="none"/>
+<path d="M0 470C260 395 432 515 690 475S980 414 1200 444" stroke="#8B5CF6" stroke-opacity=".30" stroke-width="2" fill="none"/>
+<rect x="594" y="436" width="16" height="12" rx="3" fill="#14C8A6"/><rect x="822" y="395" width="16" height="12" rx="3" fill="#00E5FF"/><rect x="1000" y="369" width="16" height="12" rx="3" fill="#8B5CF6"/>
+</svg>

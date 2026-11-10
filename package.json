@@ -2,7 +2,7 @@
   "name": "network-observatory",
   "version": "1.0.0",
   "private": true,
-  "description": "Visualiseur interactif des protocoles Internet paquet par paquet (TCP/IP, DNS, HTTP, TLS, SSH...) avec décodage des trames au niveau octet.",
+  "description": "Protocol.techsentinel.fr — 17 laboratoires animés pour explorer les protocoles réseau, octet par octet.",
   "scripts": {
     "dev": "npm --prefix app run dev",
     "build": "npm --prefix app run build",

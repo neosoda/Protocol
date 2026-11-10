@@ -1,38 +1,40 @@
-# Network Observatory — système visuel
+# Protocol.techsentinel.fr — Identité visuelle
 
-## Marque
+## Nom et signature
 
-Le monogramme montre **deux trajets de signal qui convergent vers un point d’observation** : deux lignes, trois points, sur fond encre `#101B2D`. Source : `app/public/favicon.svg`, repris en ligne dans `app/src/views/icons.ts`. Signature : « Les protocoles d’Internet, paquet par paquet ».
+Nom affiché : **Protocol.techsentinel.fr** (Protocol en premier plan, .techsentinel.fr plus discret). Adresse : https://protocol.techsentinel.fr/.
 
-## Couleurs
+Signature : « Les protocoles, paquet par paquet » / “Network protocols, packet by packet”.
 
-Jetons définis dans `app/src/ui/styles.css`, en clair et en sombre.
+Les identifiants machine `network-observatory`, les clés de progression dans localStorage et le canal `postMessage` de Sentinel Campus restent inchangés afin de préserver les intégrations existantes.
 
-| Rôle | Jeton | Usage |
-|---|---|---|
-| Fond, surfaces | `--bg`, `--surface`, `--sunken`, `--hover` | Page, panneaux, zones en creux, survol |
-| Texte | `--text`, `--text-2`, `--text-3` | Principal, secondaire, légendes |
-| Accent | `--accent`, `--accent-soft`, `--ring` | Actions, sélection, focus |
-| Tons de paquet | `--tone-control`, `--tone-data`, `--tone-secure`, `--tone-alert`, `--tone-broadcast` | Contrôle (bleu), données (vert), chiffré (violet), perte ou danger (orange), diffusion (cyan) |
-| Couches | `--l0` … `--l5` | Une couleur par couche dans l’inspecteur et le dump hexadécimal |
+## Logo
 
-La couleur double toujours une information écrite : libellé du paquet, cadenas des paquets chiffrés, croix et mention « Perdu en route ».
+Le monogramme combine **trois nœuds reliés par une route**, **deux couches superposées** et **un arc d'observation**, dans l'esprit d'un laboratoire réseau.
 
-## Typographie
+- Source vectorielle : [`app/public/favicon.svg`](../app/public/favicon.svg).
+- En-tête de l'application : `mark` dans `app/src/views/icons.ts`, géométrie identique.
+- Illustration horizontale : [`protocol-brand.svg`](protocol-brand.svg).
+- Ne pas déformer le symbole ni utiliser de pictogramme réseau générique.
 
-- Interface : Inter (variable, auto-hébergée).
-- Données (adresses, octets, champs, libellés de paquets) : police monospace du système (`ui-monospace`, Cascadia Code, SF Mono, Consolas).
+## Palette
 
-## Mouvement
+| Rôle | Teinte | Hex |
+| --- | --- | --- |
+| Fond sombre, base du logo | Bleu nuit | `#0B1026` |
+| Accent sombre et trajet des paquets | Cyan électrique | `#00E5FF` |
+| Données / activité | Turquoise | `#14C8A6` |
+| Couches et sécurité | Violet | `#8B5CF6` |
+| Fond clair | Blanc froid | `#F8FAFF` |
 
-- Le paquet suit le chemin de la topologie avec une courbe d’accélération douce ; une traînée de la couleur du ton se dessine derrière lui.
-- À l’arrivée, le nœud destinataire pulse ; l’émetteur respire pendant l’envoi.
-- La flèche du diagramme de séquence se trace au même rythme que le paquet.
-- Panneaux et cartes entrent avec un léger glissement ; les boutons répondent par un ressort à l’appui.
-- `prefers-reduced-motion` : plus d’animation, chaque étape s’affiche directement à l’arrivée.
+Le texte et les boutons en thème clair utilisent un cyan assombri `#006C80` afin de conserver le contraste. Les pertes et informations de sécurité ne dépendent pas uniquement de la couleur.
 
-## Mise en page
+## UI et intégration
 
-- Large (≥ 1280 px) : leçons | scène (carte, séquence, transport) | inspecteur.
-- Moyen : la liste des leçons devient un tiroir.
-- Étroit (< 900 px) : tout s’empile ; la carte garde un ratio 16:9, la séquence défile.
+- Police **Inter Variable** auto-hébergée et monospace système pour octets et champs réseau.
+- Contours fins, panneaux structurés, accents mesurés ; priorité à la lecture et aux animations.
+- **Moteur de simulation, paquets, topologies, caméra et intégration Campus inchangés.**
+- Compatible thème clair/sombre, mobile et `prefers-reduced-motion`.
+- Génération des actifs PNG (icônes et aperçu social) via `cd app && node scripts/brand-assets.mjs` avec un navigateur Playwright Chromium.
+
+Voir [les contrôles de publication](RELEASE_GATES.md).

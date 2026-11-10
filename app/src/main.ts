@@ -62,7 +62,7 @@ app.innerHTML = `
   <a class="skip" href="#stage" data-t="skip"></a>
   <header class="top">
     <button class="icon-btn rail-toggle" type="button" data-action="rail" aria-expanded="false">${icon(ui.menu)}</button>
-    <div class="brand">${mark}<span><strong data-t="brand"></strong><small data-t="brandTag"></small></span></div>
+    <div class="brand">${mark}<span class="brand-copy"><span class="brand-name"><strong data-t="brand"></strong><span class="brand-domain">.techsentinel.fr</span></span><small data-t="brandTag"></small></span></div>
     <div class="top-progress" role="img"><span class="tp-label" data-t="progress"></span><span class="tp-bar"><i></i></span><span class="tp-value"></span></div>
     <div class="top-actions">
       <div class="seg lang" role="group">
@@ -200,7 +200,7 @@ function renderLesson(): void {
 function renderChrome(): void {
   document.documentElement.lang = lang();
   document.documentElement.dataset.theme = theme;
-  document.title = `${scenario.name} · ${t('brand')}`;
+  document.title = `${scenario.name} · Protocol.techsentinel.fr`;
   app.querySelectorAll<HTMLElement>('[data-t]').forEach(n => { n.textContent = t(n.dataset.t as Parameters<typeof t>[0]); });
   app.querySelectorAll<HTMLElement>('[data-lang]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang())));
   $('.lang').setAttribute('aria-label', t('language'));

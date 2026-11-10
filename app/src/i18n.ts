@@ -2,8 +2,8 @@ import type { Category, Lang, Text } from './model.ts';
 
 const fr = {
   skip: 'Aller au contenu',
-  brand: 'Network Observatory',
-  brandTag: 'Les protocoles d’Internet, paquet par paquet',
+  brand: 'Protocol',
+  brandTag: 'Les protocoles, paquet par paquet',
   progress: 'Progression',
   lessons: 'Leçons',
   openLessons: 'Toutes les leçons',
@@ -34,15 +34,15 @@ const fr = {
   readMore: 'Lire la suite', readLess: 'Réduire',
   done: 'Terminé',
   start: 'Commencer',
-  footer: 'Network Observatory · scénarios pédagogiques modélisés, pas des captures réelles.',
+  footer: 'Protocol.techsentinel.fr · simulations pédagogiques, pas des captures réelles.',
   cat_foundations: 'Fondations', cat_services: 'Services réseau', cat_web: 'Web et sécurité',
   cat_mail: 'Messagerie', cat_remote: 'Accès distant et fichiers', cat_routing: 'Routage dynamique'
 };
 type Key = keyof typeof fr;
 const en: Record<Key, string> = {
   skip: 'Skip to content',
-  brand: 'Network Observatory',
-  brandTag: 'Internet protocols, packet by packet',
+  brand: 'Protocol',
+  brandTag: 'Network protocols, packet by packet',
   progress: 'Progress',
   lessons: 'Lessons',
   openLessons: 'All lessons',
@@ -73,7 +73,7 @@ const en: Record<Key, string> = {
   readMore: 'Read more', readLess: 'Show less',
   done: 'Done',
   start: 'Start',
-  footer: 'Network Observatory · modelled teaching scenarios, not real captures.',
+  footer: 'Protocol.techsentinel.fr · learning simulations, not real captures.',
   cat_foundations: 'Foundations', cat_services: 'Network services', cat_web: 'Web and security',
   cat_mail: 'Email', cat_remote: 'Remote access and files', cat_routing: 'Dynamic routing'
 };

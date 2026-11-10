@@ -1,12 +1,12 @@
 **Language / Langue:** [🇫🇷 Français](README.md) · 🇬🇧 **English**
 
-# Network Observatory
+# Protocol.techsentinel.fr
 
-**Understand network protocols, one packet at a time.**
+**Understand network protocols, one packet at a time.** · [Open the lab](https://protocol.techsentinel.fr)
 
-Network Observatory is an interactive, bilingual (French / English) learning lab. Its **17 animated lessons** explain how machines communicate: packet paths, device-to-device exchanges, and protocol contents, right down to individual bytes.
+Protocol.techsentinel.fr is an interactive, bilingual (French / English) learning lab. Its **17 animated lessons** explain how machines communicate: packet paths, device-to-device exchanges, and protocol contents, right down to individual bytes.
 
-![Network Observatory preview](docs/preview-desktop.png)
+![Protocol.techsentinel.fr visual identity](docs/protocol-brand.svg)
 
 ## What you can explore
 
@@ -74,6 +74,10 @@ Browser tests run separately with `npm run test:e2e` (Playwright browsers must b
 - [Protocol RFC references (French)](docs/PROTOCOL_REFERENCES.md)
 - [Release validation checklist (French)](docs/RELEASE_GATES.md)
 - [Licenses and attribution (French)](docs/RIGHTS_AND_ATTRIBUTIONS.md)
+
+## Visual identity
+
+The **Protocol** mark combines an observation arc, two protocol layers and a packet-routing path. Its colors are deep navy, electric cyan, teal and violet. See the [brand guide (French)](docs/DESIGN_SYSTEM_NETWORK_OBSERVATORY.md).
 
 ## License and credits
 

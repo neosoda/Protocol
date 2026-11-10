@@ -1,15 +1,27 @@
 {
-  "name": "Network Observatory",
-  "short_name": "Observatory",
-  "description": "Les protocoles d’Internet, paquet par paquet.",
+  "name": "Protocol.techsentinel.fr",
+  "short_name": "Protocol",
+  "description": "17 laboratoires animés : les protocoles réseau, paquet par paquet.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#070b15",
-  "theme_color": "#070b15",
+  "background_color": "#0B1026",
+  "theme_color": "#0B1026",
   "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
   ]
 }
