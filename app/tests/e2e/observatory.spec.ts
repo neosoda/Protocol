@@ -75,3 +75,17 @@ test('routing lessons show enterprise routers, protocol headers and no fake core
   }
   expect(failures).toEqual([]);
 });
+
+test('OSPF packet really moves along the SVG link with normal motion', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  const failures = errors(page);
+  await page.goto('/#/ospf');
+  await page.getByRole('button', { name: 'Recommencer' }).click();
+  const packet = page.locator('.topology .packet').first();
+  await expect(packet).toHaveCount(1);
+  const atStart = await packet.getAttribute('transform');
+  await expect.poll(() => packet.getAttribute('transform'), { timeout: 5000 }).not.toBe(atStart);
+  await expect(page.locator('.topology [data-node="r2"]')).toHaveCount(1);
+  await expect(page.locator('.topology [data-node="r3"]')).toHaveCount(1);
+  expect(failures).toEqual([]);
+});
