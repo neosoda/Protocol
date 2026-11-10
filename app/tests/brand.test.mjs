@@ -36,3 +36,19 @@ test('French and English readmes show language switchers and identity preview', 
   assert.ok(fr.includes('[🇬🇧 English](README.en.md)'));
   assert.ok(en.includes('[🇫🇷 Français](README.md)'));
 });
+
+test('raster brand icons and social preview have the expected PNG dimensions', async () => {
+  const assets = [
+    ['icon-192.png', 192, 192],
+    ['icon-512.png', 512, 512],
+    ['apple-touch-icon.png', 180, 180],
+    ['og.png', 1200, 630]
+  ];
+  const signature = Buffer.from([137,80,78,71,13,10,26,10]);
+  for (const [file, width, height] of assets) {
+    const png = await readFile(resolve(root, 'public', file));
+    assert.ok(png.subarray(0,8).equals(signature), file);
+    assert.equal(png.readUInt32BE(16), width, file + ' width');
+    assert.equal(png.readUInt32BE(20), height, file + ' height');
+  }
+});
