@@ -58,7 +58,7 @@ test('only meaningful equipment is drawn in foundation and routing scenes', () =
   for (const id of ['ospf', 'rip', 'bgp']) {
     const s = scenarios.find(x => x.id === id)!;
     assert.equal(s.category, 'routing');
-    assert.equal(s.topology.nodes.filter(n => n.kind === 'router').length, 3);
+    assert.equal(s.topology.nodes.filter(n => n.kind === 'network-router').length, 3);
     assert.ok(s.events.length >= 5);
   }
 });
