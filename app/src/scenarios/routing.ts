@@ -9,12 +9,12 @@ const routers: Topology = {
   nodes: [
     node('r1', 'network-router', T('Routeur R1', 'Router R1'), 125, 270, '10.0.12.1'),
     node('r2', 'network-router', T('Routeur R2', 'Router R2'), 470, 270, '10.0.12.2'),
-    node('r3', 'network-router', T('Routeur R3', 'Router R3'), 815, 270, '10.0.23.3')
+    node('r3', 'network-router', T('Routeur R3', 'Router R3'), 815, 270, '10.0.23.1')
   ],
   links: [['r1', 'r2'], ['r2', 'r3']]
 };
 const R = {
-  r1: '10.0.12.1', r2left: '10.0.12.2', r2right: '10.0.23.2', r3: '10.0.23.3',
+  r1: '10.0.12.1', r2left: '10.0.12.2', r2right: '10.0.23.2', r3: '10.0.23.1',
   id1: '10.0.0.1', id2: '10.0.0.2', id3: '10.0.0.3'
 } as const;
 const ALL_OSPF = '224.0.0.5';
@@ -210,14 +210,14 @@ export const bgp: Scenario = {
       title: T('R1 annonce son identité BGP', 'R1 introduces its BGP identity'),
       text: T('OPEN indique la version 4, l’AS 65001, le Hold Time de 90 secondes et un identifiant BGP. Cette démonstration n’ajoute aucune capacité optionnelle.',
         'OPEN declares version 4, AS 65001, a 90-second Hold Time and a BGP identifier. This lab deliberately omits optional capabilities.'),
-      parts: peering12.send(0, ['PSH', 'ACK'], [bgpOpen(65001, '1.1.1.1')])
+      parts: peering12.send(0, ['PSH', 'ACK'], [bgpOpen(65001, R.id1)])
     },
     {
       from: 'r2', to: 'r1', label: 'OPEN · AS 65002',
       title: T('R2 annonce à son tour son AS', 'R2 announces its AS in return'),
       text: T('R2 répond avec son propre OPEN, AS 65002. La cohérence de la session et les paramètres annoncés sont contrôlés avant d’accepter les routes.',
         'R2 answers with its own OPEN, AS 65002. Peering parameters are checked before accepting routing announcements.'),
-      parts: peering12.send(1, ['PSH', 'ACK'], [bgpOpen(65002, '2.2.2.2')])
+      parts: peering12.send(1, ['PSH', 'ACK'], [bgpOpen(65002, R.id2)])
     },
     {
       from: 'r1', to: 'r2', label: 'KEEPALIVE',
