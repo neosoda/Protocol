@@ -8,6 +8,9 @@ Chaque paquet est encodé champ par champ par `app/src/packets/`. Les invariants
 | ICMP | [RFC 792](https://www.rfc-editor.org/rfc/rfc792) | Echo Request/Reply, traceroute par TTL 1 puis 2, Time Exceeded citant le paquet expiré | TTL des sondes, type 11, sommes ICMP |
 | UDP | [RFC 768](https://www.rfc-editor.org/rfc/rfc768), [RFC 5905](https://www.rfc-editor.org/rfc/rfc5905) | Requête NTP sans connexion, perte silencieuse, nouvelle tentative de l’application | Longueur et somme UDP (pseudo-en-tête) |
 | TCP | [RFC 9293](https://www.rfc-editor.org/rfc/rfc9293) | Poignée de main, données, acquittement cumulatif, perte et retransmission, fermeture FIN | SEQ/ACK de bout en bout, SYN et FIN comptent pour un |
+| RIPv2 | [RFC 2453](https://www.rfc-editor.org/rfc/rfc2453) | Request, Response, incrémentation des sauts, métrique 16 (retrait) sur UDP 520 multicast | Version 2, longueur des entrées, somme UDP, métriques 1–16 |
+| OSPFv2 | [RFC 2328](https://www.rfc-editor.org/rfc/rfc2328) | Hello 2-Way, DBD, LSR, LSU, LSAck, diffusion de Router-LSA, SPF | Protocole IP 89, TTL 1, longueur et checksum OSPF, Fletcher de la LSA |
+| BGP-4 | [RFC 4271](https://www.rfc-editor.org/rfc/rfc4271) | Établissement TCP, OPEN, KEEPALIVE, UPDATE et WITHDRAW, AS_PATH en eBGP | TCP 179, marqueur, longueur, tailles des attributs |
 | DHCP | [RFC 2131](https://www.rfc-editor.org/rfc/rfc2131), [RFC 2132](https://www.rfc-editor.org/rfc/rfc2132) | DORA en diffusion, options (bail, masque, routeur, DNS) | xid constant, option 53 = 1, 2, 3, 5 |
 | DNS | [RFC 1034](https://www.rfc-editor.org/rfc/rfc1034), [RFC 1035](https://www.rfc-editor.org/rfc/rfc1035) | Résolution itérative racine → .com → serveur faisant autorité, renvois, réponse AA, cache | Identifiant repris, QR, adresse de la réponse |
 | HTTP | [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110), [RFC 9112](https://www.rfc-editor.org/rfc/rfc9112) | Connexion TCP, requête GET, réponse 200 avec en-têtes et corps | Content-Length = taille du corps |
@@ -19,8 +22,11 @@ Chaque paquet est encodé champ par champ par `app/src/packets/`. Les invariants
 | SSH | [RFC 4253](https://www.rfc-editor.org/rfc/rfc4253), [RFC 4252](https://www.rfc-editor.org/rfc/rfc4252), [RFC 4254](https://www.rfc-editor.org/rfc/rfc4254), [RFC 8731](https://www.rfc-editor.org/rfc/rfc8731) | Identification, KEXINIT, ECDH Curve25519, NEWKEYS, authentification par clé, canal | Longueur de paquet, alignement sur 8, bourrage ≥ 4 |
 | FTP | [RFC 959](https://www.rfc-editor.org/rfc/rfc959), [RFC 2428](https://www.rfc-editor.org/rfc/rfc2428) | Canal de contrôle, EPSV, connexion de données séparée | Sommes TCP |
 
+Voir aussi le [cours de routage](LESSONS_ROUTING.md), avec scénarios et exercices.
+
 ## Simplifications assumées
 
+- RIP et OSPF représentent des adjacences locales ; les annonces multicast ne traversent jamais les routeurs en tant que telles. Les scènes de contrôle OSPF sont condensées ; les mises à jour BGP de R2 vers R3 supposent une session TCP déjà établie.
 - Les paquets sont montrés tels qu’ils circulent sur le premier lien emprunté ; la couche Ethernet n’est pas représentée.
 - Les contenus chiffrés (TLS, SSH après NEWKEYS) sont remplacés par des octets pseudo-aléatoires déterministes, aux longueurs plausibles.
 - SMTP sur le port 587 est montré sans STARTTLS ni AUTH, pour garder les commandes lisibles ; la leçon le signale.
