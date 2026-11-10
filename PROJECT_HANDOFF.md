@@ -1,3 +1,15 @@
+## 10/11/2026 — Routage dynamique et revue des équipements (PR à valider)
+
+- **Branche** : `feat/routing-protocol-labs-20261110`, créée depuis `main` (`64cdcd3b29762c29f88c395c058200335cfbe970`).
+- **17 leçons prévues** : 14 existantes + **RIPv2**, **OSPFv2**, **BGP-4**, avec explications FR/EN et sous-parties interactives dans l’inspecteur. Catégorie « Routage dynamique ».
+- Paquets source `app/src/packets/routing.ts` : RIP Request/Response sur UDP 520 (multicast, metric 16), OSPF Hello/DBD/LSR/LSU/LSAck sur IP 89 (checksum OSPF + LSA Fletcher-16), BGP OPEN/KEEPALIVE/UPDATE/WITHDRAW sur TCP 179. Chemins calculés par le moteur SVG existant et résumé du journal enrichi.
+- **Topologies** : « Routeur de cœur » retiré des scénarios IP et ICMP (les étapes et TTL ont été ajustés). Les scènes de routage utilisent 3 routeurs Ethernet dessinés dans le style oblique 3D existant ; les adresses R1–R2 et R2–R3 sont valides sur leurs /30.
+- **Pédagogie** : `docs/LESSONS_ROUTING.md` (principes, cours, exercices corrigés, limites), RFC dans `docs/PROTOCOL_REFERENCES.md`.
+- **Tests ajoutés, NON exécutés** : invariants OSPF/RIP/BGP + topologies + E2E de présence des routeurs et inspecteurs. Important : ni typecheck, ni npm test, ni build, ni Playwright, ni revue en mouvement normal n’ont été exécutés ici. Aucune relance de GitHub Actions ni déploiement Coolify.
+- **Avant fusion** : `cd app && npm ci && npm run typecheck && npm test && npm run build && npm run test:e2e`. Vérifier manuellement FR/EN, les 17 animations (notamment TCP/DHCP historiques, BGP route withdrawals, OSPF LSA et l’illustration des routeurs) en 1440/768/390 px ; tester l’iframe Campus et son paramètre `scenario=ospf`. Suivre `docs/RELEASE_GATES.md`.
+
+---
+
 ## 06/11/2026 — Fusion de l'intégration Network Observatory
 
 - **PR #9 fusionnée dans main** par squash : `9f018a62e67c92c6ad2e586a8de715a1dbc96a4a`.
