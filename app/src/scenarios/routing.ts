@@ -50,11 +50,11 @@ export const ospf: Scenario = {
       parts: ospfIp(R.r3, ALL_OSPF, ospfHello(R.id3, [R.id2]), 0x9002)
     },
     {
-      from: 'r2', to: 'r3', label: 'DB Description',
+      from: 'r3', to: 'r2', label: 'DB Description',
       title: T('Comparaison des bases de topologie', 'Comparing topology databases'),
-      text: T('Après la négociation maître/esclave, les paquets Database Description résument les LSA connues. Le numéro de séquence évite les confusions. Ici, on montre un résumé sans LSA, avant la requête ciblée.',
-        'After master/slave negotiation, Database Description packets summarize known LSAs. The sequence number tracks the exchange. This simplified packet carries no LSA headers, before a targeted request.'),
-      parts: ospfIp(R.r2right, R.r3, ospfDbd(R.id2, 0x0123abcd, 0), 0x9003)
+      text: T('Après la négociation maître/esclave, R3 transmet un Database Description contenant l’en-tête de sa Router-LSA. Le numéro de séquence synchronise la comparaison : R2 constate qu’il lui manque cette annonce.',
+        'After master/slave negotiation, R3 sends a Database Description containing its Router-LSA header. The sequence number tracks the exchange: R2 notices it lacks this advertisement.'),
+      parts: ospfIp(R.r3, R.r2right, ospfDbd(R.id3, 0x0123abcd, 0, R.id3), 0x9003)
     },
     {
       from: 'r2', to: 'r3', label: 'LS Request',
