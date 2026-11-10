@@ -25,6 +25,8 @@ test('every TCP, UDP and ICMP checksum verifies', () => {
     const payload = e.packet.bytes.slice(ip.bytes.length);
     const protocol = ip.bytes[9];
     if (protocol === 1) { assert.equal(checksum(payload), 0, `${e.id}: ICMP`); continue; }
+    if (protocol === 89) { assert.equal(checksum([...payload.slice(0, 16), ...payload.slice(24)]), 0, `${e.id}: OSPF checksum`); continue; }
+    assert.ok(protocol === 6 || protocol === 17, `${e.id}: supported IPv4 payload`);
     const pseudo = [...ip.bytes.slice(12, 20), 0, protocol, payload.length >> 8, payload.length & 0xff];
     assert.equal(checksum(pseudo, payload), 0, `${e.id}: ${protocol === 6 ? 'TCP' : 'UDP'}`);
     if (protocol === 17) assert.equal(u16(payload, 4), payload.length, `${e.id}: UDP length`);
@@ -120,5 +122,76 @@ test('SSH cleartext packets are padded to a multiple of 8', () => {
       assert.equal(l.bytes.length % 8, 0, `${e.id}: block alignment`);
       assert.ok(l.bytes[4] >= 4, `${e.id}: at least 4 padding bytes`);
     }
+  }
+});
+
+test('OSPFv2 fields and Router-LSA checksums are coherent', () => {
+  const s = scenarios.find(x => x.id === 'ospf')!;
+  const ospf = s.events.filter(e => e.packet.layers.some(l => l.kind === 'ospf'));
+  assert.ok(ospf.length >= 6);
+  for (const e of ospf) {
+    assert.equal(e.packet.layers[0].bytes[9], 89, e.id);
+    const o = layer(e.packet, 'ospf')!.bytes;
+    assert.equal(o[0], 2, e.id);
+    assert.equal(u16(o, 2), o.length, e.id);
+    assert.equal(o.length >= 24, true, e.id);
+  }
+  const dbd = layer(s.events.find(e => e.label === 'DB Description')!.packet, 'ospf')!.bytes;
+  assert.equal(dbd[1], 2);
+  assert.equal(dbd.length, 24 + 8 + 20, 'DBD advertises the router LSA header');
+  for (const e of s.events.filter(e => e.label.includes('LS Update') || e.label.includes('Flooding'))) {
+    const o = layer(e.packet, 'ospf')!.bytes;
+    assert.equal(o[1], 4);
+    assert.equal(u32(o, 24), 1, 'one LSA in the update');
+    const lsa = o.subarray(28);
+    assert.equal(u16(lsa, 18), lsa.length, 'LSA length');
+    let a = 0, b = 0;
+    for (const octet of lsa.subarray(2)) { a = (a + octet) % 255; b = (b + a) % 255; }
+    assert.equal(a, 0, 'LSA Fletcher c0');
+    assert.equal(b, 0, 'LSA Fletcher c1');
+  }
+});
+
+test('RIPv2 messages use UDP 520 multicast and obey 1..16 hop metrics', () => {
+  const s = scenarios.find(x => x.id === 'rip')!;
+  const rip = s.events.filter(e => e.packet.layers.some(l => l.kind === 'rip'));
+  assert.equal(rip.length, 5);
+  for (const e of rip) {
+    const ip = layer(e.packet, 'ip')!.bytes;
+    const udp = layer(e.packet, 'udp')!.bytes;
+    const data = layer(e.packet, 'rip')!.bytes;
+    assert.equal(ip[9], 17);
+    assert.deepEqual([...ip.slice(16, 20)], ipBytes('224.0.0.9'));
+    assert.equal(u16(udp, 0), 520);
+    assert.equal(u16(udp, 2), 520);
+    assert.equal(data[1], 2);
+    assert.equal(data.length, 24);
+    assert.equal(u32(data, 20) >= 1 && u32(data, 20) <= 16, true);
+  }
+  const updates = rip.filter(e => layer(e.packet, 'rip')!.bytes[0] === 2);
+  assert.deepEqual(updates.map(e => u32(layer(e.packet, 'rip')!.bytes, 20)), [1, 2, 16, 16]);
+});
+
+test('BGP uses TCP 179 with valid OPEN, KEEPALIVE and UPDATE frames', () => {
+  const s = scenarios.find(x => x.id === 'bgp')!;
+  const msgs = s.events.flatMap(e => e.packet.layers.filter(l => l.kind === 'bgp'));
+  assert.ok(msgs.length >= 7);
+  const types = new Set<number>();
+  for (const l of msgs) {
+    assert.deepEqual([...l.bytes.slice(0, 16)], Array(16).fill(0xff));
+    assert.equal(u16(l.bytes, 16), l.bytes.length, l.title);
+    types.add(l.bytes[18]);
+    if (l.bytes[18] === 4) assert.equal(l.bytes.length, 19, 'KEEPALIVE has no body');
+    if (l.bytes[18] === 2) {
+      const withdrawn = u16(l.bytes, 19);
+      const attrs = u16(l.bytes, 21 + withdrawn);
+      assert.ok(23 + withdrawn + attrs <= l.bytes.length, 'UPDATE attributes fit');
+    }
+  }
+  assert.deepEqual([...types].sort((a,b) => a-b), [1, 2, 4]);
+  for (const e of s.events.filter(e => e.packet.layers.some(l => l.kind === 'bgp'))) {
+    assert.equal(layer(e.packet, 'ip')!.bytes[9], 6);
+    const t = layer(e.packet, 'tcp')!.bytes;
+    assert.ok(u16(t, 0) === 179 || u16(t, 2) === 179, e.id);
   }
 });
