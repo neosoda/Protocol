@@ -1,4 +1,4 @@
-# Network Observatory — application
+# Protocol.techsentinel.fr — application
 
 Vite + TypeScript, sans framework ni dépendance d’exécution.
 
@@ -13,7 +13,7 @@ Vite + TypeScript, sans framework ni dépendance d’exécution.
 | `src/views/` | Carte réseau (SVG animé), diagramme de séquence, inspecteur octets ↔ champs, icônes. |
 | `src/i18n.ts` | Libellés de l’interface en français et en anglais. |
 | `src/ui/styles.css` | Thèmes clair et sombre, mise en page responsive, animations. |
-| `public/` | Favicon, icônes, image de partage, manifeste, police Inter. |
+| `public/` | Logo SVG de référence, icônes, carte de partage, manifeste, police Inter. |
 | `scripts/` | `verify-build.mjs` (contrôle de l’artefact), `brand-assets.mjs` (génère icônes PNG et `og.png`). |
 
 ## Ajouter une leçon

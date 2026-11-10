@@ -29,7 +29,7 @@ export async function verifyBuild(dist) {
     throw new Error('Unexpected build output: ' + JSON.stringify({ index: files.includes('index.html'), unexpected }));
   }
   const html = await readFile(join(dist, 'index.html'), 'utf8');
-  if (!html.includes('Network Observatory')) throw new Error('index.html is not the Network Observatory entry');
+  if (!html.includes('Protocol.techsentinel.fr')) throw new Error('index.html is not the Protocol.techsentinel.fr entry');
   const bundles = files.filter(path => /^assets\/.+\.js$/.test(path));
   if (bundles.length !== 1) throw new Error('Expected exactly one JS bundle, found ' + bundles.length);
   return files;

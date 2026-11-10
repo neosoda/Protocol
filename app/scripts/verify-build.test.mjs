@@ -14,7 +14,7 @@ async function fixture(files) {
   return root;
 }
 const good = {
-  'index.html': '<title>Network Observatory</title>',
+  'index.html': '<title>Protocol.techsentinel.fr</title>',
   'assets/index-abc.js': 'console.log(1)',
   'assets/index-abc.css': 'body{}',
   'favicon.svg': '<svg/>',

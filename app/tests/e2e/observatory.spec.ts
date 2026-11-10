@@ -89,3 +89,14 @@ test('OSPF packet really moves along the SVG link with normal motion', async ({ 
   await expect(page.locator('.topology [data-node="r3"]')).toHaveCount(1);
   expect(failures).toEqual([]);
 });
+
+test('Protocol identity appears in page title, header, favicon and both themes', async ({ page }) => {
+  await page.goto('/#/ospf');
+  await expect(page).toHaveTitle(/Protocol[.]techsentinel[.]fr/);
+  await expect(page.locator('.brand-name')).toContainText('Protocol.techsentinel.fr');
+  await expect(page.locator('.brand .mark')).toHaveCount(1);
+  await expect(page.locator('link[rel="icon"][type="image/svg+xml"]')).toHaveAttribute('href', '/favicon.svg');
+  await page.getByRole('button', { name: 'Changer de thème' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', /^(dark|light)$/);
+  await expect(page.locator('.lesson h1')).toContainText('OSPF');
+});

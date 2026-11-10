@@ -11,7 +11,7 @@
     "build": "vite build && node scripts/verify-build.mjs",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test tests/packets.test.ts tests/scenarios.test.ts tests/player.test.ts scripts/verify-build.test.mjs",
+    "test": "node --experimental-strip-types --test tests/packets.test.ts tests/scenarios.test.ts tests/player.test.ts scripts/verify-build.test.mjs tests/brand.test.mjs",
     "test:e2e": "playwright test"
   },
   "devDependencies": {
