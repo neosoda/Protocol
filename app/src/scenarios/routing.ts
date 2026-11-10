@@ -21,7 +21,7 @@ const ALL_OSPF = '224.0.0.5';
 const ALL_RIP = '224.0.0.9';
 const prefix = '10.10.30.0', mask = '255.255.255.0';
 const ospfIp = (src: string, dst: string, payload: ReturnType<typeof ospfHello>, id: number) =>
-  ipv4({ src, dst, ttl: 1, id, df: false }, 89, [payload]);
+  ipv4({ src, dst, ttl: 1, id, df: false }, PROTO.ospf, [payload]);
 const ripIp = (src: string, payload: ReturnType<typeof ripResponse>, id: number) =>
   ipv4({ src, dst: ALL_RIP, ttl: 1, id, df: false }, PROTO.udp,
     udp({ sport: 520, dport: 520 }, src, ALL_RIP, [payload]));
