@@ -31,9 +31,17 @@ export const ui = {
 export const icon = (d: string, cls = 'icon'): string =>
   `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
 
-/** The brand mark: two signal paths meeting at an observation point. */
-export const mark = `<svg class="mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-  <rect width="64" height="64" rx="16" class="mark-bg"/>
-  <path d="M12 18h15l13 14h12" class="mark-a"/><path d="M12 46h15l13-14h12" class="mark-b"/>
-  <circle cx="12" cy="18" r="5" class="mark-a-dot"/><circle cx="12" cy="46" r="5" class="mark-b-dot"/>
-  <circle cx="52" cy="32" r="5.5" class="mark-eye"/></svg>`;
+/** Protocol: packet route over two protocol layers, observed by a cyan arc. */
+export const mark = `<svg class="mark" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+<defs><linearGradient id="protocol-cyan" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#00E5FF"/><stop offset="1" stop-color="#247CF4"/></linearGradient>
+<linearGradient id="protocol-teal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#14C8A6"/><stop offset="1" stop-color="#00E5FF"/></linearGradient>
+<linearGradient id="protocol-violet" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#5274EC"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient></defs>
+<rect width="96" height="96" rx="22" fill="#0B1026"/>
+<path d="M17 42a31 31 0 0 1 56-19" fill="none" stroke="url(#protocol-cyan)" stroke-width="4.5" stroke-linecap="round"/>
+<path d="M48 7v6M29 14l3 5M19 29l6 3" fill="none" stroke="#00E5FF" stroke-width="2.6" stroke-linecap="round"/>
+<path d="M72 17l11 3-9 10z" fill="#8B5CF6"/>
+<path d="M16 65l31-16 33 14-31 17z" fill="url(#protocol-violet)" stroke="#A89BFF" stroke-width="1.2" stroke-linejoin="round"/>
+<path d="M16 49l31-16 33 14-31 17z" fill="url(#protocol-teal)" stroke="#56F5EC" stroke-width="1.2" stroke-linejoin="round"/>
+<path d="M30 49l18 9 18-10" fill="none" stroke="#F8FAFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="30" cy="49" r="4.8" fill="#F8FAFF"/><circle cx="48" cy="58" r="4.8" fill="#F8FAFF"/><circle cx="66" cy="48" r="4.8" fill="#F8FAFF"/>
+</svg>`;
