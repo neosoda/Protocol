@@ -17,7 +17,7 @@ const ip4 = (b: Uint8Array, at: number) => `${b[at]}.${b[at + 1]}.${b[at + 2]}.$
 const flagNames: [number, string][] = [[2, 'SYN'], [16, 'ACK'], [8, 'PSH'], [1, 'FIN'], [4, 'RST']];
 
 const names: Partial<Record<Layer['kind'], string>> = {
-  icmp: 'ICMP', dns: 'DNS', dhcp: 'DHCP', http: 'HTTP', tls: 'TLS', ssh: 'SSH', smtp: 'SMTP', pop3: 'POP3', imap: 'IMAP', ftp: 'FTP'
+  icmp: 'ICMP', dns: 'DNS', dhcp: 'DHCP', http: 'HTTP', tls: 'TLS', ssh: 'SSH', smtp: 'SMTP', pop3: 'POP3', imap: 'IMAP', ftp: 'FTP', ospf: 'OSPF', rip: 'RIPv2', bgp: 'BGP'
 };
 const fieldText = (layer: Layer, name: string): string | undefined => {
   const f = layer.fields.find(x => x.name === name);
