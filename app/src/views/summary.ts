@@ -17,7 +17,7 @@ const ip4 = (b: Uint8Array, at: number) => `${b[at]}.${b[at + 1]}.${b[at + 2]}.$
 const flagNames: [number, string][] = [[2, 'SYN'], [16, 'ACK'], [8, 'PSH'], [1, 'FIN'], [4, 'RST']];
 
 const names: Partial<Record<Layer['kind'], string>> = {
-  icmp: 'ICMP', dns: 'DNS', dhcp: 'DHCP', http: 'HTTP', tls: 'TLS', ssh: 'SSH', smtp: 'SMTP', pop3: 'POP3', imap: 'IMAP', ftp: 'FTP'
+  icmp: 'ICMP', dns: 'DNS', dhcp: 'DHCP', http: 'HTTP', tls: 'TLS', ssh: 'SSH', smtp: 'SMTP', pop3: 'POP3', imap: 'IMAP', ftp: 'FTP', ospf: 'OSPF', rip: 'RIPv2', bgp: 'BGP'
 };
 const fieldText = (layer: Layer, name: string): string | undefined => {
   const f = layer.fields.find(x => x.name === name);
@@ -65,6 +65,25 @@ export function summarize(scenario: Scenario, hops: (e: NetEvent) => number): Su
 
 function describeApp(layer: Layer, event: NetEvent): string | undefined {
   switch (layer.kind) {
+    case 'ospf': {
+      const kinds = ['?', 'Hello', 'DB Description', 'LS Request', 'LS Update', 'LS Ack'];
+      const kind = kinds[Number(fieldText(layer, 'Packet Type'))] ?? 'Unknown';
+      return `OSPF ${kind} · Router ID ${fieldText(layer, 'Router ID') ?? '?'}`;
+    }
+    case 'rip': {
+      const command = Number(fieldText(layer, 'Command')) === 1 ? 'Request' : 'Response';
+      const route = fieldText(layer, 'IP Address');
+      const metric = fieldText(layer, 'Metric');
+      return `RIPv2 ${command}${route && route !== '0.0.0.0' ? ' ' + route : ''}${metric ? ' metric ' + metric : ''}`;
+    }
+    case 'bgp': {
+      const kind = Number(fieldText(layer, 'Type'));
+      if (kind === 1) return `BGP OPEN AS ${fieldText(layer, 'My AS') ?? '?'}`;
+      if (kind === 4) return 'BGP KEEPALIVE';
+      const route = fieldText(layer, 'Withdrawn Route');
+      if (route) return `BGP WITHDRAW ${route}`;
+      return `BGP UPDATE ${fieldText(layer, 'NLRI') ?? ''} AS_PATH ${fieldText(layer, 'AS_PATH') ?? ''}`;
+    }
     case 'dns': {
       const id = fieldText(layer, 'Transaction ID');
       const q = fieldText(layer, 'QNAME');

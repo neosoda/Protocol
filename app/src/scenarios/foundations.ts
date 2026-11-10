@@ -9,10 +9,9 @@ const routed: Topology = {
   nodes: [
     laptop(90, 330), box(260, 330),
     node('isp', 'router', T('Routeur du FAI', 'ISP router'), 450, 170, IP.isp),
-    node('core', 'router', T('Routeur de cœur', 'Core router'), 680, 170, IP.core),
-    node('server', 'server', T('Serveur web', 'Web server'), 880, 330, IP.web)
+    node('server', 'server', T('Serveur web', 'Web server'), 760, 330, IP.web)
   ],
-  links: [['client', 'box'], ['box', 'isp'], ['isp', 'core'], ['core', 'server']]
+  links: [['client', 'box'], ['box', 'isp'], ['isp', 'server']]
 };
 
 const echo = ascii('observatory-ping');
@@ -24,7 +23,7 @@ export const ip: Scenario = {
     'IP achemine des datagrammes de proche en proche. Chaque routeur lit l’adresse de destination, choisit le saut suivant et décrémente le TTL. Au passage, la box remplace l’adresse privée de l’ordinateur par son adresse publique : c’est la traduction d’adresses (NAT).',
     'IP carries datagrams hop by hop. Each router reads the destination address, picks the next hop and lowers the TTL. On the way out the home router swaps the laptop’s private address for its public one: network address translation (NAT).'),
   topology: routed,
-  actors: ['client', 'box', 'isp', 'core', 'server'],
+  actors: ['client', 'box', 'isp', 'server'],
   events: events('ip', [
     {
       from: 'client', to: 'box', label: 'TTL 64', tone: 'data',
@@ -43,20 +42,12 @@ export const ip: Scenario = {
       parts: ipv4({ src: IP.boxWan, dst: IP.web, ttl: 63, id: 0x51a0 }, PROTO.icmp, icmpEcho(8, 0x0c01, 1, echo))
     },
     {
-      from: 'isp', to: 'core', label: 'TTL 62', tone: 'data',
+      from: 'isp', to: 'server', label: 'TTL 62', tone: 'data',
       title: T('Routage chez le fournisseur', 'Routing at the provider'),
       text: T(
-        'Le routeur du FAI cherche dans sa table la route la plus précise vers 203.0.113.0/24 et transmet au routeur de cœur. Seuls le TTL et la somme de contrôle changent.',
-        'The ISP router looks up the most specific route to 203.0.113.0/24 and forwards to the core router. Only the TTL and the checksum change.'),
+        'Le routeur du FAI cherche dans sa table la route la plus précise vers 203.0.113.0/24 et transmet vers le réseau du serveur (les autres routeurs intermédiaires sont volontairement omis sur ce schéma). Seuls le TTL et la somme de contrôle changent.',
+        'The ISP router looks up the most specific route to 203.0.113.0/24 and forwards toward the server network (other intermediate routers are intentionally omitted from this schematic). Only the TTL and the checksum change.'),
       parts: ipv4({ src: IP.boxWan, dst: IP.web, ttl: 62, id: 0x51a0 }, PROTO.icmp, icmpEcho(8, 0x0c01, 1, echo))
-    },
-    {
-      from: 'core', to: 'server', label: 'TTL 61', tone: 'data',
-      title: T('Livraison au réseau de destination', 'Delivery to the destination network'),
-      text: T(
-        'Le dernier routeur est directement relié au réseau du serveur : il lui remet le datagramme. Le serveur voit comme source l’adresse publique de la box, jamais l’adresse privée de l’ordinateur.',
-        'The last router sits on the server’s network and hands it the datagram. The server sees the router’s public address as the source, never the laptop’s private one.'),
-      parts: ipv4({ src: IP.boxWan, dst: IP.web, ttl: 61, id: 0x51a0 }, PROTO.icmp, icmpEcho(8, 0x0c01, 1, echo))
     },
     {
       from: 'server', to: 'box', label: 'TTL 64 ←', tone: 'data',
@@ -72,7 +63,7 @@ export const ip: Scenario = {
       text: T(
         'Grâce à sa table NAT, la box sait que cette réponse est attendue par 192.168.1.23. Elle réécrit la destination et remet le datagramme sur le réseau local, avec un TTL réduit des sauts parcourus.',
         'Using its NAT table, the router knows 192.168.1.23 is waiting for this reply. It rewrites the destination and puts the datagram on the local network, its TTL reduced by the hops travelled.'),
-      parts: ipv4({ src: IP.web, dst: IP.laptop, ttl: 61, id: 0x0e77 }, PROTO.icmp, icmpEcho(0, 0x0c01, 1, echo))
+      parts: ipv4({ src: IP.web, dst: IP.laptop, ttl: 62, id: 0x0e77 }, PROTO.icmp, icmpEcho(0, 0x0c01, 1, echo))
     }
   ])
 };
@@ -92,7 +83,7 @@ export const icmp: Scenario = {
     'ICMP est le protocole des messages de service d’IP. Ping s’en sert pour vérifier qu’une machine répond ; traceroute détourne le TTL pour faire se signaler, un à un, les routeurs du chemin.',
     'ICMP carries IP’s service messages. Ping uses it to check a machine answers; traceroute bends the TTL so the routers along the path reveal themselves one by one.'),
   topology: routed,
-  actors: ['client', 'box', 'isp', 'core', 'server'],
+  actors: ['client', 'box', 'isp', 'server'],
   events: events('icmp', [
     {
       from: 'client', to: 'server', label: 'Echo Request',
@@ -108,7 +99,7 @@ export const icmp: Scenario = {
       text: T(
         'Le serveur renvoie un Echo Reply (type 0) avec les mêmes identifiant, séquence et données. Le temps écoulé entre les deux donne la latence aller-retour. Un pare-feu peut bloquer ICMP : l’absence de réponse ne prouve pas que la machine est éteinte.',
         'The server returns an Echo Reply (type 0) with the same identifier, sequence and data. The time between the two is the round-trip latency. Firewalls may block ICMP, so silence does not prove the machine is down.'),
-      parts: ipv4({ src: IP.web, dst: IP.laptop, ttl: 61, id: 0x0e78 }, PROTO.icmp, icmpEcho(0, 0x0c02, 1, echo))
+      parts: ipv4({ src: IP.web, dst: IP.laptop, ttl: 62, id: 0x0e78 }, PROTO.icmp, icmpEcho(0, 0x0c02, 1, echo))
     },
     {
       from: 'client', to: 'box', label: 'TTL 1', tone: 'data',

@@ -232,6 +232,8 @@ a{color:inherit}
 .screen-ui .ui-bar{fill:rgba(255,255,255,.85)}
 .antenna{stroke:var(--dev-edge);stroke-width:3;stroke-linecap:round}
 .antenna-tip{fill:var(--accent)}
+.eth-port{fill:var(--sunken);stroke:var(--dev-edge);stroke-width:1.3}
+.eth-pins{fill:none;stroke:var(--dev-edge);stroke-width:.85;opacity:.85}
 .vent,.slot{fill:none;stroke:var(--dev-edge);stroke-width:1.6;stroke-linecap:round;opacity:.7}
 .led{fill:var(--led-off);transition:fill .2s}
 .led-0{fill:var(--led-a)}

@@ -36,7 +36,7 @@ const fr = {
   start: 'Commencer',
   footer: 'Network Observatory · scénarios pédagogiques modélisés, pas des captures réelles.',
   cat_foundations: 'Fondations', cat_services: 'Services réseau', cat_web: 'Web et sécurité',
-  cat_mail: 'Messagerie', cat_remote: 'Accès distant et fichiers'
+  cat_mail: 'Messagerie', cat_remote: 'Accès distant et fichiers', cat_routing: 'Routage dynamique'
 };
 type Key = keyof typeof fr;
 const en: Record<Key, string> = {
@@ -75,7 +75,7 @@ const en: Record<Key, string> = {
   start: 'Start',
   footer: 'Network Observatory · modelled teaching scenarios, not real captures.',
   cat_foundations: 'Foundations', cat_services: 'Network services', cat_web: 'Web and security',
-  cat_mail: 'Email', cat_remote: 'Remote access and files'
+  cat_mail: 'Email', cat_remote: 'Remote access and files', cat_routing: 'Dynamic routing'
 };
 const dictionaries: Record<Lang, Record<Key, string>> = { fr, en };
 

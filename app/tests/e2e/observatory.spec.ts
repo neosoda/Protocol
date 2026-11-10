@@ -51,7 +51,7 @@ test('every lesson renders without errors or horizontal scroll', async ({ page }
   const failures = errors(page);
   await page.goto('/');
   const ids = await page.locator('.lesson-link').evaluateAll(links => links.map(l => (l as HTMLElement).dataset.id!));
-  expect(ids).toHaveLength(14);
+  expect(ids).toHaveLength(17);
   for (const id of ids) {
     await page.goto(`/#/${id}`);
     await page.locator('.tick').last().click();
@@ -59,5 +59,33 @@ test('every lesson renders without errors or horizontal scroll', async ({ page }
     await expect(page.locator('.step-card h2, .story h2').filter({ visible: true })).toHaveCount(1);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
+  expect(failures).toEqual([]);
+});
+
+test('routing lessons show enterprise routers, protocol headers and no fake core', async ({ page }) => {
+  const failures = errors(page);
+  for (const [id, step, layerName] of [['ospf', 5, 'ospf'], ['rip', 1, 'rip'], ['bgp', 7, 'bgp']] as const) {
+    await page.goto('/#/' + id);
+    await expect(page.locator('.node-network-router')).toHaveCount(3);
+    await expect(page.locator('[data-node="core"]')).toHaveCount(0);
+    await page.locator('.tick').nth(step).click();
+    await expect(page.locator('.layer-' + layerName)).toHaveCount(1);
+    await expect(page.locator('.hex b').first()).toBeVisible();
+    await expect(page.locator('.counter')).toContainText('Étape ' + (step + 1));
+  }
+  expect(failures).toEqual([]);
+});
+
+test('OSPF packet really moves along the SVG link with normal motion', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  const failures = errors(page);
+  await page.goto('/#/ospf');
+  await page.getByRole('button', { name: 'Recommencer' }).click();
+  const packet = page.locator('.topology .packet').first();
+  await expect(packet).toHaveCount(1);
+  const atStart = await packet.getAttribute('transform');
+  await expect.poll(() => packet.getAttribute('transform'), { timeout: 5000 }).not.toBe(atStart);
+  await expect(page.locator('.topology [data-node="r2"]')).toHaveCount(1);
+  await expect(page.locator('.topology [data-node="r3"]')).toHaveCount(1);
   expect(failures).toEqual([]);
 });

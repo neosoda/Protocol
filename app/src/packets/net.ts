@@ -1,8 +1,8 @@
 import { T, type Part } from '../model.ts';
 import { checksum, concat, hex, ipBytes, size, u16, Writer } from './bytes.ts';
 
-export const PROTO = { icmp: 1, tcp: 6, udp: 17 } as const;
-const protoName: Record<number, string> = { 1: 'ICMP', 6: 'TCP', 17: 'UDP' };
+export const PROTO = { icmp: 1, tcp: 6, udp: 17, ospf: 89 } as const;
+const protoName: Record<number, string> = { 1: 'ICMP', 6: 'TCP', 17: 'UDP', 89: 'OSPF' };
 
 export interface IpSpec { src: string; dst: string; ttl?: number; id?: number; df?: boolean; tos?: number }
 
@@ -35,8 +35,8 @@ export function ipv4(spec: IpSpec, protocol: number, payload: Part[]): Part[] {
     'Durée de vie : chaque routeur la décrémente de 1 et jette le paquet à 0, ce qui évite les boucles infinies.',
     'Time to live: each router subtracts 1 and drops the packet at 0, which stops endless loops.'));
   w.u8('Protocol', protocol, T(
-    'Indique ce que transporte le datagramme : 1 = ICMP, 6 = TCP, 17 = UDP.',
-    'Tells what the datagram carries: 1 = ICMP, 6 = TCP, 17 = UDP.'), `${protocol} (${protoName[protocol]})`);
+    'Indique ce que transporte le datagramme : 1 = ICMP, 6 = TCP, 17 = UDP, 89 = OSPF.',
+    'Tells what the datagram carries: 1 = ICMP, 6 = TCP, 17 = UDP, 89 = OSPF.'), `${protocol} (${protoName[protocol]})`);
   const sumAt = w.u16('Header Checksum', 0, T(
     'Somme de contrôle du seul en-tête, recalculée à chaque saut puisque le TTL change.',
     'Checksum of the header alone, recomputed at every hop because the TTL changes.'));

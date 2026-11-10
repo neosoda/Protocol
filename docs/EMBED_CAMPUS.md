@@ -2,11 +2,11 @@
 
 L'application autonome reste inchangée à `/#/http`. Le mode intégré s'active **uniquement dans un iframe** avec `/?embed=1&scenario=http&theme=light&lang=fr&parentOrigin=<origin encodée>`.
 
-- `scenario` : ID réel parmi les 14 scénarios ; sans ID valide, le scénario de repli est TCP.
+- `scenario` : ID réel parmi les 17 scénarios ; sans ID valide, le scénario de repli est TCP.
 - `theme` : `light` ou `dark` ; `lang` : `fr` ou `en`.
 - `parentOrigin` : origine exacte du parent. Si le navigateur fournit un `Referer`, son origine doit être identique. Aucune communication en `*`.
 - Les routes `#/` restent exclusivement celles de l'application autonome. Le mode embarqué ne modifie pas le hash.
-- Le moteur Player, les trames, inspecteurs, dessins SVG et données des 14 scénarios ne sont pas modifiés.
+- Le moteur Player, les trames, inspecteurs, dessins SVG et données des 17 scénarios ne sont pas modifiés.
 
 ## Messages
 
