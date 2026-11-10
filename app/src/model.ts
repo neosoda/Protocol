@@ -12,7 +12,7 @@ export interface Part { kind: PartKind; title: string; bytes: Uint8Array; fields
 export interface Layer extends Part { offset: number }
 export interface Packet { bytes: Uint8Array; layers: Layer[] }
 
-export type NodeKind = 'laptop' | 'phone' | 'router' | 'cloud' | 'server' | 'dns' | 'mail' | 'switch';
+export type NodeKind = 'laptop' | 'phone' | 'router' | 'cloud' | 'server' | 'dns' | 'mail' | 'switch' | 'network-router';
 export interface NetNode { id: string; kind: NodeKind; label: Text; ip?: string; x: number; y: number }
 export interface Topology { nodes: NetNode[]; links: [string, string][] }
 
