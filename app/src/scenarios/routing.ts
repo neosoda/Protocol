@@ -50,6 +50,13 @@ export const ospf: Scenario = {
       parts: ospfIp(R.r3, ALL_OSPF, ospfHello(R.id3, [R.id2]), 0x9002)
     },
     {
+      from: 'r2', to: 'r3', label: 'Hello · voisin R3',
+      title: T('R2 confirme également la relation 2-Way', 'R2 also confirms the 2-Way relationship'),
+      text: T('R2 ajoute maintenant l’identifiant de R3 dans son propre Hello. Les deux équipements se reconnaissent mutuellement avant la synchronisation de leurs bases.',
+        'R2 now lists R3’s identifier in its own Hello. Both devices recognize each other before synchronizing their databases.'),
+      parts: ospfIp(R.r2right, ALL_OSPF, ospfHello(R.id2, [R.id3]), 0x9008)
+    },
+    {
       from: 'r3', to: 'r2', label: 'DB Description',
       title: T('Comparaison des bases de topologie', 'Comparing topology databases'),
       text: T('Après la négociation maître/esclave, R3 transmet un Database Description contenant l’en-tête de sa Router-LSA. Le numéro de séquence synchronise la comparaison : R2 constate qu’il lui manque cette annonce.',
