@@ -7,7 +7,7 @@ import type { Text } from '../src/model.ts';
 
 test('17 lessons with unique ids, every category used', () => {
   assert.equal(scenarios.length, 17);
-  assert.equal(new Set(scenarios.map(s => s.id)).size, 14);
+  assert.equal(new Set(scenarios.map(s => s.id)).size, scenarios.length);
   for (const c of categories) assert.ok(scenarios.some(s => s.category === c), c);
 });
 
