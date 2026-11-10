@@ -73,3 +73,10 @@ test('link-local OSPF/RIP messages have TTL 1 and routing events target neighbor
     }
   }
 });
+
+test('simplified IPv4 forwarding retains coherent TTL and hop order', () => {
+  const s = scenarios.find(x => x.id === 'ip')!;
+  assert.deepEqual(s.topology.nodes.map(n => n.id), ['client', 'box', 'isp', 'server']);
+  assert.deepEqual(s.events.slice(0, 3).map(e => [e.from, e.to]), [['client', 'box'], ['box', 'isp'], ['isp', 'server']]);
+  assert.deepEqual(s.events.slice(0, 3).map(e => e.packet.layers[0].bytes[8]), [64, 63, 62]);
+});
