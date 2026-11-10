@@ -37,12 +37,13 @@ export function ospfHello(routerId: string, neighbors: string[] = []): Part {
   });
 }
 
-export function ospfDbd(routerId: string, sequence: number, flags: number): Part {
+export function ospfDbd(routerId: string, sequence: number, flags: number, advertisedLsa?: string): Part {
   return ospfMessage(2, routerId, w => {
     w.u16('Interface MTU', 1500, note('MTU de la liaison utilisée.', 'MTU of this link.'));
     w.u8('Options', 2, note('Capacités OSPF de la zone.', 'OSPF area capabilities.'));
     w.u8('I / M / MS', flags, note('Initialisation, autres descriptions, rôle maître/esclave.', 'Initialization, more descriptions, master/slave role.'));
     w.u32('DD Sequence', sequence, note('Synchronise l’échange des résumés de LSDB.', 'Synchronizes LSDB summary exchange.'));
+    if (advertisedLsa) w.put('LSA Header Summary', advertisedLsa, routerLsa(advertisedLsa).bytes().slice(0, 20), note('Résumé d’une LSA disponible chez ce voisin.', 'Header summary of an LSA held by this neighbor.'));
   });
 }
 
