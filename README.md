@@ -1,12 +1,18 @@
 **Langue / Language :** 🇫🇷 **Français** · [🇬🇧 English](README.en.md)
 
+<p align="center"><a href="https://protocol.techsentinel.fr"><img src="docs/protocol-brand.svg" width="100%" alt="Protocol — identité visuelle du laboratoire interactif sur TCP/IP, DNS, HTTP, TLS, SSH, RIP, OSPF et BGP"></a></p>
+
 # Protocol.techsentinel.fr
 
 **Comprendre les protocoles réseau, paquet par paquet.** · [Accéder au laboratoire](https://protocol.techsentinel.fr)
 
 Protocol.techsentinel.fr est un laboratoire pédagogique interactif et bilingue (français / anglais). Ses **17 leçons animées** montrent comment les machines communiquent : trajet des paquets, échanges entre équipements et contenu des protocoles, jusqu'aux octets.
 
-![Identité visuelle de Protocol.techsentinel.fr](docs/protocol-brand.svg)
+<p align="center"><a href="https://protocol.techsentinel.fr"><strong>▶ Explorer les 17 leçons interactives</strong></a> · <a href="#aperçu-des-interfaces">Voir les captures</a> · <a href="#lancer-le-projet">Installer localement</a> · <a href="README.en.md">English</a></p>
+
+| 🧭 **Suivre un paquet** | 🔬 **Inspecter les octets** | 🎓 **Apprendre en pratiquant** |
+| :--- | :--- | :--- |
+| Carte animée et échanges entre machines. | En-têtes décodés et vue hexadécimale synchronisée. | 17 leçons déterministes, du TCP/IP au routage dynamique. |
 
 ## Ce que propose le laboratoire
 
@@ -15,6 +21,10 @@ Protocol.techsentinel.fr est un laboratoire pédagogique interactif et bilingue 
 - **Inspecteur de paquets** : champs décodés, représentation hexadécimale et correspondance interactive entre les deux.
 - **Exploration à son rythme** : lecture, pause, pas à pas, vitesse réglable, raccourcis clavier, progression conservée, thèmes clair et sombre.
 - **Interface bilingue et responsive** : français et anglais, sur ordinateur comme sur mobile.
+
+## Aperçu des interfaces
+
+<table><tr><td width="66%"><img src="docs/preview-desktop.png" alt="Capture réelle du laboratoire Protocol sur ordinateur avec carte réseau, diagramme et inspecteur"></td><td width="34%"><img src="docs/preview-mobile.png" alt="Capture réelle de Protocol sur mobile"></td></tr><tr><td align="center"><sub>Exploration interactive sur ordinateur</sub></td><td align="center"><sub>Interface mobile</sub></td></tr></table>
 
 ## Les 17 leçons
 

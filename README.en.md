@@ -1,12 +1,18 @@
 **Language / Langue:** [🇫🇷 Français](README.md) · 🇬🇧 **English**
 
+<p align="center"><a href="https://protocol.techsentinel.fr"><img src="docs/protocol-brand.svg" width="100%" alt="Protocol — interactive network protocol learning lab for TCP/IP, DNS, HTTP, TLS, SSH, RIP, OSPF and BGP"></a></p>
+
 # Protocol.techsentinel.fr
 
 **Understand network protocols, one packet at a time.** · [Open the lab](https://protocol.techsentinel.fr)
 
 Protocol.techsentinel.fr is an interactive, bilingual (French / English) learning lab. Its **17 animated lessons** explain how machines communicate: packet paths, device-to-device exchanges, and protocol contents, right down to individual bytes.
 
-![Protocol.techsentinel.fr visual identity](docs/protocol-brand.svg)
+<p align="center"><a href="https://protocol.techsentinel.fr"><strong>▶ Try all 17 interactive lessons</strong></a> · <a href="#screenshots">Screenshots</a> · <a href="#run-locally">Run locally</a> · <a href="README.md">Français</a></p>
+
+| 🧭 **Follow the packet** | 🔬 **Inspect the bytes** | 🎓 **Learn by exploring** |
+| :--- | :--- | :--- |
+| Animated topology and device exchanges. | Decoded headers with synchronized hexadecimal view. | 17 deterministic lessons from TCP/IP to dynamic routing. |
 
 ## What you can explore
 
@@ -15,6 +21,10 @@ Protocol.techsentinel.fr is an interactive, bilingual (French / English) learnin
 - **Packet inspector** with decoded fields, hexadecimal bytes, and interactive highlighting between the two views.
 - **Playback controls** for play, pause, step-by-step exploration, adjustable speed, keyboard shortcuts, saved progress, and light/dark themes.
 - **Bilingual, responsive interface** for desktop and mobile, in French and English.
+
+## Screenshots
+
+<table><tr><td width="66%"><img src="docs/preview-desktop.png" alt="Actual desktop view of the Protocol interactive network lab, map and packet inspector"></td><td width="34%"><img src="docs/preview-mobile.png" alt="Actual mobile view of Protocol interactive lessons"></td></tr><tr><td align="center"><sub>Interactive desktop experience</sub></td><td align="center"><sub>Responsive mobile experience</sub></td></tr></table>
 
 ## All 17 lessons
 
