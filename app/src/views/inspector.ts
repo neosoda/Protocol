@@ -1,5 +1,5 @@
 import type { Field, NetEvent, Scenario } from '../model.ts';
-import { t, tx } from '../i18n.ts';
+import { lang, t, tx } from '../i18n.ts';
 import { escapeHtml as esc } from './escape.ts';
 import { icon, ui } from './icons.ts';
 
@@ -10,6 +10,7 @@ export class InspectorView {
   private readonly root: HTMLElement;
   private bytes: HTMLElement[] = [];
   private fields: Located[] = [];
+  private layerSelections: Located[] = [];
   private pinned: Located | null = null;
   private eventId = '';
 
@@ -27,7 +28,7 @@ export class InspectorView {
   }
 
   render(scenario: Scenario, event: NetEvent, index: number, arrived: boolean): void {
-    const key = `${scenario.id}:${event.id}`;
+    const key = `${lang()}:${scenario.id}:${event.id}`;
     const changed = key !== this.eventId;
     this.root.classList.toggle('is-waiting', !arrived);
     if (!changed) return;
@@ -35,6 +36,17 @@ export class InspectorView {
     this.pinned = null;
     const name = (id: string) => tx(scenario.topology.nodes.find(n => n.id === id)?.label ?? id);
     this.fields = event.packet.layers.flatMap((layer, l) => layer.fields.map((f, i) => ({ layer: l, field: i, f })));
+    this.layerSelections = event.packet.layers.map((layer, l) => ({
+      layer: l, field: -1,
+      f: {
+        name: layer.title, value: `${layer.bytes.length} B`,
+        offset: layer.offset, length: layer.bytes.length,
+        note: {
+          fr: 'Octets appartenant à cette couche dans le paquet pédagogique reconstruit.',
+          en: 'Bytes belonging to this layer in the reconstructed educational packet.'
+        }
+      }
+    }));
     const layers = event.packet.layers.map((layer, l) => `
       <section class="layer layer-${layer.kind}${layer.encrypted ? ' is-encrypted' : ''}" style="--layer:var(--l${l % 6})">
         <header><span class="layer-chip"></span><strong>${esc(layer.title)}</strong>
@@ -52,6 +64,16 @@ export class InspectorView {
       </div>
       <div class="packet-panel">
         <div class="panel-title"><h3>${t('inspector')}</h3><span>${event.packet.bytes.length} ${t('bytes').toLowerCase()}</span></div>
+        <div class="xray-caption"><h3>${t('xray')}</h3><span>${t('xrayHint')}</span></div>
+        <div class="xray" role="group" aria-label="${esc(t('xray'))}">
+          ${event.packet.layers.map((layer, l) => `
+            <button type="button" class="xray-segment" data-layer="${l}" data-size="${layer.bytes.length}"
+              aria-pressed="false"
+              aria-label="${esc(layer.title)} — ${layer.bytes.length} ${t('bytes').toLowerCase()}"
+              style="--layer:var(--l${l % 6});--weight:${Math.max(1, Math.round(Math.sqrt(layer.bytes.length)))}">
+              <span>${esc(layer.title)}</span><small>${layer.bytes.length} B</small>
+            </button>`).join('')}
+        </div>
         <div class="layers" aria-label="${esc(t('layers'))}">${layers}</div>
         <div class="field-detail" aria-live="polite"></div>
         <div class="hex-title"><h3>${t('bytes')}</h3><span>${t('bytesHint')}</span></div>
@@ -86,6 +108,8 @@ export class InspectorView {
   }
 
   private locate(target: Element): Located | null {
+    const segment = target.closest<HTMLElement>('.xray-segment');
+    if (segment) return this.layerSelections[Number(segment.dataset.layer)] ?? null;
     const button = target.closest<HTMLElement>('[data-field]');
     if (button) {
       const [l, i] = button.dataset.field!.split(':').map(Number);
@@ -109,6 +133,11 @@ export class InspectorView {
     for (const cell of [...this.bytes, ...text]) {
       const at = Number(cell.dataset.byte);
       cell.classList.toggle('on', !!located && at >= located.f.offset && at < located.f.offset + located.f.length);
+    }
+    for (const segment of this.root.querySelectorAll<HTMLElement>('.xray-segment')) {
+      const on = !!located && Number(segment.dataset.layer) === located.layer;
+      segment.classList.toggle('on', on);
+      segment.setAttribute('aria-pressed', String(!!this.pinned && this.pinned.field === -1 && on));
     }
     for (const b of this.root.querySelectorAll<HTMLElement>('.field')) {
       const on = !!located && b.dataset.field === `${located.layer}:${located.field}`;
