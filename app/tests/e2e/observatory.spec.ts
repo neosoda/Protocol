@@ -117,3 +117,15 @@ test('Packet X-Ray uses the actual byte offsets and is keyboard-accessible', asy
   await expect(segment).toHaveAttribute('aria-pressed', 'false');
   expect(await page.locator('.hex b.on').count()).toBeGreaterThan(0);
 });
+
+test('saved progress is bounded even when storage contains malformed values', async ({ page }) => {
+  await page.goto('/#/tcp');
+  for (const saved of ['null', '{"tcp":999999,"udp":-999,"ssh":"not-a-step"}']) {
+    await page.evaluate(value => localStorage.setItem('observatory:progress', value), saved);
+    await page.reload();
+    await expect(page.locator('.counter')).toContainText('Étape 1');
+    const percentage = Number((await page.locator('.tp-value').innerText()).replace(/[^0-9]/g, ''));
+    expect(percentage).toBeGreaterThanOrEqual(0);
+    expect(percentage).toBeLessThanOrEqual(100);
+  }
+});
