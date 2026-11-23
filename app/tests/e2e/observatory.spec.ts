@@ -129,3 +129,20 @@ test('saved progress is bounded even when storage contains malformed values', as
     expect(percentage).toBeLessThanOrEqual(100);
   }
 });
+
+test('the timeline slider is operable from the keyboard without double stepping', async ({ page }) => {
+  await page.goto('/#/tcp');
+  const slider = page.getByRole('slider', { name: 'Chronologie' });
+  await slider.focus();
+  await page.keyboard.press('End');
+  await expect(slider).toHaveAttribute('aria-valuenow', '11');
+  await expect(page.locator('.counter')).toHaveText('Étape 11 sur 11');
+  await page.keyboard.press('Home');
+  await expect(slider).toHaveAttribute('aria-valuenow', '1');
+  await page.keyboard.press('ArrowRight');
+  await expect(page.locator('.counter')).toHaveText('Étape 2 sur 11');
+  await page.keyboard.press('PageDown');
+  await expect(slider).toHaveAttribute('aria-valuenow', '7');
+  await page.keyboard.press('ArrowLeft');
+  await expect(slider).toHaveAttribute('aria-valuenow', '6');
+});
