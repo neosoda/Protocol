@@ -18,7 +18,7 @@ Protocol.techsentinel.fr est un laboratoire pédagogique interactif et bilingue 
 
 - **Carte du réseau animée** : visualisation des équipements, des sauts, des diffusions et des pertes de paquets.
 - **Diagramme de séquence synchronisé** : chaque échange apparaît au rythme de la simulation.
-- **Inspecteur de paquets** : champs décodés, représentation hexadécimale et correspondance interactive entre les deux.
+- **Packet X-Ray et inspecteur de paquets** : vue interactive des couches et de leurs tailles, champs décodés et plages d'octets synchronisées.
 - **Exploration à son rythme** : lecture, pause, pas à pas, vitesse réglable, raccourcis clavier, progression conservée, thèmes clair et sombre.
 - **Interface bilingue et responsive** : français et anglais, sur ordinateur comme sur mobile.
 
