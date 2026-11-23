@@ -101,6 +101,12 @@ export class Player {
     const target = this.frame().index - 1;
     this.seek(target < 0 ? 0 : this.slots[target].arrive);
   }
+  /** Seek directly to the arrival of a numbered event (keyboard timeline). */
+  seekStep(index: number): void {
+    if (!Number.isInteger(index) || !this.slots.length) return;
+    const safe = Math.max(0, Math.min(this.slots.length - 1, index));
+    this.seek(this.slots[safe].arrive);
+  }
   seek(time: number): void {
     this.pause();
     this.time = Math.max(0, Math.min(this.total, time));
