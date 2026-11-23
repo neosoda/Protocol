@@ -50,3 +50,18 @@ test('with reduced motion, replay jumps straight to arrival', () => {
   player.next();
   assert.deepEqual([last!.index, last!.progress], [5, 1]);
 });
+
+test('reloading the same scenario can keep an exact playhead without resuming', () => {
+  const player = new Player(() => {});
+  player.load(slots);
+  const halfway = (slots[3].start + slots[3].arrive) / 2;
+  player.seek(halfway);
+  player.load(slots, -1, halfway);
+  assert.equal(player.frame().index, 3);
+  assert.equal(player.frame().progress, 0.5);
+  assert.equal(player.frame().playing, false);
+  player.load(slots, -1, Number.POSITIVE_INFINITY);
+  assert.equal(player.frame().time, 0, 'non-finite overrides are ignored');
+  player.load(slots, -1, player.total + 500);
+  assert.equal(player.frame().time, player.total, 'time is clamped to the new scenario');
+});
