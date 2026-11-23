@@ -41,3 +41,40 @@ test('regular standalone navigation still resolves hash scenarios', async ({ pag
   await expect(page.locator('h1')).toContainText('DNS');
   await expect(page.locator('.rail')).toBeVisible();
 });
+
+test('Campus language changes preserve the playhead, visit count and translated inspector', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => {
+    const messages: unknown[] = [];
+    Object.assign(window, { __localeEmbedMessages: messages });
+    addEventListener('message', event => {
+      if (event.origin === location.origin && event.data?.source === 'network-observatory') messages.push(event.data);
+    });
+    const iframe = document.createElement('iframe');
+    iframe.dataset.test = 'locale-embed';
+    iframe.title = 'Campus HTTP';
+    iframe.style.width = '960px';
+    iframe.style.height = '900px';
+    const url = new URL('/', location.origin);
+    for (const [key, value] of Object.entries({ embed: '1', scenario: 'http', lang: 'fr', theme: 'dark', parentOrigin: location.origin })) {
+      url.searchParams.set(key, value);
+    }
+    iframe.src = url.href;
+    document.body.appendChild(iframe);
+  });
+  const frame = page.frameLocator('iframe[data-test="locale-embed"]');
+  await expect(frame.locator('.counter')).toContainText('Étape 1');
+  await frame.locator('.tick').nth(3).click();
+  await expect(frame.locator('.counter')).toContainText('Étape 4');
+  const before = await page.evaluate(() => (window as any).__localeEmbedMessages.filter((e: any) => e.type === 'progress').length);
+  expect(before).toBe(1);
+  await page.evaluate(() => {
+    const iframe = document.querySelector<HTMLIFrameElement>('iframe[data-test="locale-embed"]')!;
+    iframe.contentWindow!.postMessage({ source: 'sentinel-campus', version: 1, type: 'lang', scenarioId: 'http', value: 'en' }, location.origin);
+  });
+  await expect(frame.locator('.counter')).toContainText('Step 4');
+  await expect(frame.locator('.xray-caption h3')).toHaveText('Packet X-Ray');
+  expect(await page.evaluate(() => (window as any).__localeEmbedMessages.filter((e: any) => e.type === 'progress').length)).toBe(before);
+  await frame.locator('.tick').nth(4).click();
+  await expect.poll(() => page.evaluate(() => (window as any).__localeEmbedMessages.filter((e: any) => e.type === 'progress').length)).toBe(2);
+});
