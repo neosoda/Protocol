@@ -101,3 +101,19 @@ test('Protocol identity appears in page title, header, favicon and both themes',
   await expect(page.locator('html')).not.toHaveAttribute('data-theme', themeBefore ?? '');
   await expect(page.locator('.lesson h1')).toContainText('OSPF');
 });
+
+test('Packet X-Ray uses the actual byte offsets and is keyboard-accessible', async ({ page }) => {
+  await page.goto('/#/tcp');
+  await page.locator('.tick').nth(2).click();
+  const segment = page.locator('.xray-segment').first();
+  const size = Number(await segment.getAttribute('data-size'));
+  expect(size).toBeGreaterThan(0);
+  await segment.focus();
+  await page.keyboard.press('Enter');
+  await expect(segment).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('.hex b.on')).toHaveCount(size);
+  await expect(page.locator('.field-detail .field-head strong')).toHaveText(await segment.locator('span').innerText());
+  await page.locator('.field').first().click();
+  await expect(segment).toHaveAttribute('aria-pressed', 'false');
+  expect(await page.locator('.hex b.on').count()).toBeGreaterThan(0);
+});
