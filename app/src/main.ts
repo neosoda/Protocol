@@ -43,7 +43,16 @@ const store = {
   set(key: string, value: string): void { try { localStorage.setItem('observatory:' + key, value); } catch { /* private mode: stay usable */ } }
 };
 const readProgress = (): Record<string, number> => {
-  try { return JSON.parse(store.get('progress') ?? '{}') as Record<string, number>; } catch { return {}; }
+  try {
+    const parsed: unknown = JSON.parse(store.get('progress') ?? '{}');
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    const saved = parsed as Record<string, unknown>;
+    return Object.fromEntries(scenarios.map(s => {
+      const value = saved[s.id];
+      return [s.id, typeof value === 'number' && Number.isInteger(value)
+        ? Math.max(-1, Math.min(s.events.length - 1, value)) : -1];
+    }));
+  } catch { return {}; }
 };
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -230,12 +239,16 @@ function renderChrome(): void {
 }
 
 function open(next: Scenario, keepPlace = false): void {
+  const previousTime = keepPlace ? player.frame().time : null;
   scenario = next;
   store.set('last', scenario.id);
   if (!embedded && location.hash !== `#/${scenario.id}`) history.replaceState(null, '', `#/${scenario.id}`);
   shownIndex = -1;
-  embedStarted = false;
-  visitedEmbedSteps.clear();
+  // Changing the language must not erase the Campus visit history.
+  if (!keepPlace) {
+    embedStarted = false;
+    visitedEmbedSteps.clear();
+  }
   renderChrome();
   renderRail();
   renderLesson();
@@ -247,7 +260,7 @@ function open(next: Scenario, keepPlace = false): void {
   log.render(scenario, summaries);
   const slots = schedule(scenario.events, e => hops(scenario.topology, e));
   const seen = progress[scenario.id] ?? -1;
-  player.load(slots, embedded ? -1 : keepPlace ? player.frame().index : seen >= scenario.events.length - 1 ? -1 : seen);
+  player.load(slots, embedded ? -1 : seen >= scenario.events.length - 1 ? -1 : seen, previousTime);
   notifyParent('ready', { totalSteps: scenario.events.length });
 }
 
