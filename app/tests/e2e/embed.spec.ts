@@ -43,6 +43,7 @@ test('regular standalone navigation still resolves hash scenarios', async ({ pag
 });
 
 test('Campus language changes preserve the playhead, visit count and translated inspector', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   await page.evaluate(() => {
     const messages: unknown[] = [];
