@@ -43,7 +43,16 @@ const store = {
   set(key: string, value: string): void { try { localStorage.setItem('observatory:' + key, value); } catch { /* private mode: stay usable */ } }
 };
 const readProgress = (): Record<string, number> => {
-  try { return JSON.parse(store.get('progress') ?? '{}') as Record<string, number>; } catch { return {}; }
+  try {
+    const parsed: unknown = JSON.parse(store.get('progress') ?? '{}');
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    const saved = parsed as Record<string, unknown>;
+    return Object.fromEntries(scenarios.map(s => {
+      const value = saved[s.id];
+      return [s.id, typeof value === 'number' && Number.isInteger(value)
+        ? Math.max(-1, Math.min(s.events.length - 1, value)) : -1];
+    }));
+  } catch { return {}; }
 };
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -95,7 +104,7 @@ app.innerHTML = `
           <button class="play" type="button" data-action="play"></button>
           <button class="icon-btn" type="button" data-action="next">${icon(ui.next)}</button>
         </div>
-        <div class="scrub"><div class="ticks"></div><div class="scrub-track"><i></i></div></div>
+        <div class="scrub"><div class="ticks"></div><div class="scrub-track" role="slider" tabindex="0" aria-orientation="horizontal" aria-valuemin="1" aria-valuemax="1" aria-valuenow="1"><i></i></div></div>
         <span class="counter"></span>
         <div class="seg speed" role="group">${SPEEDS.map(s => `<button type="button" data-speed="${s}">${s}×</button>`).join('')}</div>
       </section>
@@ -141,6 +150,9 @@ function draw(frame: Frame): void {
     play.setAttribute('aria-label', t(frame.playing ? 'pause' : 'play'));
   }
   $('.scrub-track i').style.width = `${(100 * frame.time / (frame.total || 1)).toFixed(2)}%`;
+  const track = $('.scrub-track');
+  track.setAttribute('aria-valuenow', String(frame.index + 1));
+  track.setAttribute('aria-valuetext', `${t('step')} ${frame.index + 1} ${t('of')} ${scenario.events.length}: ${tx(event.title)}`);
   if (frame.index !== shownIndex) {
     shownIndex = frame.index;
     $('.counter').textContent = `${t('step')} ${frame.index + 1} ${t('of')} ${scenario.events.length}`;
@@ -195,6 +207,7 @@ function renderLesson(): void {
     <button type="button" class="more" data-action="more" aria-expanded="false">${t('readMore')}</button>`;
   $('.ticks').innerHTML = scenario.events.map((e, i) =>
     `<button type="button" class="tick tone-${e.tone}" data-index="${i}" aria-label="${esc(`${t('step')} ${i + 1} : ${tx(e.title)}`)}" title="${esc(`${i + 1}. ${tx(e.title)}`)}"></button>`).join('');
+  $('.scrub-track').setAttribute('aria-valuemax', String(scenario.events.length));
 }
 
 function renderChrome(): void {
@@ -224,18 +237,22 @@ function renderChrome(): void {
     b.setAttribute('aria-label', t(key));
     b.title = t(key);
   }
-  $('.scrub').setAttribute('aria-label', t('timeline'));
+  $('.scrub-track').setAttribute('aria-label', t('timeline'));
   $('.hint').textContent = t('shortcuts');
   $('.play').dataset.state = '';
 }
 
 function open(next: Scenario, keepPlace = false): void {
+  const previousTime = keepPlace ? player.frame().time : null;
   scenario = next;
   store.set('last', scenario.id);
   if (!embedded && location.hash !== `#/${scenario.id}`) history.replaceState(null, '', `#/${scenario.id}`);
   shownIndex = -1;
-  embedStarted = false;
-  visitedEmbedSteps.clear();
+  // Changing the language must not erase the Campus visit history.
+  if (!keepPlace) {
+    embedStarted = false;
+    visitedEmbedSteps.clear();
+  }
   renderChrome();
   renderRail();
   renderLesson();
@@ -247,7 +264,7 @@ function open(next: Scenario, keepPlace = false): void {
   log.render(scenario, summaries);
   const slots = schedule(scenario.events, e => hops(scenario.topology, e));
   const seen = progress[scenario.id] ?? -1;
-  player.load(slots, embedded ? -1 : keepPlace ? player.frame().index : seen >= scenario.events.length - 1 ? -1 : seen);
+  player.load(slots, embedded ? -1 : seen >= scenario.events.length - 1 ? -1 : seen, previousTime);
   notifyParent('ready', { totalSteps: scenario.events.length });
 }
 
@@ -301,6 +318,26 @@ function setView(next: View): void {
   store.set('view', view);
   renderChrome();
 }
+
+$('.scrub-track').addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  const current = player.frame().index;
+  const last = scenario.events.length - 1;
+  let target: number | null = null;
+  switch (e.key) {
+    case 'ArrowRight': case 'ArrowUp': target = Math.min(last, current + 1); break;
+    case 'ArrowLeft': case 'ArrowDown': target = Math.max(0, current - 1); break;
+    case 'PageDown': target = Math.min(last, current + 5); break;
+    case 'PageUp': target = Math.max(0, current - 5); break;
+    case 'Home': target = 0; break;
+    case 'End': target = last; break;
+  }
+  if (target === null) return;
+  e.preventDefault();
+  e.stopPropagation(); // Do not also trigger document-level playback shortcuts.
+  embedStarted = true;
+  player.seekStep(target);
+});
 
 $('.scrub-track').addEventListener('pointerdown', e => {
   const track = e.currentTarget as HTMLElement;

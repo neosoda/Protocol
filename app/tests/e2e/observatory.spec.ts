@@ -101,3 +101,48 @@ test('Protocol identity appears in page title, header, favicon and both themes',
   await expect(page.locator('html')).not.toHaveAttribute('data-theme', themeBefore ?? '');
   await expect(page.locator('.lesson h1')).toContainText('OSPF');
 });
+
+test('Packet X-Ray uses the actual byte offsets and is keyboard-accessible', async ({ page }) => {
+  await page.goto('/#/tcp');
+  await page.locator('.tick').nth(2).click();
+  const segment = page.locator('.xray-segment').first();
+  const size = Number(await segment.getAttribute('data-size'));
+  expect(size).toBeGreaterThan(0);
+  await segment.focus();
+  await page.keyboard.press('Enter');
+  await expect(segment).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('.hex b.on')).toHaveCount(size);
+  await expect(page.locator('.field-detail .field-head strong')).toHaveText(await segment.locator('span').innerText());
+  await page.locator('.field').first().click();
+  await expect(segment).toHaveAttribute('aria-pressed', 'false');
+  expect(await page.locator('.hex b.on').count()).toBeGreaterThan(0);
+});
+
+test('saved progress is bounded even when storage contains malformed values', async ({ page }) => {
+  await page.goto('/#/tcp');
+  for (const saved of ['null', '{"tcp":999999,"udp":-999,"ssh":"not-a-step"}']) {
+    await page.evaluate(value => localStorage.setItem('observatory:progress', value), saved);
+    await page.reload();
+    await expect(page.locator('.counter')).toContainText('Étape 1');
+    const percentage = Number((await page.locator('.tp-value').innerText()).replace(/[^0-9]/g, ''));
+    expect(percentage).toBeGreaterThanOrEqual(0);
+    expect(percentage).toBeLessThanOrEqual(100);
+  }
+});
+
+test('the timeline slider is operable from the keyboard without double stepping', async ({ page }) => {
+  await page.goto('/#/tcp');
+  const slider = page.getByRole('slider', { name: 'Chronologie' });
+  await slider.focus();
+  await page.keyboard.press('End');
+  await expect(slider).toHaveAttribute('aria-valuenow', '11');
+  await expect(page.locator('.counter')).toHaveText('Étape 11 sur 11');
+  await page.keyboard.press('Home');
+  await expect(slider).toHaveAttribute('aria-valuenow', '1');
+  await page.keyboard.press('ArrowRight');
+  await expect(page.locator('.counter')).toHaveText('Étape 2 sur 11');
+  await page.keyboard.press('PageDown');
+  await expect(slider).toHaveAttribute('aria-valuenow', '7');
+  await page.keyboard.press('ArrowLeft');
+  await expect(slider).toHaveAttribute('aria-valuenow', '6');
+});

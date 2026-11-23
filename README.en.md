@@ -18,7 +18,7 @@ Protocol.techsentinel.fr is an interactive, bilingual (French / English) learnin
 
 - **Animated network map** showing devices, hops, broadcasts, and packet loss.
 - **Synchronized sequence diagram** where exchanges unfold alongside the simulation.
-- **Packet inspector** with decoded fields, hexadecimal bytes, and interactive highlighting between the two views.
+- **Packet X-Ray and inspector** with interactive layer sizes, decoded fields, and synchronized byte-range highlighting.
 - **Playback controls** for play, pause, step-by-step exploration, adjustable speed, keyboard shortcuts, saved progress, and light/dark themes.
 - **Bilingual, responsive interface** for desktop and mobile, in French and English.
 
