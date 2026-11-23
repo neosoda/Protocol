@@ -323,6 +323,7 @@ a{color:inherit}
 .tick.is-done{background:color-mix(in srgb,var(--tone) 70%,transparent)}
 .tick.is-current{background:var(--tone);transform:scaleY(1.6)}
 .scrub-track{height:4px;border-radius:4px;background:var(--line);cursor:pointer;position:relative;touch-action:none}
+.scrub-track:focus-visible{outline:3px solid var(--accent);outline-offset:6px}
 .scrub-track::before{content:"";position:absolute;inset:-8px 0}
 .scrub-track i{display:block;height:100%;width:0;border-radius:inherit;background:var(--accent)}
 .counter{font-size:13px;font-weight:600;color:var(--text-2);font-variant-numeric:tabular-nums;white-space:nowrap}
