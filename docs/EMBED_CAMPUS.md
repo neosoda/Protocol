@@ -18,7 +18,7 @@ Du parent vers le laboratoire (`source: 'sentinel-campus', version: 1, scenarioI
 - `{type:'hello'}` demande à nouveau `ready` après le chargement de l'iframe ; `{type:'restore', visited:[1, 2, ...]}` restaure les étapes consultées sans attribuer de nouvelle progression.
 - `{type:'pause'}`, `{type:'play'}`, `{type:'restart'}`
 - `{type:'theme', value:'light'|'dark'}`
-- `{type:'lang', value:'fr'|'en'}`
+- `{type:'lang', value:'fr'|'en'}`. Le changement de langue conserve la position dans la chronologie et les étapes déjà consultées.
 
 Les messages entrants ne sont acceptés que depuis `window.parent` avec l'origine exacte attendue, l'identifiant du scénario et la version 1. La progression pédagogique évaluée reste la responsabilité de Campus. Le laboratoire conserve sa propre progression autonome.
 
