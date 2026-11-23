@@ -47,13 +47,15 @@ export class Player {
   }
 
   /** Loads a scenario, showing event `arrived` as delivered (-1: before the first departure). */
-  load(slots: Slot[], arrived = -1): void {
+  load(slots: Slot[], arrived = -1, atTime: number | null = null): void {
     // Stop and reset the clock before emitting: the old time means nothing in the new scenario.
     this.playing = false;
     this.stopAt = null;
     cancelAnimationFrame(this.raf);
     this.slots = slots;
-    this.time = arrived >= 0 && slots.length ? slots[Math.min(arrived, slots.length - 1)].arrive : 0;
+    this.time = atTime !== null && Number.isFinite(atTime)
+      ? Math.max(0, Math.min(this.total, atTime))
+      : arrived >= 0 && slots.length ? slots[Math.min(arrived, slots.length - 1)].arrive : 0;
     this.emit();
   }
 
